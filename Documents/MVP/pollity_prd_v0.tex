@@ -616,19 +616,82 @@ AC8 is for internal testing only --- do not demo the security rejection to judge
 %% =============================================================================
 \section{Risks and Mitigations}
 
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\linewidth}{lXll}
-\toprule
-\textbf{Risk} & \textbf{Description} & \textbf{Likelihood} & \textbf{Mitigation} \\
-\midrule
-Meta approval delay     & WhatsApp Business API approval takes longer than expected & Medium & Apply Day 1; use Meta test number for demo \\
-Railway downtime        & Backend unreachable during live demo & Low & Test 24h before pitch; have a screen recording backup \\
-Claude API outage       & Haiku unavailable during demo & Low & Fallback to hardcoded classification for demo if needed \\
-Supabase free tier limit & Exceeds 500MB or 50K rows & Very Low & Not reachable at demo scale \\
-Bad internet at pitch   & Demo fails due to connectivity & Medium & Pre-load dashboard; cache key demo state \\
-Scope creep             & Team adds Phase 2 features to Phase 1 & High & This PRD is the guard; defer everything in Section 8 \\
-\bottomrule
+%% Likelihood colour tags
+\newcommand{\high}{\textcolor{white}{\colorbox{criticalred}{\textbf{\ HIGH\ }}}}
+\newcommand{\medium}{\textcolor{white}{\colorbox{highorg}{\textbf{\ MEDIUM\ }}}}
+\newcommand{\low}{\textcolor{white}{\colorbox{mediumblu}{\textbf{\ LOW\ }}}}
+\newcommand{\vlow}{\textcolor{white}{\colorbox{lowgreen}{\textbf{\ VERY LOW\ }}}}
+
+%% Risk card style
+\newtcolorbox{riskcard}[2]{
+  colback=lightgray, colframe=pollityblue,
+  sharp corners, boxrule=0.5pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+  title={\textbf{#1} \hfill #2},
+  coltitle=pollityblue, attach boxed title to top left,
+  boxed title style={colback=white, colframe=pollityblue,
+    sharp corners, boxrule=0.5pt, left=4pt, right=4pt,
+    top=2pt, bottom=2pt},
+  fonttitle=\small,
+}
+
+% ── R1 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R1 \ Meta WhatsApp Approval Delay}{\medium}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & WhatsApp Business API approval takes longer than expected; production number not ready before demo. \\[3pt]
+\textbf{Mitigation}  & Apply on Day 1. Use Meta's built-in test number for the SNVC demo --- it is fully functional and requires no approval. \\
 \end{tabularx}
+\end{riskcard}
+
+\vspace{0.6em}
+
+% ── R2 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R2 \ Railway Backend Downtime During Demo}{\low}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & Backend is unreachable at the moment of the live pitch due to a Railway incident or deployment error. \\[3pt]
+\textbf{Mitigation}  & Run a full end-to-end test 24 hours before the pitch. Record a screen capture of the working demo as a backup. \\
+\end{tabularx}
+\end{riskcard}
+
+\vspace{0.6em}
+
+% ── R3 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R3 \ Claude API Outage}{\low}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & Anthropic's Claude Haiku API is unavailable during the demo, blocking classification and blocking the ACK. \\[3pt]
+\textbf{Mitigation}  & Add a hardcoded fallback: if Haiku times out, classify as \texttt{others / medium} and still issue the Ref ID. Demo is not blocked. \\
+\end{tabularx}
+\end{riskcard}
+
+\vspace{0.6em}
+
+% ── R4 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R4 \ Supabase Free Tier Limit}{\vlow}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & Supabase free tier caps at 500 MB storage and 50,000 rows. Could be exceeded with heavy use. \\[3pt]
+\textbf{Mitigation}  & Not reachable at demo scale (tens of grievances). No action needed for Phase 1. Monitor in Phase 2. \\
+\end{tabularx}
+\end{riskcard}
+
+\vspace{0.6em}
+
+% ── R5 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R5 \ Poor Internet at Pitch Venue}{\medium}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & Live demo fails mid-pitch due to slow or unreliable Wi-Fi at the SNVC venue. \\[3pt]
+\textbf{Mitigation}  & Pre-load the dashboard before going on stage. Use phone hotspot as backup. Have a screen recording ready as last resort. \\
+\end{tabularx}
+\end{riskcard}
+
+\vspace{0.6em}
+
+% ── R6 ────────────────────────────────────────────────────────────────────────
+\begin{riskcard}{R6 \ Scope Creep}{\high}
+\begin{tabularx}{\linewidth}{lX}
+\textbf{Description} & Team is tempted to add Phase 2 features (Auth, multi-tenancy, email digests) to Phase 1, delaying the demo-ready build. \\[3pt]
+\textbf{Mitigation}  & This PRD is the contract. Section 8 (Out of Scope) is the definitive list. Any addition requires explicit agreement from both founders. \\
+\end{tabularx}
+\end{riskcard}
 
 \newpage
 
