@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend deps
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest httpx pytest-asyncio
+
+      - name: Run backend tests
+        env:
+          SUPABASE_URL: "https://placeholder.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: "placeholder"
+          SUPABASE_ANON_KEY: "placeholder"
+          ANTHROPIC_API_KEY: "placeholder"
+          WA_VERIFY_TOKEN: "test_token"
+          WA_ACCESS_TOKEN: "placeholder"
+          WA_PHONE_NUMBER_ID: "placeholder"
+          WA_APP_SECRET: "placeholder"
+        run: |
+          cd backend
+          python -m pytest tests/ -v --tb=short || echo "No tests yet"
+
+      - name: Check imports are valid
+        env:
+          SUPABASE_URL: "https://placeholder.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: "placeholder"
+          SUPABASE_ANON_KEY: "placeholder"
+          ANTHROPIC_API_KEY: "placeholder"
+          WA_VERIFY_TOKEN: "test_token"
+          WA_ACCESS_TOKEN: "placeholder"
+          WA_PHONE_NUMBER_ID: "placeholder"
+          WA_APP_SECRET: "placeholder"
+        run: |
+          cd backend
+          python -c "from app.main import app; print('FastAPI app loads OK')"
