@@ -24,10 +24,17 @@ st.set_page_config(
     layout="wide",
 )
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
+# Works on both Streamlit Cloud (st.secrets) and local (os.environ)
+def _get(key, default=""):
+    try:
+        return st.secrets[key]
+    except Exception:
+        return os.environ.get(key, default)
+
+SUPABASE_URL = _get("SUPABASE_URL")
+SUPABASE_ANON_KEY = _get("SUPABASE_ANON_KEY")
 # For demo: hardcoded office_id — in Phase 2 this comes from Supabase Auth session
-DEMO_OFFICE_ID = os.environ.get("DEMO_OFFICE_ID", "")
+DEMO_OFFICE_ID = _get("DEMO_OFFICE_ID")
 
 STATUS_ORDER = [
     "registered", "acknowledged", "assigned",
