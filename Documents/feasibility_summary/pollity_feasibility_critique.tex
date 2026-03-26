@@ -1,0 +1,511 @@
+\documentclass[12pt, a4paper]{article}
+
+% -------------------------------------------------------------------------
+% Packages
+% -------------------------------------------------------------------------
+\usepackage[margin=2.5cm, headheight=15pt]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\newcommand{\rupee}{\textit{Rs.}}
+
+% -------------------------------------------------------------------------
+% Colors
+% -------------------------------------------------------------------------
+\definecolor{pollityblue}{RGB}{0, 84, 166}
+\definecolor{critred}{RGB}{192, 0, 0}
+\definecolor{warnorange}{RGB}{220, 100, 0}
+\definecolor{okgreen}{RGB}{0, 128, 0}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{midgray}{RGB}{180, 180, 180}
+\definecolor{rowblue}{RGB}{220, 235, 252}
+
+% -------------------------------------------------------------------------
+% Section formatting
+% -------------------------------------------------------------------------
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{critred}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{}{0em}{}
+
+% -------------------------------------------------------------------------
+% Header / Footer
+% -------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Pollity Feasibility Summary --- Critical Analysis}}
+\fancyhead[R]{\small\textit{Confidential / Internal}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% -------------------------------------------------------------------------
+% Hyperref
+% -------------------------------------------------------------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=pollityblue,
+    urlcolor=pollityblue,
+    pdftitle={Pollity Feasibility Summary Critical Analysis},
+    pdfauthor={Piyush Zaware}
+}
+
+% -------------------------------------------------------------------------
+% Custom commands
+% -------------------------------------------------------------------------
+\newcommand{\strength}[1]{\textcolor{okgreen}{\textbf{#1}}}
+\newcommand{\weakness}[1]{\textcolor{critred}{\textbf{#1}}}
+\newcommand{\caution}[1]{\textcolor{warnorange}{\textbf{#1}}}
+
+% -------------------------------------------------------------------------
+\begin{document}
+
+% =========================================================================
+% TITLE PAGE
+% =========================================================================
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\color{pollityblue}\rule{\linewidth}{2pt}}\\[0.4cm]
+    {\Huge\bfseries\color{pollityblue} POLLITY}\\[0.3cm]
+    {\large\itshape Building India's Last Mile of Digital Governance}\\[0.2cm]
+    {\color{pollityblue}\rule{\linewidth}{2pt}}\\[1.5cm]
+
+    {\LARGE\bfseries Feasibility Summary\\[0.2cm]Critical Analysis}\\[1cm]
+
+    \begin{tabular}{ll}
+        \textbf{Document Type:} & Internal critique / Pre-pitch review \\[0.3em]
+        \textbf{Source Document:} & Pollity Feasibility Summary (Feb 2026) \\[0.3em]
+        \textbf{Prepared by:}    & Piyush Zaware, Co-Founder \& CTO \\[0.3em]
+        \textbf{Date:}           & March 2026 \\[0.3em]
+        \textbf{Purpose:}        & Identify critical weaknesses before \\
+                                 & investor and SNVC presentations \\
+    \end{tabular}
+
+    \vfill
+
+    {\color{midgray}\rule{\linewidth}{0.5pt}}\\[0.3cm]
+    {\small pollity.in \quad $\cdot$ \quad hello@pollity.in}\\[0.2cm]
+    {\small\textcopyright\ 2026 Pollity. Confidential.}
+\end{titlepage}
+
+% =========================================================================
+% TABLE OF CONTENTS
+% =========================================================================
+\tableofcontents
+\newpage
+
+% =========================================================================
+% PREAMBLE
+% =========================================================================
+\section*{Preamble}
+\addcontentsline{toc}{section}{Preamble}
+
+This document is an internal, adversarial critique of Pollity's February 2026 Feasibility Summary prepared for the UChicago Booth Social New Venture Challenge (SNVC). The purpose is not to undermine the venture but to identify every argument, assumption, and number that will be challenged by a sophisticated investor, a domain expert, or a government stakeholder---before those conversations happen.
+
+The analysis is structured around ten critical failure points. Each section identifies the claim made in the original document, the critical problem with that claim, and a recommended fix or reframe.
+
+\textbf{Overall assessment:} The core business idea is real and worth pursuing. The document as currently written will not survive a 30-minute session with a sharp investor. The gaps are fixable.
+
+\newpage
+
+% =========================================================================
+% SECTION 1: MARKET SIZE
+% =========================================================================
+\section{Market Sizing: The TAM Is Not a TAM}
+
+\subsection{The Claim}
+The document states a Total Addressable Market (TAM) of \textbf{\$78.6M annually}, derived by multiplying every elected representative in India (343,000) by full pricing at each tier.
+
+\subsection{The Problem}
+
+A TAM calculation must account for willingness-to-pay, budget legality, and realistic reachability. The document does none of these.
+
+\subsubsection{The Panchayat Revenue Line Is Not Real}
+253,163 panchayat sarpanchs at \$5/month generates a \$15.18M TAM figure---but this assumes 10\% freemium-to-paid conversion among representatives earning \rupee{}2,000--10,000/month in honorariums. The \$5/month (\rupee{}499) price point represents 5--25\% of a sarpanch's monthly income. This is not a viable SaaS price point for this population.
+
+\subsubsection{Ward Funds Cannot Pay for SaaS}
+The document lists ``\rupee{}10--50L ward funds'' as the budget source for municipal councillors. Ward development funds are government allocations earmarked for infrastructure and public works under the PFMS (Public Financial Management System). They \textbf{cannot legally be used to pay for private SaaS subscriptions.} This is a fundamental misunderstanding of municipal finance in India. There is no budget line from which a municipal councillor can pay \rupee{}4,999/month for software.
+
+\subsubsection{The Corrected Market Sizing}
+
+\begin{table}[h!]
+\centering
+\caption{Revised Market Sizing with Realistic Assumptions}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+\rowcolor{rowblue}
+\textbf{Tier} & \textbf{Count} & \textbf{Realistic Price} & \textbf{Realistic TAM} \\
+\midrule
+MPs & 788 & \$249 & \$2.35M \\
+MLAs/MLCs & 4,550 & \$149 & \$8.14M \\
+Municipal Councillors & 85,000 & \$20 (halved for WTP) & \$20.4M \\
+Panchayat (paid only, 3\%) & 7,595 & \$5 & \$0.46M \\
+\midrule
+\rowcolor{lightgray}
+\textbf{Revised TAM} & \multicolumn{2}{l}{} & \textbf{\$31.3M} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The \$31.3M revised figure is still a substantial market. Lead with this number; \$78.6M will be challenged immediately.
+
+\subsection{Recommendation}
+Remove the panchayat tier from the TAM calculation entirely or reframe it as a social impact metric, not a revenue line. Halve the councillor price assumption to reflect realistic willingness-to-pay. Acknowledge that ward funds cannot be used for SaaS and identify the actual budget source (personal/office discretionary funds).
+
+\newpage
+
+% =========================================================================
+% SECTION 2: UNIT ECONOMICS
+% =========================================================================
+\section{Unit Economics: The Lifetime Assumptions Are Unsupported}
+
+\subsection{The Claim}
+Average customer lifetimes of 7.7--8.3 years yield LTV:CAC ratios of 23:1--24.9:1, demonstrating ``strong unit economics.''
+
+\subsection{The Problem}
+
+The 7.7--8.3 year average lifetime is the most consequential unvalidated assumption in the entire document. It is buried in a table without justification.
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Indian Lok Sabha and Vidhan Sabha terms are \textbf{5 years}. Historical re-election rates for Indian MPs are 40--50\%. This implies structural churn of 25--30\% every 5 years from electoral defeat alone.
+    \item Party defections, floor crossings, disqualifications, and by-elections create mid-cycle churn that does not appear in the model.
+    \item Post-election churn events (a state assembly election affects 250+ MLA accounts simultaneously) are not modelled. Revenue could fall 30\% in a single quarter following a state election.
+\end{itemize}
+
+\subsubsection{Corrected Unit Economics}
+
+\begin{table}[h!]
+\centering
+\caption{LTV Sensitivity to Customer Lifetime Assumptions}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lXXXX}
+\toprule
+\rowcolor{rowblue}
+\textbf{Tier} & \textbf{Monthly Price} & \textbf{Doc Lifetime} & \textbf{Realistic Lifetime} & \textbf{Revised LTV} \\
+\midrule
+MPs     & \$249 & 8.3 yr & 4 yr & \$11,952 \\
+MLAs    & \$149 & 7.7 yr & 3.5 yr & \$6,258 \\
+Councillors & \$49 & 6.5 yr & 3 yr & \$1,764 \\
+\midrule
+\multicolumn{5}{l}{\small LTV:CAC at realistic lifetimes: MPs 11.9:1 \quad MLAs 10.4:1 \quad Councillors 8.8:1} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+These revised ratios still exceed the 3:1 benchmark---but the story changes from ``exceptional'' to ``solid.'' Investors who know Indian electoral cycles will run this calculation themselves. Do it first.
+
+\subsection{Recommendation}
+Ground the lifetime assumption in electoral cycle data. Model an explicit ``election-year churn scenario'' showing the business survives a bad election cycle. This demonstrates analytical rigor, not weakness.
+
+\newpage
+
+% =========================================================================
+% SECTION 3: COMPETITIVE LANDSCAPE
+% =========================================================================
+\section{Competitive Landscape: Three Omissions That Will Kill the Pitch}
+
+\subsection{The Claim}
+``No direct competitor offers an integrated governance management platform for elected representatives.'' Three adjacent categories (CPGRAMS, generic CRM, campaign tools) are dismissed in six sentences.
+
+\subsection{The Problem}
+
+\subsubsection{I-PAC Is Not Just an Election Tool}
+I-PAC earned \rupee{}209 crore in FY24 serving the same customer base. The document correctly notes this validates willingness-to-pay. But it fails to note that I-PAC already runs \textbf{year-round constituency communication programs} for several state governments. They have the relationships, the political trust, 100+ employees, and the capital to build what Pollity is building in 6 months the moment they see product-market fit validated by a smaller player.
+
+\subsubsection{NIC + State Portals Offer the Same Thing for Free}
+The National Informatics Centre and state IT departments maintain constituency portals for representatives in Maharashtra, Gujarat, Telangana, and other digitally advanced states. These are free. A representative will always choose a free government tool over a \rupee{}14,999/month subscription if they perform comparably, even if slightly worse.
+
+\subsubsection{WhatsApp CRM Is a \rupee{}2,000/Month Alternative}
+Pollity's core intake channel---WhatsApp Business API---is accessible to any tech-savvy office manager via Interakt, Wati, or Zoko for \rupee{}1,500--3,000/month. A configured WhatsApp CRM with custom labels, auto-replies, and basic tagging replicates 40\% of Jan-Sunwai's functionality at one-tenth the price. This is the real competition at the councillor tier.
+
+\subsection{Recommendation}
+Restructure the competitive section to acknowledge these threats and explain specifically why Pollity wins despite them: CPGRAMS integration depth, multilingual NLP, governance-specific workflows, and aggregated data network effects. ``No competitor exists'' is not credible. ``We win on these five dimensions'' is.
+
+\newpage
+
+% =========================================================================
+% SECTION 4: FINANCIAL PROJECTIONS
+% =========================================================================
+\section{Financial Projections: Disconnected from Operations}
+
+\subsection{The Claim}
+By 2028, Pollity reaches 3,000 customers and \$1.1M ARR. By 2030, 25,000 customers and \$7.3M ARR.
+
+\subsection{The Problem}
+
+The projections are not connected to any hiring plan, sales motion, or operational model. Consider what 3,000 customers by end-2028 actually requires:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Commercial launch assumed Q1--Q2 2027. That leaves roughly 18 months to sign 3,000 accounts.
+    \item \textbf{Net new customer requirement: ~167 per month, or ~40 per week.}
+    \item The Seed round (\$300--500K) allocates 30\% to sales/marketing = \$90--150K.
+    \item \$90K funds approximately 2 full-time sales hires in India for one year.
+    \item Two salespeople closing 40 accounts per week is 20 accounts per person per week---physically impossible given the relationship-based, high-trust sales cycle the document itself describes.
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\caption{Operational Feasibility of Financial Projections}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+\rowcolor{rowblue}
+\textbf{Year} & \textbf{New Customers} & \textbf{Required Weekly Closes} & \textbf{Implied Sales Team} \\
+\midrule
+2027 & 500  & 10/wk & 1--2 reps \\
+2028 & 2,500 & 48/wk & 8--10 reps \\
+2029 & 5,000 & 96/wk & 15--20 reps \\
+2030 & 17,000 & 327/wk & 50+ reps \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The 2030 target requires a sales infrastructure that is never modelled or funded in any of the described rounds.
+
+\subsection{Recommendation}
+Rebuild projections from a bottom-up sales capacity model: how many salespeople, at what quota, in which geographies, funded by which round. Honest 2027 target: 150--200 customers, \$150--180K ARR. This is achievable and still impressive for a 12-month commercial operation.
+
+\newpage
+
+% =========================================================================
+% SECTION 5: FOUR-AGENT SCOPE
+% =========================================================================
+\section{Product Scope: Four Agents at Pre-Seed Is Scope Overreach}
+
+\subsection{The Claim}
+Pollity delivers four intelligent platform agents (Jan-Sunwai, Vidhayak-Mitra, Vikas-Tracker, Nagrik-Setu) across six service areas with \$100K pre-seed capital.
+
+\subsection{The Problem}
+
+Each agent is a distinct, complex product:
+
+\begin{table}[h!]
+\centering
+\caption{Engineering Complexity per Agent}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\rowcolor{rowblue}
+\textbf{Agent} & \textbf{Core Dependencies} & \textbf{Realistic Build Time} \\
+\midrule
+Jan-Sunwai & WhatsApp Business API, multilingual NLP, case management backend, CPGRAMS integration, rep dashboard & 10--14 months (small team) \\
+\midrule
+Vidhayak-Mitra & Legal database RAG, parliamentary proceedings (largely undigitized), policy brief generation in 22 languages & 12--18 months \\
+\midrule
+Vikas-Tracker & MPLADS portal integrations (different per state, mostly non-public APIs), finance ministry reporting & 12--24 months (government API access alone takes 6--18 months) \\
+\midrule
+Nagrik-Setu & Social media APIs (X/Twitter now paid, Meta restricted), multilingual content generation, multi-platform publishing & 8--12 months \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Building all four in parallel with a 3-person founding team and \$100K budget does not produce four working agents. It produces four broken prototypes.
+
+\subsection{Recommendation}
+\textbf{MVP = Jan-Sunwai only.} WhatsApp intake, Hindi/Marathi NLP, basic case management dashboard, no CPGRAMS integration in v1. Get 50 users using this one workflow well. The other three agents are roadmap items, not MVP scope. Investors fund focused bets---presenting four simultaneous products signals lack of prioritization.
+
+\newpage
+
+% =========================================================================
+% SECTION 6: CPGRAMS INTEGRATION
+% =========================================================================
+\section{CPGRAMS Integration: A Government Negotiation, Not a Technical Task}
+
+\subsection{The Claim}
+CPGRAMS integration is listed as a core technical dependency and competitive moat, allocated from the \$55K product development budget.
+
+\subsection{The Problem}
+
+CPGRAMS is owned by DARPG (Department of Administrative Reforms and Public Grievances), Ministry of Personnel. Integration requires:
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item A formal Memorandum of Understanding with DARPG
+    \item A security clearance and code audit by NIC
+    \item Recognition as a government-approved technology partner
+    \item Formal API access approval (CPGRAMS does not have a public API)
+\end{enumerate}
+
+This process takes \textbf{12--36 months} minimum and requires political relationships at the ministry level that a pre-seed startup does not have. It cannot be purchased with product development budget.
+
+\subsection{Recommendation}
+Remove CPGRAMS from the MVP architecture entirely. Build Jan-Sunwai as a standalone grievance management system for the representative's own office. Position CPGRAMS integration as a Phase 2 feature unlocked after government partnerships are established. This is honest and buildable.
+
+\newpage
+
+% =========================================================================
+% SECTION 7: BHASHINI DEPENDENCY
+% =========================================================================
+\section{Bhashini: The Multilingual Claim Overstates Current Capability}
+
+\subsection{The Claim}
+``Leveraging India's Bhashini platform \ldots\ Pollity can understand multilingual grievances and route them correctly without requiring citizens to select from 18,000+ subcategories.''
+
+\subsection{The Problem}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Bhashini's ASR (automatic speech recognition) accuracy for informal spoken Hindi and Hinglish in noisy environments (village background noise, phone calls) is \textbf{60--75\%} in real-world conditions---not the 90\%+ required for reliable grievance classification.
+    \item Bhashini has no production SLA. It is a government initiative with documented periodic outages. A production product cannot depend on infrastructure with no uptime guarantee.
+    \item Grievance text from WhatsApp is informal, misspelled, code-switched, and emotionally complex. Fine-tuning a classification model on this data requires a labelled dataset of real grievances that \textbf{does not yet exist.}
+    \item The auto-categorization claim (routing grievances across 18,000+ CPGRAMS subcategories without user input) is a state-of-the-art NLP research problem, not a product feature achievable with off-the-shelf Bhashini calls.
+\end{itemize}
+
+\subsection{Recommendation}
+Reframe the multilingual claim: ``Bhashini enables basic language detection and rough categorization; human review handles edge cases in v1.'' Build a human-in-the-loop classification system for the MVP rather than claiming full automation. Accuracy improves with data collected during beta.
+
+\newpage
+
+% =========================================================================
+% SECTION 8: POLITICAL NEUTRALITY
+% =========================================================================
+\section{Political Neutrality: The Most Underrated Existential Risk}
+
+\subsection{The Claim}
+Political neutrality breach is rated \textbf{Low probability / Critical impact}. Mitigation: ``strict non-partisan policies; serve all parties equally; diverse customer base.''
+
+\subsection{The Problem}
+
+This is the most dangerous underestimation in the document.
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Pollity will hold constituency grievance patterns, voting demographic analytics, fund utilization data, and social media sentiment for representatives across all parties. This is among the most sensitive political data imaginable in Indian democratic context.
+    \item A single incident---a data leak, a government data access order under the IT Act or the new DPDP Act, or a perception that data was shared across party lines---does not damage the product. It ends the company.
+    \item The founding team has documented political affiliations: Piyush lists ``Research Team Lead at Indian Nationalist Congress Party -- SharadChandra Pawar'' and Noorul lists ``former I-PAC Media Analyst.'' These are sales liabilities with BJP, AAP, and other non-INC/NCP representatives. A BJP MLA will not put their constituency data on a platform founded by an INC researcher and an I-PAC analyst.
+    \item ``Serve all parties equally'' is a statement of intent. It is not a legal structure, a technical data isolation architecture, or a contractual protection.
+\end{itemize}
+
+\subsection{Recommendation}
+This risk needs a three-part response: (1) \textbf{Legal:} Establish a data trust structure with independent governance; (2) \textbf{Technical:} Hard tenant isolation---no cross-account data access at the infrastructure level; (3) \textbf{Branding:} The founding team's political backgrounds must be addressed proactively in sales conversations with non-INC representatives, not left as a liability to be discovered.
+
+\newpage
+
+% =========================================================================
+% SECTION 9: TEAM CREDIBILITY GAP
+% =========================================================================
+\section{Team: The Core Capability Gap Is Not Acknowledged}
+
+\subsection{The Claim}
+The team is presented as combining ``deep government experience, political operations expertise, and data science capabilities.''
+
+\subsection{The Problem}
+
+This framing is accurate but incomplete. The founding team has strong domain knowledge and exceptional credentials. What it does not have---and the document does not acknowledge---is \textbf{a track record of shipping B2B SaaS products.}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Manav} built Elcare India, scaled to 15 employees. This is a service venture, not a SaaS product. The skills are different.
+    \item \textbf{Piyush}'s background is quantitative research, econometrics, and financial data analysis---strong technical foundations, but no software product delivery experience in the resume.
+    \item \textbf{Noorul}'s political operations background is invaluable for sales and partnerships. Zero relevance to product.
+\end{itemize}
+
+The ``Key Hires Needed'' section lists Head of Product, Head of Sales, and Senior Full-Stack Engineer. Listing these as needed hires signals that \textbf{the team cannot currently build or sell the product.} These are co-founder-level roles being treated as post-funding hires.
+
+\subsection{Recommendation}
+Either bring a technical co-founder with SaaS product delivery experience onto the team before the SNVC pitch, or reframe the narrative: ``We are domain experts who have validated the problem and defined the solution. We are raising to hire the product and engineering talent to build it.'' The second framing is honest and still fundable at pre-seed---but it must be said explicitly.
+
+\newpage
+
+% =========================================================================
+% SECTION 10: BUDGET REALITY
+% =========================================================================
+\section{Pre-Seed Budget: \$100K Buys a Prototype, Not an MVP}
+
+\subsection{The Claim}
+\$100K in pre-seed capital will produce a working MVP validated with 50 beta users, NPS $>$ 40, and 5 documented case studies over 9--12 months.
+
+\subsection{The Problem}
+
+\begin{table}[h!]
+\centering
+\caption{Budget Reality Check}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+\rowcolor{rowblue}
+\textbf{Category} & \textbf{Allocated} & \textbf{Realistic Need} & \textbf{Gap} \\
+\midrule
+Product Dev & \$55K & AWS Mumbai (\$1--2K/mo $\times$ 12) + WhatsApp Business API setup + backend contractor (min \$2,500/mo for 6 months) = \$42--54K infra/contractor alone, leaving \$1--13K for NLP pipeline, dashboard, mobile app & Tight to impossible \\
+\midrule
+Beta Acquisition & \$20K & 50 beta users in Delhi/Maharashtra requires 6--12 months of relationship outreach, 2--3 trips/month, user research sessions, onboarding support. \$20K = \~\rupee{}1.65L for 12 months of BD in two metros & Very tight \\
+\midrule
+Operations \& Legal & \$15K & Company incorporation + DPDP compliance assessment + ISO 27001 gap analysis = \rupee{}8--12L (\$10--14K) before any ongoing legal counsel & Barely adequate \\
+\midrule
+Contingency & \$10K & 10\% on a complex regulated product in a new market is insufficient & Inadequate \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The honest output of \$100K with this team is: a functional WhatsApp grievance intake system with a basic web dashboard, tested with 10--15 beta users. That is still a meaningful MVP milestone---but the pre-seed success criteria as written (\textgreater50 users, NPS \textgreater40, 5 case studies) oversell what \$100K achieves.
+
+\subsection{Recommendation}
+Either raise the pre-seed ask to \$150--200K to match the milestones, or reduce the milestones to match the \$100K budget. Recommended revised milestones: functional Jan-Sunwai prototype, 15--20 active beta users, 3 documented case studies, NPS \textgreater30. These are achievable and still demonstrate product-market fit validation.
+
+\newpage
+
+% =========================================================================
+% SUMMARY SCORECARD
+% =========================================================================
+\section{Summary Scorecard}
+
+\begin{table}[h!]
+\centering
+\caption{Critical Assessment by Dimension}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\rowcolor{rowblue}
+\textbf{Dimension} & \textbf{Assessment} & \textbf{Rating} \\
+\midrule
+Problem identification       & Real, documented, validated by CPGRAMS data and fieldwork & \strength{Strong} \\
+\midrule
+Solution concept             & Four-agent architecture logically maps to rep workflows & \strength{Strong} \\
+\midrule
+Market sizing (TAM)          & Inflated 2--3$\times$ by freemium tier and illegal budget sources & \weakness{Weak} \\
+\midrule
+Unit economics               & Lifetime assumptions unsupported by electoral cycle data & \weakness{Weak} \\
+\midrule
+Competitive analysis         & I-PAC, NIC portals, and WhatsApp CRM alternatives omitted & \weakness{Weak} \\
+\midrule
+Financial projections        & Not connected to any operational or hiring model & \weakness{Very Weak} \\
+\midrule
+Technical feasibility (MVP)  & CPGRAMS and Bhashini risks unaddressed; scope too broad & \caution{Mixed} \\
+\midrule
+Team                         & Domain exceptional; SaaS delivery experience absent & \caution{Mixed} \\
+\midrule
+Political neutrality risk    & Severity drastically underestimated; no structural mitigation & \weakness{Weak} \\
+\midrule
+Pre-seed budget              & \$100K buys prototype quality, not stated MVP milestones & \caution{Borderline} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Overall Verdict}
+
+The core business thesis is \textbf{sound and worth building.} India's 3.3 million elected representatives genuinely lack purpose-built governance tools. The founding team has the domain knowledge, political network, and UChicago credibility to launch this. The feasibility document, however, contains assumptions that will be exposed under investor scrutiny.
+
+\textbf{The three fixes that matter most before any investor conversation:}
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Rebuild the financials} from a bottom-up sales capacity model. Remove the \$78.6M TAM headline. Lead with \$31M revised TAM and \$94--140K Year-1 SOM.
+    \item \textbf{Scope the MVP to Jan-Sunwai only.} No CPGRAMS. No four-agent architecture in v1. One agent, one workflow, 50 users, NPS \textgreater40.
+    \item \textbf{Address the political neutrality and team credibility gaps explicitly.} These will be asked. Having the answers prepared demonstrates seriousness.
+\end{enumerate}
+
+\vfill
+\begin{center}
+    {\color{midgray}\rule{0.5\linewidth}{0.5pt}}\\[0.3cm]
+    {\small\itshape Pollity --- Building India's Last Mile of Digital Governance}\\
+    {\small pollity.in \quad $\cdot$ \quad hello@pollity.in}
+\end{center}
+
+\end{document}
