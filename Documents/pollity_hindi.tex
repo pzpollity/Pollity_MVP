@@ -1,0 +1,164 @@
+%% =============================================================================
+%% Pollity.in — हिंदी परिचय पत्रिका
+%% =============================================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{hindi}
+\setotherlanguage{english}
+
+\setmainfont{ITF Devanagari}[
+  BoldFont   = {ITF Devanagari Bold},
+  ItalicFont = {ITF Devanagari Light},
+]
+\newfontfamily\englishfont{Helvetica Neue}
+
+\usepackage[margin=2.5cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+
+%% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{pollityblue}{RGB}{31, 97, 141}
+\definecolor{pollitygold}{RGB}{212, 172, 13}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+
+%% ── Section Formatting ───────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\color{pollityblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{pollityblue}}{}{0em}{}
+
+%% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\color{pollityblue}\textbf{\textenglish{Pollity.in}}}
+\rhead{\color{gray}\small हम क्या बना रहे हैं}
+\cfoot{\color{gray}\small \textenglish{pollity.in} \textbar{} मार्च २०२६}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\hypersetup{colorlinks=true, urlcolor=pollityblue, linkcolor=pollityblue}
+
+%% =============================================================================
+\begin{document}
+
+%% ── शीर्षक ───────────────────────────────────────────────────────────────────
+\begin{center}
+  {\color{pollityblue}\rule{\linewidth}{1.5pt}}\\[0.5em]
+  {\Huge\bfseries\color{pollityblue}\textenglish{Pollity.in}}\\[0.3em]
+  {\large निर्वाचित जनप्रतिनिधियों के लिए डिजिटल मुख्य सहायक}\\[0.3em]
+  {\color{pollityblue}\rule{\linewidth}{1.5pt}}
+\end{center}
+
+\vspace{0.8em}
+
+%% ── समस्या ───────────────────────────────────────────────────────────────────
+\section{समस्या क्या है?}
+
+भारत में \textbf{३३ लाख से अधिक निर्वाचित जनप्रतिनिधि} हैं: सांसद, विधायक, नगरसेवक, ग्राम पंचायत सरपंच। इनमें से हर एक व्यक्ति प्रतिदिन सैकड़ों नागरिकों की समस्याओं का सामना करता है।
+
+ये समस्याएं \textenglish{WhatsApp} संदेशों, व्यक्तिगत मुलाकातों, फोन कॉल्स और पत्रों के जरिए आती हैं। लेकिन इन सभी शिकायतों को एक जगह रखने की कोई व्यवस्था नहीं है।
+
+इसका परिणाम यह होता है:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item शिकायतें दर्ज होने के बाद भूल जाती हैं या खो जाती हैं
+  \item नागरिकों को उनकी शिकायत के बारे में कोई जवाब नहीं मिलता
+  \item कौन सी समस्याएं सुलझीं और कौन सी नहीं, इसका कोई हिसाब नहीं होता
+  \item कार्यालय के कर्मचारी संदेश आगे भेजने और विभागों का पीछा करने में समय गँवाते हैं
+\end{itemize}
+
+"कागज पर सुलझी" और "वास्तव में सुलझी" के बीच की खाई बहुत बड़ी है। कोई इसे नहीं मापता।
+
+%% ── हम क्या बना रहे हैं ──────────────────────────────────────────────────────
+\section{हम क्या बना रहे हैं?}
+
+\begin{tcolorbox}[colback=pollityblue!8, colframe=pollityblue, sharp corners, boxrule=0.6pt]
+\textbf{\textenglish{Pollity.in} निर्वाचित जनप्रतिनिधियों के लिए एक \textenglish{AI}-आधारित प्रबंधन साधन है।}
+यह एक डिजिटल मुख्य सहायक की तरह काम करता है जो निर्वाचन क्षेत्र कार्यालय का रोज़मर्रा का काम संभालता है, ताकि प्रतिनिधि असली काम पर ध्यान केंद्रित कर सकें।
+\end{tcolorbox}
+
+\vspace{0.8em}
+
+पहला मॉड्यूल, \textbf{जन-सुनवाई}, शिकायत प्रबंधन संभालता है:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=4pt]
+  \item नागरिक अपनी समस्या \textenglish{WhatsApp} पर संदेश भेजकर बताते हैं
+  \item हमारी \textenglish{AI} तकनीक तुरंत शिकायत का प्रकार (बुनियादी ढाँचा, स्वास्थ्य, भ्रष्टाचार आदि) और तात्कालिकता तय करती है
+  \item नागरिक को कुछ ही सेकंड में एक संदर्भ संख्या मिलती है, ताकि उन्हें पता चले कि शिकायत दर्ज हो गई
+  \item कार्यालय के कर्मचारियों को एक ही \textenglish{Dashboard} पर सभी शिकायतें दिखती हैं, हर एक को जिम्मेदार व्यक्ति नियुक्त किया जा सकता है और समाधान तक पीछा किया जा सकता है
+  \item प्रतिनिधियों को \textenglish{data} मिलता है: कितनी शिकायतें आईं, कितनी सुलझीं, और निर्वाचन क्षेत्र की मुख्य समस्याएं क्या हैं
+\end{enumerate}
+
+\vspace{0.5em}
+
+\textbf{\textenglish{WhatsApp} पर संदेश नहीं खोएंगे। नागरिकों को जवाब न मिलना बंद होगा। अनिश्चितता नहीं।}
+
+%% ── बड़ी दृष्टि ───────────────────────────────────────────────────────────────
+\section{बड़ी दृष्टि}
+
+जन-सुनवाई पहला कदम है। पूरे \textenglish{Pollity} मंच में यह शामिल होगा:
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{मॉड्यूल} & \textbf{कार्य} \\
+\midrule
+जन-सुनवाई    & शिकायत प्रबंधन और नागरिक सेवा \\
+विधायक मित्र & विधायी अनुसंधान: विधेयकों के सारांश, नीति विश्लेषण, चर्चा के मुद्दे \\
+विकास ट्रैकर & निर्वाचन क्षेत्र विकास निधि का अनुसरण, परियोजनाओं की स्थिति, बजट उपयोग \\
+नागरिक सेतु  & \textenglish{Social Media} और जन संचार के माध्यम से नागरिकों से संपर्क \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+ये सभी मॉड्यूल मिलकर हर निर्वाचित प्रतिनिधि को वह बुनियादी सुविधा देते हैं जो आज तक केवल बड़े राजनेताओं को ही मिलती थी, और वह भी बहुत कम खर्च में।
+
+%% ── यह क्यों जरूरी है ─────────────────────────────────────────────────────────
+\section{यह क्यों जरूरी है?}
+
+भारत का लोकतंत्र ३३ लाख स्थानीय प्रतिनिधियों पर टिका है। इनमें से अधिकतर पहली बार राजनीति में आए हैं, जिनके पास कर्मचारी नहीं हैं, व्यवस्था नहीं है, \textenglish{data} नहीं है। \textenglish{Pollity} उन्हें यह व्यवस्था देता है।
+
+जब उत्तर प्रदेश के किसी ग्रामीण क्षेत्र का सरपंच अपने निर्वाचन क्षेत्र को दिखा सकता है कि पिछली तिमाही में ८४ प्रतिशत शिकायतें सुलझाई गईं, तो यही सच्ची जवाबदेही है। यही नागरिकों और सरकार के बीच विश्वास बनाता है।
+
+%% ── हमारी टीम ────────────────────────────────────────────────────────────────
+\section{हमारी टीम}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{\textenglish{Manav Mutneja}} & सह-संस्थापक और मुख्य कार्यकारी अधिकारी। \textenglish{Antitrust} वकील और डिजिटल \textenglish{governance} विशेषज्ञ। नीति, साझेदारी और सरकारी संस्थाओं के साथ संवाद का नेतृत्व करते हैं। \\[4pt]
+\textbf{\textenglish{Piyush Zaware}} & सह-संस्थापक और मुख्य प्रौद्योगिकी अधिकारी। संगणकीय अभियंता और अर्थमितिशास्त्री। तकनीकी बुनियादी ढाँचा और \textenglish{data} प्रणाली तैयार करते हैं। \\[4pt]
+\textbf{\textenglish{Joe DiTommasso}} & सह-संस्थापक और मुख्य परिचालन अधिकारी। सूचना प्रबंधन और प्रौद्योगिकी पृष्ठभूमि। उत्पाद परिचालन, उपयोगकर्ता अधिग्रहण और बाज़ार प्रवेश का नेतृत्व करते हैं। \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+हम इस समय \textenglish{Spring} २०२६ में एक सीधे प्रदर्शन \textenglish{demo} के लिए तैयारी कर रहे हैं।
+
+%% ── हम कहाँ हैं ───────────────────────────────────────────────────────────────
+\section{हम अभी कहाँ हैं?}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners, boxrule=0.5pt]
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt, topsep=2pt]
+  \item[$\checkmark$] ग्राहक खोज साक्षात्कारों के माध्यम से मुख्य उत्पाद अवधारणा सिद्ध
+  \item[$\checkmark$] जन-सुनवाई \textenglish{backend} तैयार और तैनात
+  \item[$\checkmark$] \textenglish{AI} वर्गीकरण प्रणाली सक्रिय (८ श्रेणियाँ, ४ तात्कालिकता स्तर)
+  \item[$\checkmark$] शिकायत \textenglish{Dashboard} तैनात
+  \item[$\rightarrow$] \textenglish{WhatsApp Business} एकीकरण प्रक्रिया में
+  \item[$\rightarrow$] पहले \textenglish{beta} उपयोगकर्ता लक्ष्य: ५० कार्यालय, तीसरी तिमाही २०२६
+\end{itemize}
+\end{tcolorbox}
+
+\vspace{1em}
+\begin{center}
+{\color{pollityblue}\rule{0.5\linewidth}{0.4pt}}\\[0.5em]
+{\small रुचि है? संपर्क करें: \textbf{\textenglish{piyush.zaware@pollity.in}}}
+\end{center}
+
+\end{document}
