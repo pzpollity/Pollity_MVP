@@ -1,0 +1,157 @@
+%% =============================================================================
+%% Pollity.in — What We Are Building (One-Pager)
+%% =============================================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+
+%% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{pollityblue}{RGB}{31, 97, 141}
+\definecolor{pollitygold}{RGB}{212, 172, 13}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{darktext}{RGB}{30, 30, 30}
+
+%% ── Section Formatting ───────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\color{pollityblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{pollityblue}}{}{0em}{}
+
+%% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\color{pollityblue}\textbf{Pollity.in}}
+\rhead{\color{gray}\small What We Are Building}
+\cfoot{\color{gray}\small pollity.in \textbar{} March 2026}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\hypersetup{colorlinks=true, urlcolor=pollityblue, linkcolor=pollityblue}
+
+%% =============================================================================
+\begin{document}
+
+%% ── Header ───────────────────────────────────────────────────────────────────
+\begin{center}
+  {\color{pollityblue}\rule{\linewidth}{1.5pt}}\\[0.5em]
+  {\Huge\bfseries\color{pollityblue} Pollity.in}\\[0.3em]
+  {\large A Digital Chief of Staff for India's Elected Representatives}\\[0.3em]
+  {\color{pollityblue}\rule{\linewidth}{1.5pt}}
+\end{center}
+
+\vspace{0.8em}
+
+%% ── The Problem ──────────────────────────────────────────────────────────────
+\section{The Problem}
+
+India has \textbf{3.3 million elected representatives} --- MPs, MLAs, municipal councillors, panchayat sarpanchs. Every single one of them is overwhelmed.
+
+Each week, hundreds of constituents reach out with problems: a broken road, a blocked pension, a corrupt official, a child out of school. These grievances arrive through WhatsApp messages, phone calls, in-person visits, and handwritten letters. There is no system to manage any of it.
+
+The result:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item Grievances get lost between intake and resolution
+  \item Citizens hear nothing after they file a complaint
+  \item Representatives cannot answer ``how many problems did we solve this month?''
+  \item Staff spend their days forwarding messages and chasing departments, not solving problems
+\end{itemize}
+
+The gap between ``resolved on paper'' and ``actually resolved'' is enormous --- and no one is measuring it.
+
+%% ── What We Are Building ─────────────────────────────────────────────────────
+\section{What We Are Building}
+
+\begin{tcolorbox}[colback=pollityblue!8, colframe=pollityblue, sharp corners, boxrule=0.6pt]
+\textbf{Pollity.in is an AI-powered management platform for elected representatives.}
+Think of it as a Digital Chief of Staff --- it handles the operational complexity of running a constituency office so the representative can focus on actual governance.
+\end{tcolorbox}
+
+\vspace{0.8em}
+
+The first module, \textbf{Jan-Sunwai}, tackles grievance management:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=4pt]
+  \item A constituent sends a WhatsApp message describing their problem
+  \item Our AI instantly classifies it by type (infrastructure, healthcare, corruption, etc.) and urgency
+  \item The constituent gets an acknowledgement with a unique Reference ID --- within seconds
+  \item The office staff see every grievance on a single dashboard, assigned, tracked, and updated through to resolution
+  \item The representative gets data: how many grievances came in, how many were resolved, what the biggest issues are
+\end{enumerate}
+
+\vspace{0.5em}
+
+\textbf{No more lost WhatsApp messages. No more citizens calling back with no answer. No more guessing.}
+
+%% ── The Bigger Vision ────────────────────────────────────────────────────────
+\section{The Bigger Vision}
+
+Jan-Sunwai is module one. The full Pollity platform will include:
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Module} & \textbf{What It Does} \\
+\midrule
+Jan-Sunwai      & Grievance management and constituent service \\
+Vidhayak-Mitra  & Legislative research --- summaries of bills, policy analysis, talking points \\
+Vikas-Tracker   & Track constituency development funds, project status, budget utilisation \\
+Nagrik-Setu     & Constituent engagement via social media and mass communication \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+Together, these modules give every elected representative the operational infrastructure that only well-funded national politicians currently have access to --- at a fraction of the cost.
+
+%% ── Why It Matters ───────────────────────────────────────────────────────────
+\section{Why It Matters}
+
+India's democracy runs on 3.3 million local representatives. Most of them are first-generation politicians with no staff, no systems, and no data. Pollity gives them infrastructure.
+
+When a sarpanch in rural Maharashtra can show her constituency that she resolved 84\% of grievances filed last quarter --- that is accountability. That is what builds trust between citizens and their government at the grassroots level.
+
+%% ── Who We Are ───────────────────────────────────────────────────────────────
+\section{Who We Are}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Piyush Zaware} & Co-Founder \& CTO. MPP candidate at University of Chicago Harris (Data Analytics). Background in econometrics, ML, and data engineering. \\[4pt]
+\textbf{Joe}           & Co-Founder \& COO. MIS and technology background. Leads product operations, user acquisition, and systems design. \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+We are currently participating in the \textbf{Social New Venture Challenge (SNVC) 2026} at the University of Chicago Booth School of Business, building toward a live prototype demo in Spring 2026.
+
+%% ── Where We Are ─────────────────────────────────────────────────────────────
+\section{Where We Are Right Now}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners, boxrule=0.5pt]
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt, topsep=2pt]
+  \item[$\checkmark$] Core product concept validated through customer discovery interviews
+  \item[$\checkmark$] Jan-Sunwai backend built and deployed (FastAPI on Railway)
+  \item[$\checkmark$] AI classification pipeline live (Claude Haiku --- 8 categories, 4 urgency levels)
+  \item[$\checkmark$] Grievance dashboard deployed (Streamlit)
+  \item[$\rightarrow$] WhatsApp Business API integration in progress
+  \item[$\rightarrow$] First beta users targeted post-SNVC (50 offices, Q3 2026)
+\end{itemize}
+\end{tcolorbox}
+
+\vspace{1em}
+\begin{center}
+{\color{pollityblue}\rule{0.5\linewidth}{0.4pt}}\\[0.5em]
+{\small Interested? Reach out at \textbf{piyush@pollity.in}}\\[0.2em]
+{\small\color{gray} Pollity.in \textbar{} SNVC 2026 \textbar{} University of Chicago}
+\end{center}
+
+\end{document}
