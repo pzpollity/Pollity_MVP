@@ -1,0 +1,680 @@
+%% =============================================================================
+%% Pollity.in — Jan-Sunwai Product Requirements Document (PRD) MVP v0
+%% Authors: Piyush Zaware & Joe
+%% Date: March 2026
+%% =============================================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{colortbl}
+
+%% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{pollityblue}{RGB}{31, 97, 141}
+\definecolor{pollitygold}{RGB}{212, 172, 13}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{criticalred}{RGB}{192, 57, 43}
+\definecolor{highorg}{RGB}{211, 84, 0}
+\definecolor{mediumblu}{RGB}{41, 128, 185}
+\definecolor{lowgreen}{RGB}{39, 174, 96}
+\definecolor{mustcol}{RGB}{39, 174, 96}
+\definecolor{shouldcol}{RGB}{41, 128, 185}
+\definecolor{couldcol}{RGB}{243, 156, 18}
+\definecolor{wontcol}{RGB}{149, 165, 166}
+\definecolor{rowgray}{RGB}{236, 240, 241}
+
+%% ── Section Formatting ───────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\color{pollityblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{pollityblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\itshape\color{pollityblue}}{}{0em}{}
+
+%% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\color{pollityblue}\textbf{Pollity.in} \textbar{} Jan-Sunwai PRD v0}
+\rhead{\color{gray}\small Product Requirements Document}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── tcolorbox styles ─────────────────────────────────────────────────────────
+\tcbuselibrary{skins, breakable}
+\newtcolorbox{visionbox}{
+  colback=pollityblue!8, colframe=pollityblue, sharp corners,
+  boxrule=0.6pt, left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+\newtcolorbox{notebox}{
+  colback=pollitygold!12, colframe=pollitygold, sharp corners,
+  boxrule=0.6pt, left=8pt, right=8pt, top=4pt, bottom=4pt
+}
+\newtcolorbox{reqbox}[1]{
+  colback=lightgray, colframe=pollityblue, coltitle=white,
+  fonttitle=\bfseries, title=#1, sharp corners,
+  boxrule=0.6pt, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+%% ── Requirement priority tags ────────────────────────────────────────────────
+\newcommand{\must}{\textcolor{white}{\colorbox{mustcol}{\textbf{\ MUST\ }}}}
+\newcommand{\should}{\textcolor{white}{\colorbox{shouldcol}{\textbf{\ SHOULD\ }}}}
+\newcommand{\could}{\textcolor{white}{\colorbox{couldcol}{\textbf{\ COULD\ }}}}
+\newcommand{\wont}{\textcolor{white}{\colorbox{wontcol}{\textbf{\ WONT\ }}}}
+
+%% ── Hyperref ─────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=pollityblue,
+  urlcolor=pollityblue,
+  pdftitle={Pollity.in Jan-Sunwai PRD v0},
+  pdfauthor={Piyush Zaware, Joe},
+}
+
+%% =============================================================================
+\begin{document}
+
+%% ── Title Page ───────────────────────────────────────────────────────────────
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+{\color{pollityblue}\rule{\linewidth}{1.5pt}}\\[0.4cm]
+{\Huge\bfseries\color{pollityblue} Pollity.in}\\[0.3cm]
+{\Large Jan-Sunwai: Grievance Management Module}\\[0.2cm]
+{\large\bfseries Product Requirements Document --- MVP v0}\\[0.3cm]
+{\color{pollityblue}\rule{\linewidth}{1.5pt}}
+
+\vspace{1.2cm}
+
+\begin{visionbox}
+\centering
+\textbf{Product Vision}\\[0.4em]
+Jan-Sunwai transforms how elected representatives manage constituent grievances ---
+replacing scattered WhatsApp messages, paper registers, and missed follow-ups
+with a single, intelligent system that ensures every grievance is tracked,
+classified, assigned, and closed.
+\end{visionbox}
+
+\vspace{1.2cm}
+
+\begin{tabular}{ll}
+\toprule
+\textbf{Document version} & 0.1.0 \\
+\textbf{Product version}  & MVP v0 (Phase 1 --- SNVC Prototype) \\
+\textbf{Authors}          & Piyush Zaware (CTO) \& Joe (COO) \\
+\textbf{Date}             & March 2026 \\
+\textbf{Status}           & Active --- In Development \\
+\textbf{Phase}            & SNVC 2026, University of Chicago Booth \\
+\bottomrule
+\end{tabular}
+
+\vspace{1.2cm}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes} \\
+\midrule
+0.1.0 & March 2026 & Initial PRD, Phase 1 scope \\
+\bottomrule
+\end{tabular}
+
+\vfill
+{\small\color{gray} Pollity.in \textbar{} SNVC 2026 \textbar{} University of Chicago Booth School of Business}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%% =============================================================================
+\section{Executive Summary}
+
+Jan-Sunwai is the first module of Pollity.in, an AI-empowered Digital Chief of Staff for India's 3.3 million elected representatives. This PRD defines the requirements for \textbf{MVP v0} --- a working Phase 1 prototype to be demonstrated live at the SNVC Week 9 pitch in Spring 2026.
+
+The prototype covers one use case end-to-end: a citizen sends a WhatsApp message, the system classifies it using AI, stores it, sends an acknowledgement, and displays it on a dashboard where office staff can track and update its status through closure.
+
+\begin{notebox}
+\textbf{This is a prototype, not a production system.} MVP v0 is designed to validate the core value proposition with a single demo office. Production hardening, multi-tenancy, and full Auth happen in Phase 2 (post-SNVC).
+\end{notebox}
+
+\newpage
+
+%% =============================================================================
+\section{Problem Statement}
+
+\subsection{The Governance Gap}
+
+India's elected representatives --- MPs, MLAs, municipal councillors, panchayat sarpanchs --- receive hundreds of constituent grievances per week through a chaotic mix of channels: WhatsApp messages, in-person visits, phone calls, letters, and social media. There is no standard system for managing these.
+
+The result is predictable:
+\begin{itemize}[leftmargin=1.5em]
+  \item Grievances are forgotten or lost between intake and resolution
+  \item No visibility into how many grievances exist, their status, or which departments are responsible
+  \item Citizens receive no acknowledgement or follow-up, eroding trust
+  \item Representatives cannot demonstrate accountability --- they have no data on what they resolved
+  \item Staff spend hours manually forwarding messages and chasing departments
+\end{itemize}
+
+\subsection{The Specific Problem Jan-Sunwai Solves}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Pain Point} & \textbf{What Jan-Sunwai Does} \\
+\midrule
+Grievances arrive on personal WhatsApp, get buried & Dedicated office number, every message captured \\
+No categorisation or prioritisation & Claude AI classifies by category and urgency instantly \\
+No acknowledgement to citizen & Automatic Ref ID sent back within seconds \\
+No tracking after intake & Dashboard with full lifecycle from registered to closed \\
+No accountability data & Every grievance timestamped, assigned, and searchable \\
+Duplicate grievances from same citizen & AI duplicate detection flags repeat submissions \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Why Now}
+
+WhatsApp Business API, capable AI classification at near-zero cost (Claude Haiku at \$0.00026 per grievance), and managed Postgres (Supabase free tier) make this buildable under \$500 total. This was not economically feasible two years ago.
+
+\newpage
+
+%% =============================================================================
+\section{Goals and Success Metrics}
+
+\subsection{Phase 1 Goals (SNVC Prototype --- 9 Weeks)}
+
+\begin{tabularx}{\linewidth}{lXl}
+\toprule
+\textbf{Goal} & \textbf{Description} & \textbf{Metric} \\
+\midrule
+G1 & End-to-end flow works live & Demo completes without error at Week 9 pitch \\
+G2 & AI classification is accurate & $\geq$85\% correct category on test messages \\
+G3 & Acknowledgement is fast & Citizen receives Ref ID within 10 seconds \\
+G4 & Dashboard is usable & Non-technical staff can update a status in $<$2 min \\
+G5 & System is stable & No crashes during the live demo \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Phase 2 Goals (Post-SNVC --- 20 Weeks)}
+
+\begin{tabularx}{\linewidth}{lXl}
+\toprule
+\textbf{Goal} & \textbf{Description} & \textbf{Metric} \\
+\midrule
+G6 & Beta users onboarded       & 50 paying beta users \\
+G7 & Constituent satisfaction   & Net Promoter Score $>$ 40 \\
+G8 & Grievance resolution rate  & $\geq$70\% of registered grievances closed within 30 days \\
+G9 & Retention                  & $\geq$80\% of beta users active after 60 days \\
+G10 & Seed round unlock         & Metrics sufficient for seed round conversation \\
+\bottomrule
+\end{tabularx}
+
+\subsection{What Does Not Count as Success}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Number of features built (irrelevant if G1--G5 are not met)
+  \item Code quality metrics (prototype; refactor in Phase 2)
+  \item Users outside the demo office (Phase 2 scope)
+\end{itemize}
+
+\newpage
+
+%% =============================================================================
+\section{Users and Personas}
+
+\begin{notebox}
+Jan-Sunwai is \textbf{office-facing, not citizen-facing.} Citizens interact only through WhatsApp (intake and status updates). They never log in to the system.
+\end{notebox}
+
+\vspace{0.8em}
+
+\subsection{Primary User: Office Staff}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners]
+\textbf{Who:} Personal Assistant (PA) or Constituency Manager in the representative's office \\[0.3em]
+\textbf{Tech comfort:} Uses WhatsApp daily; comfortable with Google Sheets; has never used a CRM or SaaS dashboard \\[0.3em]
+\textbf{Primary job:} Receives grievances, forwards them to departments, follows up, reports back to the representative \\[0.3em]
+\textbf{Key frustration:} Loses track of grievances after forwarding; citizens call back asking for status; has no way to show the representative what was done \\[0.3em]
+\textbf{What they need from Jan-Sunwai:} See all open grievances in one place; update status in 3 clicks; know what needs action today
+\end{tcolorbox}
+
+\subsection{Secondary User: Elected Representative}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners]
+\textbf{Who:} MLA, MP, municipal councillor, or panchayat sarpanch \\[0.3em]
+\textbf{Tech comfort:} Uses WhatsApp; may not use a laptop regularly \\[0.3em]
+\textbf{Primary job:} Constituent service, legislative work, political engagement \\[0.3em]
+\textbf{Key frustration:} Cannot answer ``how many grievances did we resolve this month?'' Cannot hold staff accountable without data \\[0.3em]
+\textbf{What they need from Jan-Sunwai:} A weekly summary of grievance resolution; a number they can quote publicly; confidence that nothing is falling through the cracks
+\end{tcolorbox}
+
+\subsection{Non-User: Citizen}
+
+The citizen is a \textbf{touchpoint}, not a user. They interact via WhatsApp only:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Input:} Sends a grievance message in any language
+  \item \textbf{Output:} Receives an acknowledgement with a Reference ID
+  \item They do not log in, do not see the dashboard, and do not have an account
+\end{itemize}
+
+\newpage
+
+%% =============================================================================
+\section{User Stories}
+
+Priority notation: \must\ = must have for v0 demo \quad \should\ = important but not blocking \quad \could\ = nice to have \quad \wont\ = out of scope for v0
+
+\subsection{Citizen Stories}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Priority} & \textbf{Story} \\
+\midrule
+C1 & \must   & As a citizen, I want to send a grievance via WhatsApp so that I can report a problem without visiting an office. \\
+C2 & \must   & As a citizen, I want to receive an acknowledgement with a Reference ID so that I know my grievance was received and can follow up. \\
+C3 & \should & As a citizen, I want the acknowledgement to be in the same language I wrote in so that I can understand it. \\
+C4 & \could  & As a citizen, I want to receive a status update when my grievance is resolved so that I am informed of the outcome. \\
+C5 & \wont   & As a citizen, I want to log in and track my grievance online. (Phase 2) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Office Staff Stories}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Priority} & \textbf{Story} \\
+\midrule
+S1  & \must   & As office staff, I want to see all incoming grievances on a single dashboard so that I do not miss any. \\
+S2  & \must   & As office staff, I want each grievance to be automatically categorised and prioritised so that I know what to act on first. \\
+S3  & \must   & As office staff, I want to update the status of a grievance so that the system reflects the current state of resolution. \\
+S4  & \must   & As office staff, I want to assign a grievance to a department or person so that accountability is clear. \\
+S5  & \must   & As office staff, I want to see a summary of all open grievances so that I can report to the representative. \\
+S6  & \should & As office staff, I want to filter grievances by category, urgency, and status so that I can focus on specific subsets. \\
+S7  & \should & As office staff, I want to record a next action note on each grievance so that I remember what step is pending. \\
+S8  & \could  & As office staff, I want to see if a new grievance is a duplicate of an existing one so that I avoid processing the same issue twice. \\
+S9  & \could  & As office staff, I want to add walk-in grievances manually through the dashboard so that all channels are in one system. \\
+S10 & \wont   & As office staff, I want to log in with a secure password. (Phase 2 --- Auth) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Representative Stories}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Priority} & \textbf{Story} \\
+\midrule
+R1 & \should & As a representative, I want to see KPI metrics (total, open, critical, resolved today) so that I have an at-a-glance view of constituency health. \\
+R2 & \could  & As a representative, I want to see a breakdown of grievances by category so that I know which issues dominate my constituency. \\
+R3 & \wont   & As a representative, I want a weekly email digest summarising grievance resolution. (Phase 2) \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{Functional Requirements}
+
+\subsection{FR1 --- WhatsApp Intake}
+
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} & \textbf{Story} \\
+\midrule
+FR1.1 & \must   & System must receive incoming WhatsApp messages via Meta Cloud API webhook & C1 \\
+FR1.2 & \must   & System must validate every incoming webhook POST using HMAC-SHA256 signature & C1 \\
+FR1.3 & \must   & System must respond to Meta's GET verification challenge & C1 \\
+FR1.4 & \must   & System must process text messages; non-text messages (images, audio) are silently ignored in v0 & C1 \\
+FR1.5 & \must   & System must identify which office a message belongs to using the WhatsApp phone number ID & S1 \\
+FR1.6 & \must   & Webhook must return HTTP 200 to Meta within 5 seconds regardless of processing time & C1 \\
+\bottomrule
+\end{tabularx}
+
+\subsection{FR2 --- AI Classification}
+
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} & \textbf{Story} \\
+\midrule
+FR2.1 & \must   & System must classify each grievance into one of 8 categories: infrastructure, welfare schemes, public safety, healthcare, education, land/revenue, corruption, others & S2 \\
+FR2.2 & \must   & System must assign one of 4 urgency levels: critical, high, medium, low & S2 \\
+FR2.3 & \must   & System must generate a 1--2 sentence English summary of the grievance & S5 \\
+FR2.4 & \must   & System must detect the language of the incoming message (ISO 639-1 code) & C3 \\
+FR2.5 & \must   & System must guard against prompt injection: citizen message text must be treated as data, never as instructions & S1 \\
+FR2.6 & \must   & If the AI returns malformed output, the system must fall back to category=others, urgency=medium rather than crash & S1 \\
+FR2.7 & \should & System must check for duplicate grievances within the same office (same issue filed by the same citizen recently) & S8 \\
+\bottomrule
+\end{tabularx}
+
+\subsection{FR3 --- Grievance Storage}
+
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} & \textbf{Story} \\
+\midrule
+FR3.1 & \must   & Each grievance must be assigned a unique human-readable Reference ID in the format \texttt{GR-\{OFFICE\}-\{YEAR\}-\{SEQ\}} & C2 \\
+FR3.2 & \must   & Reference ID sequence must be atomic --- no two grievances for the same office can have the same ID & C2 \\
+FR3.3 & \must   & System must store: raw text, category, urgency, summary, language, channel, citizen contact, office ID, timestamps & S1 \\
+FR3.4 & \must   & System must store the full grievance lifecycle status & S3 \\
+FR3.5 & \should & System must store assigned\_to and next\_action fields & S4, S7 \\
+FR3.6 & \should & System must record closed\_at timestamp when a grievance reaches closed status & S3 \\
+\bottomrule
+\end{tabularx}
+
+\subsection{FR4 --- Citizen Acknowledgement}
+
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} & \textbf{Story} \\
+\midrule
+FR4.1 & \must   & System must send an acknowledgement WhatsApp message to the citizen after registration & C2 \\
+FR4.2 & \must   & Acknowledgement must include the Reference ID & C2 \\
+FR4.3 & \must   & Acknowledgement for critical grievances must include an escalation notice & C2 \\
+FR4.4 & \should & Acknowledgement must include the grievance category so the citizen knows it was understood & C2 \\
+\bottomrule
+\end{tabularx}
+
+\subsection{FR5 --- Dashboard}
+
+\begin{tabularx}{\linewidth}{clXl}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} & \textbf{Story} \\
+\midrule
+FR5.1  & \must   & Dashboard must display a KPI row: total grievances, open, critical, resolved today & R1 \\
+FR5.2  & \must   & Dashboard must display all grievances in a sortable, filterable table & S1 \\
+FR5.3  & \must   & Table must show: Ref ID, date filed, urgency, category, status, summary, citizen contact, assigned to & S1 \\
+FR5.4  & \must   & Dashboard must allow status updates: set new status, assigned\_to, next\_action & S3, S4 \\
+FR5.5  & \must   & Dashboard must display a chart of open grievances by category & R2 \\
+FR5.6  & \must   & Dashboard must display a chart of grievances by status & S5 \\
+FR5.7  & \should & Dashboard must support filtering by status, urgency, and category simultaneously & S6 \\
+FR5.8  & \should & Dashboard must auto-refresh data when a status update is submitted & S3 \\
+FR5.9  & \could  & Dashboard must visually distinguish urgency levels by colour (critical=red, high=orange, medium=blue, low=green) & S2 \\
+\bottomrule
+\end{tabularx}
+
+\subsection{FR6 --- Grievance Lifecycle}
+
+The following status transitions are supported. Staff move grievances forward manually through the dashboard.
+
+\begin{center}
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners]
+\small\ttfamily
+registered $\to$ acknowledged $\to$ assigned $\to$ in\_progress $\to$ resolved $\to$ verified $\to$ closed
+\end{tcolorbox}
+\end{center}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Status} & \textbf{Meaning} \\
+\midrule
+registered   & Grievance received and classified. Ref ID issued to citizen. \\
+acknowledged & Office has reviewed the grievance. \\
+assigned     & Forwarded to a department or staff member. \\
+in\_progress & Department has confirmed receipt and is working on it. \\
+resolved     & Department reports the issue is fixed. \\
+verified     & Office has independently confirmed resolution (not just paper). \\
+closed       & Case closed. Citizen may be notified (Phase 2). \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{Non-Functional Requirements}
+
+\subsection{Performance}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} \\
+\midrule
+NF1.1 & \must   & Webhook endpoint must return 200 to Meta within 5 seconds \\
+NF1.2 & \must   & End-to-end processing (webhook receipt to citizen acknowledgement) must complete within 15 seconds under normal load \\
+NF1.3 & \should & Dashboard must load initial data within 3 seconds on a standard connection \\
+NF1.4 & \could  & System must handle up to 100 concurrent grievances per day without degradation (beta scale) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Reliability}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} \\
+\midrule
+NF2.1 & \must   & Backend must not crash on malformed webhook payloads \\
+NF2.2 & \must   & Backend must not crash if Claude API is unavailable; must fall back gracefully \\
+NF2.3 & \must   & Railway deployment must stay alive 24/7 (no spin-down) \\
+NF2.4 & \should & All grievance data must be backed up daily (Supabase handles this on free tier) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Security}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} \\
+\midrule
+NF3.1 & \must   & All webhook POST requests must be validated with HMAC-SHA256 before processing \\
+NF3.2 & \must   & Service role key (Supabase) must never be exposed client-side \\
+NF3.3 & \must   & All secrets must be stored as environment variables, never hardcoded \\
+NF3.4 & \must   & Citizen message text must be treated as data (prompt injection guardrail) \\
+NF3.5 & \should & Dashboard must use Supabase anon key with Row Level Security so staff only see their office's data \\
+NF3.6 & \wont   & Full authentication with passwords and sessions (Phase 2) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Cost}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} \\
+\midrule
+NF4.1 & \must   & Total Phase 1 infrastructure cost must not exceed \$85 \\
+NF4.2 & \must   & Monthly recurring cost must not exceed \$7 \\
+NF4.3 & \must   & AI cost (Claude Haiku) must not exceed \$1 for the Phase 1 demo period \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Usability}
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Pri} & \textbf{Requirement} \\
+\midrule
+NF5.1 & \must   & A non-technical staff member must be able to update a grievance status in under 2 minutes with no training \\
+NF5.2 & \should & Dashboard text must be in English for v0 (multilingual in Phase 2) \\
+NF5.3 & \should & Dashboard must be accessible on a laptop browser without installation \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{Out of Scope for MVP v0}
+
+The following are explicitly \textbf{not} requirements for Phase 1. They are recorded here to prevent scope creep.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{lXl}
+\toprule
+\textbf{Feature} & \textbf{Reason deferred} & \textbf{Phase} \\
+\midrule
+Supabase Auth (login/password) & DEMO\_OFFICE\_ID env var used instead & Phase 2 \\
+Multi-tenancy (multiple offices) & Single demo office sufficient for SNVC pitch & Phase 2 \\
+Status updates sent to citizens & WhatsApp template approval takes time; not needed for demo & Phase 2 \\
+Walk-in / phone intake form & Dashboard form; not needed for WhatsApp demo & Phase 2 \\
+Weekly digest email & Resend integration; out of demo scope & Phase 2 \\
+CPGRAMS integration & Complex API; not needed for prototype & Phase 2 \\
+Pattern recognition reports & Requires sufficient data volume & Phase 2 \\
+Referral letter drafting & Valuable but not core to demo flow & Phase 2 \\
+Media messages (images, audio) & Text-only classification sufficient for demo & Phase 2 \\
+Mobile-optimised dashboard & Laptop browser sufficient for demo & Phase 2 \\
+DPDP Act compliance & Railway on US servers; formal compliance post-seed & Post-seed \\
+Vidhayak-Mitra module & Legislative research module; separate build & Post-seed \\
+Vikas-Tracker module & Fund management module; separate build & Post-seed \\
+Nagrik-Setu module & Social media / engagement module; separate build & Post-seed \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{System Architecture Summary}
+
+\subsection{Components}
+
+\begin{tabularx}{\linewidth}{llXl}
+\toprule
+\textbf{Component} & \textbf{Technology} & \textbf{Role} & \textbf{Cost} \\
+\midrule
+Backend API     & FastAPI (Python 3.12) & Webhook handler, classifier orchestration, CRUD API & --- \\
+Hosting         & Railway               & Keeps backend alive 24/7, public HTTPS URL & \$5/mo \\
+Database        & Supabase (Postgres)   & Grievance storage, RLS, atomic counter RPC & Free \\
+AI Classifier   & Claude Haiku          & Category, urgency, summary, language, duplicate & $\sim$\$0.13 \\
+Messaging       & Meta WhatsApp Cloud   & Intake webhook, outbound ACK & Free \\
+Dashboard       & Streamlit             & Staff-facing UI, charts, status updates & Free \\
+CI/CD           & GitHub Actions        & Import checks, unit tests on push & Free \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Data Flow}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners, fontupper=\small\ttfamily]
+\begin{verbatim}
+Citizen sends WhatsApp message
+        |
+        v
+Meta Cloud API  --POST /webhook-->  FastAPI on Railway
+                                         |
+                               [HMAC-SHA256 verify]
+                                         |
+                               [parse_incoming()]
+                                         |
+                               [grievance_service]
+                                    /   |   \
+                           lookup   classify  persist
+                          office    (Haiku)  (Supabase)
+                             |         |         |
+                             +----+----+         |
+                                  |              v
+                             [generate       grievances
+                              Ref ID]          table
+                                  |
+                         [send_text() ACK]
+                                  |
+                                  v
+                       Citizen receives Ref ID
+
+Office Staff
+        |
+        v
+Streamlit Dashboard  <-->  Supabase (anon key + RLS)
+  - KPIs, charts
+  - Grievance table
+  - Status updates
+\end{verbatim}
+\end{tcolorbox}
+
+\newpage
+
+%% =============================================================================
+\section{Acceptance Criteria for Demo (SNVC Week 9)}
+
+The following scenarios must work live at the pitch without failure.
+
+\begin{tabularx}{\linewidth}{clX}
+\toprule
+\textbf{ID} & \textbf{Status} & \textbf{Scenario} \\
+\midrule
+AC1 & $\square$ & Send a Hindi infrastructure grievance via WhatsApp $\to$ citizen receives Ref ID within 15 seconds \\
+AC2 & $\square$ & Dashboard shows the new grievance with correct category (infrastructure) and urgency \\
+AC3 & $\square$ & Send a critical safety grievance $\to$ urgency = critical, ACK contains escalation notice \\
+AC4 & $\square$ & Update grievance status from registered to assigned, add assigned\_to $\to$ dashboard reflects change \\
+AC5 & $\square$ & Dashboard KPI row shows correct counts (total, open, critical) \\
+AC6 & $\square$ & Filter grievances by category $\to$ only matching rows displayed \\
+AC7 & $\square$ & Close a grievance $\to$ removed from open count, closed\_at timestamp recorded \\
+AC8 & $\square$ & Send a tampered webhook (bad HMAC) $\to$ system returns 401, no grievance created \\
+\bottomrule
+\end{tabularx}
+
+\vspace{1em}
+\begin{notebox}
+AC8 is for internal testing only --- do not demo the security rejection to judges unless asked. Demo AC1--AC7 in sequence for maximum narrative impact.
+\end{notebox}
+
+\newpage
+
+%% =============================================================================
+\section{Risks and Mitigations}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\linewidth}{lXll}
+\toprule
+\textbf{Risk} & \textbf{Description} & \textbf{Likelihood} & \textbf{Mitigation} \\
+\midrule
+Meta approval delay     & WhatsApp Business API approval takes longer than expected & Medium & Apply Day 1; use Meta test number for demo \\
+Railway downtime        & Backend unreachable during live demo & Low & Test 24h before pitch; have a screen recording backup \\
+Claude API outage       & Haiku unavailable during demo & Low & Fallback to hardcoded classification for demo if needed \\
+Supabase free tier limit & Exceeds 500MB or 50K rows & Very Low & Not reachable at demo scale \\
+Bad internet at pitch   & Demo fails due to connectivity & Medium & Pre-load dashboard; cache key demo state \\
+Scope creep             & Team adds Phase 2 features to Phase 1 & High & This PRD is the guard; defer everything in Section 8 \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{Phase 1 Build Milestones}
+
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Week} & \textbf{SNVC Deliverable} & \textbf{Product Build Target} \\
+\midrule
+1 & Problem framing    & Repo scaffold, Supabase schema live \\
+2 & Customer discovery & WhatsApp webhook receiving messages \\
+3 & Customer interviews & Claude classifier integrated, ACK sending \\
+4 & Value proposition  & Dashboard v0 deployed on Streamlit Cloud \\
+5 & Business model     & End-to-end flow working (AC1--AC3 passing) \\
+6 & Competitive analysis & Dashboard filters, status updates (AC4--AC7) \\
+7 & Financial model    & All acceptance criteria passing \\
+8 & Pitch rehearsal    & Bug fixes, demo polish, backup recording \\
+9 & \textbf{Final Pitch} & \textbf{Live demo at SNVC} \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{Open Questions}
+
+The following questions are unresolved as of this version of the PRD. They must be answered before Phase 2 planning.
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Pricing:} What is the right monthly price for a beta user? Options under consideration: \$0 (free beta) / \$10 / \$25 per office per month.
+
+  \item \textbf{Language:} Should the acknowledgement message to citizens be sent in the same language as their message? Requires Claude to translate the ACK --- adds latency and cost.
+
+  \item \textbf{Phone number:} Will each office get their own WhatsApp number, or share one? Separate numbers are cleaner for citizens but require more Meta WABA management.
+
+  \item \textbf{Onboarding:} How do we onboard 50 beta offices post-SNVC? Manual white-glove, or self-serve?
+
+  \item \textbf{Indian data residency:} DPDP Act requires data localisation. Railway currently runs on US/EU servers. Do we need to host on AWS Mumbai before Phase 2 beta, or after seed?
+
+  \item \textbf{WhatsApp template messages:} For status updates to citizens (Phase 2), Meta requires pre-approved message templates. When do we apply for approval --- during Phase 1 or at start of Phase 2?
+\end{enumerate}
+
+\vfill
+\begin{center}
+{\color{gray}\small\textit{Pollity.in \textbar{} Jan-Sunwai PRD v0 \textbar{} March 2026 \textbar{} Piyush Zaware \& Joe}}
+\end{center}
+
+\end{document}
