@@ -1,0 +1,436 @@
+%% =============================================================================
+%% Pollity.in — Meeting Notes System Setup Guide
+%% Authors: Piyush Zaware & Joe
+%% Date: March 2026
+%% =============================================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{amssymb}
+
+%% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{pollityblue}{RGB}{31, 97, 141}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{pollitygold}{RGB}{212, 172, 13}
+\definecolor{googleblue}{RGB}{66, 133, 244}
+\definecolor{ottergreen}{RGB}{0, 168, 107}
+\definecolor{codegray}{RGB}{248, 248, 248}
+\definecolor{codeframe}{RGB}{220, 220, 220}
+
+%% ── Section Formatting ───────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\color{pollityblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{pollityblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{}{0em}{}
+
+%% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\color{pollityblue}\textbf{Pollity.in} \textbar{} Meeting Notes System}
+\rhead{\color{gray}\small Internal Setup Guide}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── tcolorbox styles ─────────────────────────────────────────────────────────
+\tcbuselibrary{skins, breakable}
+\newtcolorbox{stepbox}[1]{
+  colback=pollityblue!8, colframe=pollityblue, coltitle=white,
+  fonttitle=\bfseries\large, title=#1,
+  sharp corners, boxrule=0.6pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+\newtcolorbox{notebox}{
+  colback=pollitygold!12, colframe=pollitygold,
+  sharp corners, boxrule=0.6pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt
+}
+\newtcolorbox{greenbox}{
+  colback=ottergreen!10, colframe=ottergreen,
+  sharp corners, boxrule=0.6pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt
+}
+
+%% ── Hyperref ─────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=pollityblue,
+  urlcolor=pollityblue,
+  pdftitle={Pollity.in Meeting Notes System},
+}
+
+%% =============================================================================
+\begin{document}
+
+%% ── Title ────────────────────────────────────────────────────────────────────
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\color{pollityblue}\rule{\linewidth}{1.5pt}}\\[0.4cm]
+{\Huge\bfseries\color{pollityblue} Pollity.in}\\[0.3cm]
+{\Large Meeting Notes System}\\[0.2cm]
+{\large\itshape Setup Guide for the Whole Team}\\[0.3cm]
+{\color{pollityblue}\rule{\linewidth}{1.5pt}}\\[1.5cm]
+
+\begin{tcolorbox}[colback=pollityblue!8, colframe=pollityblue, sharp corners, width=0.85\linewidth]
+\centering
+This guide sets up an automatic meeting notes system for all Pollity team meetings.
+No one types notes manually. Google Meet records and transcribes everything.
+A shared Drive folder keeps all notes in one place, accessible to the whole team
+via your \texttt{@pollity.in} Google Workspace accounts.
+\end{tcolorbox}
+
+\vspace{1.5cm}
+
+\begin{tabular}{ll}
+\toprule
+\textbf{For}        & All Pollity team members \\
+\textbf{Accounts}   & \texttt{@pollity.in} Google Workspace \\
+\textbf{Setup time} & 15 minutes (admin) + 2 minutes (each member) \\
+\textbf{Date}       & March 2026 \\
+\bottomrule
+\end{tabular}
+
+\vfill
+{\small\color{gray} Pollity.in \textbar{} Internal Operations}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%% =============================================================================
+\section{Weekly Meeting Schedule}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Day} & \textbf{Meeting} & \textbf{Focus} \\
+\midrule
+Monday    & All-Team Meeting      & SNVC pitch preparation, class deliverables, weekly priorities \\
+Tuesday   & SNVC Class            & UChicago Booth class session (notes for reference) \\
+Thursday  & Product Meeting       & MVP build, technical decisions, sprint review \\
+Friday    & General Team Meeting  & Weekly wrap-up, blockers, next week planning \\
+\bottomrule
+\end{tabularx}
+
+\vspace{1em}
+\begin{notebox}
+\textbf{Goal:} After every meeting, a summary with decisions and action items is automatically available in the shared Drive folder within 5 minutes --- with zero manual typing.
+\end{notebox}
+
+\newpage
+
+%% =============================================================================
+\section{Part A — Admin Setup (Piyush Only, Do Once)}
+
+\begin{notebox}
+You need admin access to the Pollity Google Workspace. Log in with your admin \texttt{@pollity.in} account for these steps.
+\end{notebox}
+
+\vspace{0.5em}
+
+\begin{stepbox}{Step 1 — Enable Transcripts in Google Workspace Admin}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Go to \href{https://admin.google.com}{admin.google.com}
+  \item Sign in with your \texttt{@pollity.in} admin account
+  \item Left sidebar: \textbf{Apps} $\to$ \textbf{Google Workspace} $\to$ \textbf{Google Meet}
+  \item Click \textbf{Meet video settings}
+  \item Find \textbf{Recording} $\to$ toggle ON
+  \item Find \textbf{Transcripts} $\to$ toggle ON
+  \item Click \textbf{Save}
+\end{enumerate}
+\textit{Takes effect within a few minutes for all \texttt{@pollity.in} accounts.}
+\end{stepbox}
+
+\vspace{1em}
+
+\begin{stepbox}{Step 2 — Create the Shared Drive Folder Structure}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Go to \href{https://drive.google.com}{drive.google.com} (signed in as \texttt{@pollity.in})
+  \item Click \textbf{New} $\to$ \textbf{Folder} $\to$ name it \texttt{Pollity}
+  \item Inside \texttt{Pollity}, create a folder named \texttt{Meetings}
+  \item Inside \texttt{Meetings}, create four subfolders:
+  \begin{itemize}
+    \item \texttt{Monday -- SNVC Team}
+    \item \texttt{Tuesday -- SNVC Class}
+    \item \texttt{Thursday -- Product}
+    \item \texttt{Friday -- General Team}
+  \end{itemize}
+  \item Right-click the \texttt{Pollity} folder $\to$ \textbf{Share} $\to$ add all \texttt{@pollity.in} team email addresses with \textbf{Editor} access
+\end{enumerate}
+\end{stepbox}
+
+\vspace{1em}
+
+\begin{stepbox}{Step 3 — Create a Meeting Notes Template Doc}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Inside the \texttt{Meetings} folder, create a new Google Doc
+  \item Name it \texttt{\_TEMPLATE -- Meeting Notes}
+  \item Paste the template from Section 4 of this document into it
+  \item This is the master template --- do not delete it
+\end{enumerate}
+\end{stepbox}
+
+\newpage
+
+%% =============================================================================
+\section{Part B — Every Team Member (Do Once, 2 Minutes)}
+
+\begin{stepbox}{Step 4 — Check You Have Access}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Sign in to Google with your \texttt{@pollity.in} account
+  \item Go to \href{https://drive.google.com}{drive.google.com}
+  \item Under \textbf{Shared with me} or \textbf{My Drive}, confirm you can see the \texttt{Pollity/Meetings} folder
+  \item If you cannot see it, ask Piyush to re-share
+\end{enumerate}
+\end{stepbox}
+
+\vspace{1em}
+
+\begin{stepbox}{Step 5 — Bookmark the Meetings Folder}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Open the \texttt{Pollity/Meetings} folder in Drive
+  \item In your browser, bookmark this page as \texttt{Pollity Meetings}
+  \item This is where all notes will live after every meeting
+\end{enumerate}
+\end{stepbox}
+
+\newpage
+
+%% =============================================================================
+\section{Part C — What To Do Each Meeting (Every Week)}
+
+\subsection{Before the Meeting Starts (30 seconds)}
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item Open the \texttt{\_TEMPLATE -- Meeting Notes} doc
+  \item File $\to$ \textbf{Make a copy}
+  \item Rename it: \texttt{YYYY-MM-DD [Meeting Type]} \\
+  Example: \texttt{2026-03-30 Monday SNVC Team}
+  \item Move the copy into the correct subfolder (Monday / Thursday / etc.)
+  \item Share the doc link in the team WhatsApp group so everyone can follow along
+\end{enumerate}
+
+\subsection{At the Start of the Call (30 seconds)}
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item Start Google Meet as usual
+  \item Bottom right corner $\to$ click the \textbf{Activities} icon (looks like a star or three shapes)
+  \item Click \textbf{Transcripts} $\to$ \textbf{Start Transcript}
+  \item A notification appears: \textit{``This call is being transcribed''} --- everyone sees it
+\end{enumerate}
+
+\begin{notebox}
+\textbf{One person only} needs to start the transcript (usually whoever creates the Meet link). Everyone in the call is captured automatically.
+\end{notebox}
+
+\subsection{During the Meeting}
+
+Do not type detailed notes. Just jot down:
+\begin{itemize}[leftmargin=1.5em]
+  \item Key decisions (bullet points only)
+  \item Action items as they come up: \textit{who + what + by when}
+\end{itemize}
+The transcript captures everything else verbatim.
+
+\subsection{After the Meeting (5 minutes total)}
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item Google auto-saves the transcript to the \textbf{meeting organiser's} Drive under \texttt{Meet Recordings}
+  \item Move the transcript file into the correct \texttt{Pollity/Meetings} subfolder --- same folder as the notes doc
+  \item Open \href{https://gemini.google.com}{gemini.google.com} (free, use your \texttt{@pollity.in} account)
+  \item Paste the transcript text and use the prompt in Section 4.4
+  \item Copy Gemini's output into the meeting notes doc under the \textbf{AI Summary} section
+  \item Change the doc status to \textbf{Final}
+  \item Post the doc link in the team WhatsApp group
+\end{enumerate}
+
+\newpage
+
+%% =============================================================================
+\section{Templates and Prompts}
+
+\subsection{Meeting Notes Doc Template}
+
+Copy this into the \texttt{\_TEMPLATE -- Meeting Notes} Google Doc:
+
+\begin{tcolorbox}[colback=codegray, colframe=codeframe, sharp corners, fontupper=\small\ttfamily, breakable]
+\begin{verbatim}
+POLLITY.IN - MEETING NOTES
+==========================
+Date:         [YYYY-MM-DD]
+Meeting Type: [Monday SNVC Team / Tuesday SNVC Class /
+               Thursday Product / Friday General Team]
+Attendees:    [Names]
+Status:       Draft / Final
+
+
+AGENDA
+------
+1.
+2.
+3.
+
+
+KEY DECISIONS
+-------------
+-
+-
+
+
+ACTION ITEMS
+------------
+| Item | Owner | Due Date | Done? |
+|------|-------|----------|-------|
+|      |       |          |       |
+|      |       |          |       |
+
+
+BLOCKERS / ISSUES
+-----------------
+-
+
+
+AI SUMMARY
+----------
+[Paste Gemini summary here after the meeting]
+
+
+TRANSCRIPT LINK
+---------------
+[Link to the auto-saved Google Meet transcript in Drive]
+
+
+NEXT MEETING
+------------
+Date:
+Focus:
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Gemini Prompt (Copy-Paste After Every Meeting)}
+
+After the meeting, open \href{https://gemini.google.com}{gemini.google.com}, paste the transcript, and use this prompt:
+
+\begin{tcolorbox}[colback=googleblue!8, colframe=googleblue, sharp corners, breakable, fontupper=\small]
+\textit{``You are summarising a meeting for a startup called Pollity.in, which builds governance software for elected representatives in India. Read the following meeting transcript and produce:}
+\begin{itemize}
+\item \textit{A 3--5 sentence summary of what was discussed}
+\item \textit{A bullet list of key decisions made}
+\item \textit{A table of action items with columns: Item, Owner, Due Date}
+\item \textit{Any blockers or open questions that need follow-up}
+\end{itemize}
+\textit{Be concise. Use plain English. Do not include filler or pleasantries.''}
+\end{tcolorbox}
+
+\subsection{File Naming Convention}
+
+Always name files as: \quad \texttt{YYYY-MM-DD [Meeting Type]}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Example filename} & \textbf{Meaning} \\
+\midrule
+\texttt{2026-03-30 Monday SNVC Team}    & Monday all-team, 30 March 2026 \\
+\texttt{2026-04-01 Tuesday SNVC Class}  & SNVC class session, 1 April 2026 \\
+\texttt{2026-04-02 Thursday Product}    & Product meeting, 2 April 2026 \\
+\texttt{2026-04-03 Friday General Team} & Friday wrap-up, 3 April 2026 \\
+\bottomrule
+\end{tabularx}
+
+\newpage
+
+%% =============================================================================
+\section{If Google Workspace Transcripts Are Not Available}
+
+If your Workspace plan does not include Meet transcripts (you will know because the Transcripts option will not appear in Activities), use \textbf{Otter.ai} instead. It is free.
+
+\begin{greenbox}
+\textbf{Otter.ai Free Plan:} 300 minutes of transcription per month. Your 4 weekly meetings average 60--90 minutes total --- well within the free limit.
+\end{greenbox}
+
+\vspace{0.5em}
+
+\begin{stepbox}{Setting Up Otter.ai}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Go to \href{https://otter.ai}{otter.ai} $\to$ Sign up with your \texttt{@pollity.in} Google account
+  \item Grant calendar access so Otter can see your Google Meet links
+  \item In Otter settings $\to$ enable \textbf{Auto-join meetings} --- Otter will automatically join every Google Meet on your calendar and transcribe it
+  \item After each meeting, Otter emails you the transcript and a basic summary
+  \item Share the Otter link in the Drive folder alongside the notes doc
+\end{enumerate}
+\end{stepbox}
+
+\vspace{1em}
+
+The rest of the process (Gemini summary, Drive folder, naming convention) is identical to Sections 3 and 4.
+
+\newpage
+
+%% =============================================================================
+\section{Quick Reference Card}
+
+Cut this out and pin it somewhere visible.
+
+\begin{tcolorbox}[colback=pollityblue!10, colframe=pollityblue, sharp corners, breakable]
+\begin{center}
+\large\bfseries\color{pollityblue} Pollity Meeting Checklist
+\end{center}
+
+\vspace{0.5em}
+
+\textbf{Before the call:}
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item[$\square$] Make a copy of \texttt{\_TEMPLATE} in the right folder
+  \item[$\square$] Rename it: \texttt{YYYY-MM-DD [Meeting Type]}
+  \item[$\square$] Share the doc link in WhatsApp
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{At the start of the call:}
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item[$\square$] Activities $\to$ Transcripts $\to$ Start Transcript
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{During the call:}
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item[$\square$] Note decisions and action items only (who + what + when)
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{After the call (5 min):}
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item[$\square$] Move transcript from Meet Recordings to the right subfolder
+  \item[$\square$] Paste transcript into Gemini with the standard prompt
+  \item[$\square$] Copy AI summary into the notes doc
+  \item[$\square$] Mark doc status: \textbf{Final}
+  \item[$\square$] Post doc link in team WhatsApp
+\end{itemize}
+
+\vspace{1em}
+\begin{center}
+\textbf{Drive folder:} \texttt{My Drive / Pollity / Meetings}\\[0.3em]
+\textbf{Gemini:} \texttt{gemini.google.com}
+\end{center}
+\end{tcolorbox}
+
+\vfill
+\begin{center}
+{\color{gray}\small\textit{Pollity.in \textbar{} Meeting Notes System \textbar{} March 2026}}
+\end{center}
+
+\end{document}
