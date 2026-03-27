@@ -1,0 +1,561 @@
+%% =============================================================================
+%% Matdata Suraksha — SIR Analysis and Electoral Roll Monitoring Concept
+%% =============================================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm, top=2cm, bottom=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{setspace}
+
+%% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{pollityblue}{RGB}{31, 97, 141}
+\definecolor{pollitygold}{RGB}{212, 172, 13}
+\definecolor{alertred}{RGB}{180, 35, 35}
+\definecolor{safegreen}{RGB}{30, 120, 60}
+\definecolor{warnorange}{RGB}{200, 100, 10}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{darktext}{RGB}{30, 30, 30}
+\definecolor{midgray}{RGB}{220, 220, 220}
+
+%% ── Section Formatting ───────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{pollityblue}}{}{0em}{}[\color{pollityblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{pollityblue}}{}{0em}{}
+\titleformat{\subsubsection}{\small\bfseries\color{darktext}}{}{0em}{}
+
+%% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\color{pollityblue}\textbf{Pollity.in} \textbar{} \color{gray}\small Matdata Suraksha}
+\rhead{\color{gray}\small SIR Analysis and Electoral Monitoring}
+\cfoot{\color{gray}\small pollity.in \textbar{} March 2026 \textbar{} Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\hypersetup{colorlinks=true, urlcolor=pollityblue, linkcolor=pollityblue}
+
+%% =============================================================================
+\begin{document}
+
+%% ── Cover ────────────────────────────────────────────────────────────────────
+\begin{center}
+  {\color{pollityblue}\rule{\linewidth}{2pt}}\\[0.8em]
+  {\Huge\bfseries\color{pollityblue} Matdata Suraksha}\\[0.4em]
+  {\large\bfseries Electoral Roll Integrity Monitoring}\\[0.3em]
+  {\normalsize\color{gray} A Pollity.in Concept Document}\\[0.5em]
+  {\color{pollityblue}\rule{\linewidth}{2pt}}
+\end{center}
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=lightgray, colframe=pollityblue, sharp corners, boxrule=0.6pt]
+\small
+This document has two parts. \textbf{Part I} provides a factual account of India's Special Intensive Revision (SIR) exercise: what it is, how it works, who is involved, and what the current controversies are. \textbf{Part II} presents the Matdata Suraksha concept, a data product that could bring transparency and independent audit capability to the electoral roll revision process. This document is intended for internal use, investor conversations, and policy dialogue.
+\end{tcolorbox}
+
+\vspace{1em}
+
+\tableofcontents
+
+\newpage
+
+%% =============================================================================
+\part*{Part I: The Special Intensive Revision Exercise}
+\addcontentsline{toc}{part}{Part I: The Special Intensive Revision Exercise}
+%% =============================================================================
+
+\section{What Is the Electoral Roll?}
+
+India's democratic system rests on the electoral roll, also called the voter list or voter roll. It is the definitive list of citizens who are eligible to vote in any given constituency. Every Lok Sabha constituency has one roll; it is subdivided into assembly segments (Vidhan Sabha constituencies), which are themselves broken into polling station-level parts.
+
+Each entry in the roll contains a voter's name, relative's name, house number, gender, age, and a unique Electors Photo Identity Card (EPIC) number. As of the 2024 general election, India's electoral roll contained approximately 969 million registered voters, the largest in the world.
+
+The Election Commission of India (ECI) is constitutionally mandated under Article 324 to superintend, direct, and control the preparation of electoral rolls. The rolls are published under the Representation of the People Act, 1950, and the Registration of Electors Rules, 1960.
+
+\subsection{Why the Roll Matters So Much}
+
+The electoral roll is the gateway to democratic participation. Deletion from the roll means disenfranchisement, the loss of the right to vote. For India's poorest and most marginalised citizens, who lack the social capital to quickly re-register, an erroneous deletion can mean missing an election entirely.
+
+The stakes are not symmetric. A fraudulent addition to the roll (a ``ghost voter'') can theoretically be cancelled out by other legitimate votes. But a fraudulent deletion removes a real person's ability to vote. This asymmetry is why scrutiny of deletions matters far more than scrutiny of additions.
+
+%% ── What is SIR ─────────────────────────────────────────────────────────────
+\section{Special Intensive Revision (SIR): Background and Process}
+
+\subsection{What SIR Is}
+
+The Special Intensive Revision (SIR) is a concentrated, time-bound exercise conducted by the Election Commission of India to update electoral rolls. Unlike the routine annual revision (which runs continuously), SIR involves physical door-to-door enumeration across the country within a compressed window, typically three to six weeks.
+
+SIR is meant to accomplish several things simultaneously:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=4pt]
+  \item Add newly eligible voters (citizens who have turned 18 or moved into the constituency)
+  \item Delete entries that are genuinely obsolete (deaths, permanent relocations)
+  \item Correct errors in names, addresses, and identifying details
+  \item Identify and remove duplicate entries (the same person appearing in two or more places on the roll)
+  \item Update photographs on voter ID cards
+\end{itemize}
+
+SIR is typically conducted before major election cycles. The most recent and controversial SIR was announced in June 2024 and carried out in Bihar in preparation for the 2025 Bihar Legislative Assembly elections, and in several other states during the same period.
+
+\subsection{The Legal and Administrative Framework}
+
+SIR operates under:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item The Representation of the People Act, 1950 (Sections 15--21)
+  \item The Registration of Electors Rules, 1960
+  \item ECI instructions issued periodically to Chief Electoral Officers (CEOs) of each state
+\end{itemize}
+
+The Chief Electoral Officer of a state is the administrative head of the electoral roll machinery. Below her sit District Election Officers (DEOs), Electoral Registration Officers (EROs) at the assembly-segment level, and Assistant Electoral Registration Officers (AEROs). At the ground level, the key actor is the Booth Level Officer (BLO).
+
+\subsection{The Booth Level Officer (BLO)}
+
+The BLO is the most important figure in the SIR process and the most consequential for roll integrity. A BLO is a government employee (typically a schoolteacher, anganwadi worker, or other local government functionary) assigned to a single polling booth, which on average covers 800 to 1,200 voters.
+
+During SIR, the BLO's duties are:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=4pt]
+  \item Conduct house-to-house enumeration within the booth's geographic area
+  \item Verify that each voter on the existing roll is still resident and alive
+  \item Collect Form 6 applications from new voters wishing to register
+  \item Identify voters who should be deleted and record these using Form 7 (deletion/objection)
+  \item Identify voters who need corrections (Form 8) or who wish to shift entries to another booth (Form 8A)
+  \item Compile and submit a draft roll revision report to the ERO
+\end{enumerate}
+
+BLOs are supposed to record a reason for every proposed deletion. The stated valid reasons are: death of the voter, permanent migration out of the constituency, and court-ordered or ECI-ordered removal (e.g. for non-citizens).
+
+\subsection{Forms Used in SIR}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Form} & \textbf{Purpose} \\
+\midrule
+Form 6  & Application for inclusion in electoral roll (new registration) \\
+Form 6A & Overseas Indians seeking registration in constituency of origin \\
+Form 7  & Application for deletion or objection to inclusion \\
+Form 8  & Application for correction of entries (name, address, photo) \\
+Form 8A & Application for transposition to a different part of the roll \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+
+The key document in the deletion controversy is Form 7. Under the rules, the person whose deletion is being proposed must be given notice and an opportunity to respond. In practice, during large-scale SIR exercises, this procedural safeguard is frequently bypassed.
+
+\subsection{The SIR Timeline (Typical)}
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
+  \item ECI issues SIR instructions and schedule to state CEOs
+  \item Draft electoral roll published; claims and objections period opens (typically 30 days)
+  \item BLOs conduct door-to-door enumeration and collect forms
+  \item EROs process forms, hear objections, approve or reject changes
+  \item Final electoral roll published
+  \item Supplementary rolls added for late registrations
+\end{enumerate}
+
+%% ── Section 3 ────────────────────────────────────────────────────────────────
+\section{The 2024--2025 SIR: Scale and Context}
+
+The SIR conducted in 2024--2025 was notable for its scale. In Bihar alone, the ECI reported that over 75 lakh (7.5 million) entries were reviewed for deletion during the Bihar SIR. Across the states where SIR was active, total deletions ran into the tens of millions.
+
+This is not unusual in absolute terms: India's population is mobile, and deaths, migrations, and relocations create genuine churn in the roll. What made the 2024--2025 exercise unusual was the speed of processing (several states compressed the enumeration into less than three weeks), the centralised push from ECI to meet deletion targets in areas of suspected roll inflation, and the political timing (upcoming state assembly elections in Bihar, Delhi, and several other states).
+
+It is in this context that the controversy around the SIR arose.
+
+\newpage
+
+%% =============================================================================
+\section{The Allegations: What Critics Are Saying}
+
+The controversy around SIR is serious, contested, and involves multiple distinct claims. It is important to distinguish these clearly because they have very different implications and very different standards of evidence.
+
+\subsection{Allegation 1: Targeted Deletion of Marginalised Voters}
+
+The most grave allegation is that voter deletions during SIR are not random errors but are systematically concentrated in communities that historically vote for opposition parties, particularly Dalit, Adivasi, and Muslim communities in states like Bihar, Uttar Pradesh, and Delhi.
+
+The argument runs as follows: BLOs in many areas are subject to informal pressure from local elected officials, political party workers, and administrative hierarchies. Since BLOs are local government employees who depend on the good will of the ruling establishment for postings, transfers, and promotions, they can be nudged to submit deletion Form 7s for addresses where the ``wrong'' community lives, while leaving addresses of party loyalists untouched.
+
+The evidence for this allegation is currently circumstantial but suggestive. Several independent observers and opposition parties have pointed to booth-level data showing deletion rates significantly higher in Muslim-majority wards and in Scheduled Caste colonies than in upper-caste or OBC-majority wards of the same assembly segment.
+
+\begin{tcolorbox}[colback=alertred!6, colframe=alertred, sharp corners, boxrule=0.6pt]
+\textbf{Critical caveat:} Higher deletion rates in certain communities can have innocent explanations (higher mobility, more rental housing, denser living arrangements that produce more address-change Form 8A filings, etc.). The allegation of targeting requires not just showing differential deletion rates but ruling out these confounds. No systematic peer-reviewed study has done this yet. The claims are serious enough to warrant investigation, not to be accepted as proven.
+\end{tcolorbox}
+
+\subsection{Allegation 2: Duplicate Detection Errors Causing Legitimate Deletions}
+
+The ECI uses a deduplication algorithm to identify voters who appear on the roll in more than one location (same state or cross-state). The algorithm compares names, dates of birth, and photographs. When a match is found above a threshold, one of the two entries is marked for deletion via Form 7.
+
+Critics and election law researchers have identified a structural problem: India's naming conventions are not unique. Common names like ``Ram Kumar Singh'' or ``Mohammad Ali'' or ``Sunita Devi'' can match dozens of people across a district. If the matching algorithm does not weight address sufficiently, it will produce false positive matches, i.e., it will identify two genuinely different people as the same person and delete one of them.
+
+This problem is compounded by:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item Inconsistent romanisation of Indian-language names (``Rajesh'' vs ``Rajesh Kumar'' vs ``R. Kumar'')
+  \item Missing or incorrect date-of-birth fields (particularly for older voters registered before biometric data was collected)
+  \item Low-quality photographs from older registrations that do not match well against new images
+\end{itemize}
+
+The result can be mass deletion of legitimate voters who happen to share common names with someone registered elsewhere.
+
+\subsection{Allegation 3: Procedural Violations and Lack of Transparency}
+
+A third set of concerns is procedural rather than substantive. Critics argue that:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=4pt]
+  \item The 30-day claims and objections window is inadequate for voters in rural areas to notice and contest their deletion
+  \item Deletion notices (Form 7) are not always delivered to the voter whose entry is being deleted
+  \item The BLO's report, which should contain the reason for each deletion, is not made publicly accessible
+  \item Aggregate deletion data at the booth level is not published in machine-readable form, making independent audit extremely difficult
+  \item The ECI's response to RTI applications seeking booth-level deletion statistics has been slow or refused on grounds of ``third-party information''
+\end{itemize}
+
+These procedural gaps do not prove wrongdoing, but they make wrongdoing undetectable even if it is occurring at scale.
+
+\subsection{Allegation 4: The Bihar SIR Specifically}
+
+The Bihar SIR of 2024--2025 attracted the most media attention. The Opposition INDIA bloc formally objected to the ECI, citing:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item A total of 32 lakh (3.2 million) voters proposed for deletion out of a roll of approximately 7.5 crore (75 million) voters, i.e., roughly 4.3\% of the total roll
+  \item Deletion rates reportedly above 8--10\% in several minority-heavy constituencies in Seemanchal (Kishanganj, Araria, Purnea, Katihar districts)
+  \item Reports from local civil society groups of voters arriving at polling stations in the 2025 Bihar by-elections to find their names missing
+  \item Accusations that the SIR schedule was designed to compress the objection window to make it practically impossible for deleted voters to seek reinstatement before elections
+\end{itemize}
+
+The ECI's official response was that all deletions followed due process, that the overall roll had grown (net additions exceeded deletions), and that any specific grievance could be filed through the Voter Helpline 1950 or through the online NVSP portal.
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=warnorange!8, colframe=warnorange, sharp corners, boxrule=0.6pt]
+\textbf{The structural problem with the ECI's response:} The fact that the total roll grew in net terms does not tell us anything about whether specific communities were disproportionately deleted. Net growth can mask targeted churn. This is precisely the kind of claim that requires disaggregated, booth-level data to evaluate, and that data is not currently available to independent researchers or the public.
+\end{tcolorbox}
+
+\newpage
+
+%% =============================================================================
+\part*{Part II: Matdata Suraksha}
+\addcontentsline{toc}{part}{Part II: Matdata Suraksha}
+%% =============================================================================
+
+\section{The Opportunity}
+
+The SIR controversy reveals a fundamental data gap: the absence of any independent, systematic, publicly accessible audit of electoral roll changes at the booth level.
+
+The ECI publishes final rolls. It publishes summary statistics. It does not publish, in usable form, the before-and-after comparison for every booth: how many voters were on the roll before SIR, how many additions were made, how many deletions were made, and what reasons were recorded.
+
+Without this data, the controversy cannot be resolved. With this data, it can.
+
+This is the opening that Matdata Suraksha addresses.
+
+\section{What Matdata Suraksha Is}
+
+\begin{tcolorbox}[colback=pollityblue!8, colframe=pollityblue, sharp corners, boxrule=0.6pt]
+\textbf{Matdata Suraksha is an electoral roll integrity monitoring platform.} It ingests published electoral roll PDFs, reconstructs voter-level records from them, tracks changes between roll versions, detects statistical anomalies in deletion patterns, and surfaces results in a transparent public dashboard. It is a civic technology tool designed to make electoral roll audits possible for researchers, journalists, civil society organisations, and elected representatives.
+\end{tcolorbox}
+
+\vspace{0.8em}
+
+Matdata Suraksha does not require access to any non-public data. Everything it needs is already published: the electoral rolls are public documents, available for download from each state's Chief Electoral Officer website. The innovation is in the pipeline that converts unstructured PDFs into structured, queryable data and then applies statistical methods to surface anomalies.
+
+\subsection{What the Platform Does Not Do}
+
+It is important to be explicit about the scope:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item Matdata Suraksha does not make claims about intent. It identifies statistical patterns. Human interpretation, journalistic investigation, and policy deliberation determine what those patterns mean.
+  \item It does not create a list of ``wrongfully deleted'' voters, that requires individual verification that goes beyond what roll comparison can establish.
+  \item It does not intercept or interfere with the SIR process itself.
+  \item It does not hold any voter's personal data beyond what is already in the published electoral roll.
+\end{itemize}
+
+\section{The Technical Architecture}
+
+\subsection{Module 1: PDF Ingestion and Parsing}
+
+Electoral rolls in India are published as multi-part PDF files, one file per assembly segment, broken into ``parts'' by polling booth. Each booth's part lists all voters in a structured but inconsistently formatted table.
+
+The ingestion module:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=4pt]
+  \item Downloads roll PDFs from state CEO websites (one run per published revision)
+  \item Uses \textbf{pdfplumber} (primary) and \textbf{PyMuPDF} (fallback) to extract text and table data
+  \item Parses each voter record into structured fields: EPIC number, name, relative's name, house number, gender, age, part number (booth)
+  \item Stores records in a Postgres database with a version tag (e.g., ``Bihar-2024-Draft'' vs ``Bihar-2025-Final'')
+\end{enumerate}
+
+EPIC numbers serve as the primary key. They are supposed to be globally unique and persistent across revisions, making them the anchor for before-and-after comparison.
+
+\subsection{Module 2: Roll Comparison Engine}
+
+Given two versions of a roll (before SIR and after SIR), the comparison engine:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=4pt]
+  \item Performs an EPIC-level join: voters present in version 1 but absent in version 2 are classified as deleted
+  \item Voters present in version 2 but absent in version 1 are classified as added
+  \item Voters present in both but with changed fields (address, age, name spelling) are classified as modified
+  \item Where EPIC numbers are unreliable (known issue: duplicate EPICs exist in some states' older rolls), a secondary fuzzy-match on name plus address is used
+\end{enumerate}
+
+The output is a structured deletion table: for every booth in every assembly segment, the number of additions, deletions, modifications, and net change.
+
+\subsection{Module 3: Anomaly Detection}
+
+This is the analytical core of Matdata Suraksha. The detection module applies three complementary methods:
+
+\subsubsection{Method A: Z-Score Flagging}
+
+For each assembly segment, compute the distribution of booth-level deletion rates (deletions as a fraction of the pre-SIR roll). Booths with deletion rates more than 2 standard deviations above the segment mean are flagged for review.
+
+This method is fast, interpretable, and requires no external data. Its limitation is that it is relative: if the entire segment has high deletion rates, no individual booth will be flagged.
+
+\subsubsection{Method B: Demographic Intersection}
+
+Where constituency-level demographic data is available (from the Census or from Delimitation Commission data), the platform can overlay deletion rates against demographic composition. This tests the specific allegation of targeted deletion: do booths with higher Muslim or SC/ST voter share show higher deletion rates, controlling for booth size and urban/rural classification?
+
+This is implemented as a regression model:
+
+\[
+\text{DeletionRate}_{b} = \alpha + \beta_1 \cdot \text{MinorityShare}_{b} + \beta_2 \cdot \text{BoothSize}_{b} + \beta_3 \cdot \text{Urban}_{b} + \varepsilon_{b}
+\]
+
+where $b$ indexes booths. A statistically significant positive $\hat{\beta}_1$ would be consistent with the targeting allegation. This is not proof of intent, but it is a falsifiable statistical claim.
+
+\subsubsection{Method C: Duplicate Detection Quality Audit}
+
+The platform runs its own name-matching algorithm (same general approach as the ECI's deduplication algorithm) on the pre-SIR roll and identifies voter pairs that are likely false-positive duplicates: same name, different address, different photograph (where photographs are included in the digital roll). If these false-positive pairs cluster in the same deletion list, it suggests the ECI's algorithm produced the errors the platform predicts.
+
+\subsection{Module 4: Public Dashboard}
+
+The dashboard presents findings in a form accessible to non-technical users: journalists, elected representatives, civil society organisations, and citizens.
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Dashboard View} & \textbf{What It Shows} \\
+\midrule
+State Overview      & Total roll size, net change, additions vs deletions, timeline \\
+Constituency Map    & Choropleth of deletion rates by assembly segment \\
+Booth Heatmap       & Within-constituency view of anomalous booths (colour-coded by z-score) \\
+Demographic Overlay & Deletion rate vs minority/SC share scatter plot with regression line \\
+Flagged Booths      & Sortable table of booths above anomaly threshold with detail drill-down \\
+Download            & CSV export of all computed statistics for independent analysis \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Technology Stack}
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Component} & \textbf{Technology} \\
+\midrule
+PDF parsing         & Python (pdfplumber, PyMuPDF) \\
+Data storage        & Supabase (Postgres) \\
+Anomaly detection   & Python (pandas, scipy, statsmodels, scikit-learn) \\
+API layer           & FastAPI (Python) \\
+Dashboard           & Streamlit (public-facing) \\
+Hosting             & Railway (backend), Streamlit Community Cloud (dashboard) \\
+Roll downloads      & Python (requests, BeautifulSoup for CEO portal scraping) \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+
+This stack is identical to the existing Pollity.in infrastructure. Matdata Suraksha would be built as a standalone module that shares the backend architecture, keeping incremental build costs low.
+
+\section{Data Sources}
+
+\subsection{Electoral Rolls}
+
+Electoral rolls for all states are publicly available from the respective state CEO websites. Key states for the initial build:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item Bihar (ceo.bihar.gov.in) --- most relevant to the current controversy
+  \item Delhi (ceodelhi.gov.in) --- urban, high visibility, active monitoring
+  \item Maharashtra (ceo.maharashtra.gov.in) --- largest state roll by voter count
+  \item Uttar Pradesh (ceouttarpradesh.nic.in) --- largest state by seats
+\end{itemize}
+
+Rolls are published as PDF files of varying quality, typically 100--500 KB per booth part. A full state download (e.g., Bihar with approximately 243 assembly segments, each with 200--400 booth parts) requires 50--100 GB of PDF storage and 40--80 hours of processing time.
+
+\subsection{Demographic Data}
+
+For the demographic overlay analysis, the platform uses:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item Census 2011 religion and SC/ST data at the village/ward level (publicly available from the Office of the Registrar General)
+  \item Delimitation Commission constituency maps (public, available as shapefiles)
+  \item Geographic matching: voter addresses from the roll are matched to census villages/wards using fuzzy string matching and, where possible, pin codes
+\end{itemize}
+
+\section{Why This Is Feasible Now}
+
+Three conditions make Matdata Suraksha technically feasible at low cost in 2025--2026 that were not true five years ago:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=5pt]
+  \item \textbf{PDF parsing quality has improved dramatically.} pdfplumber and PyMuPDF can now reliably extract tabular data from the semi-structured PDFs that Indian electoral rolls use. Two years ago, OCR was required for many state rolls. Today it is not.
+
+  \item \textbf{Storage costs have collapsed.} 100 GB of Supabase or S3 storage costs under \$10/month. Processing a full state's roll in Python on a \$20/month cloud VM is feasible. The entire Bihar roll can be ingested and compared in a single overnight run.
+
+  \item \textbf{The public data is now reliably accessible.} Most state CEO portals now publish rolls in a structured URL format that can be systematically scraped. A few states (notably UP) still require manual navigation, but Bihar and Maharashtra are fully automatable.
+\end{enumerate}
+
+\section{Why Matdata Suraksha Fits Within Pollity.in}
+
+Pollity.in is building governance infrastructure for India's elected representatives. Matdata Suraksha is governance infrastructure for the electoral system that produces those representatives.
+
+The connection is direct: the elected officials who are Pollity's customers have a strong interest in ensuring their own voter base is not erroneously deleted before elections. An MLA in Bihar who knows that three booths in her constituency show anomalous deletion rates has actionable information: she can mobilise her team to check whether her supporters' names are still on the roll and file Form 6 reinstatement applications for those who have been erroneously removed.
+
+This is not a stretch from Pollity's core mission. It is an extension of the same principle: giving local elected representatives the data and tools they need to do their jobs, information that has historically been available only to well-resourced actors.
+
+\subsection{Positioning Options}
+
+Matdata Suraksha can be positioned in at least three ways, and the choice depends on the institutional context:
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Positioning} & \textbf{Implication} \\
+\midrule
+Civic Tech (Public Good) & Open dashboard, all data public, no paywall. Builds credibility and press attention. Revenue comes from consulting, training, or grants. \\[4pt]
+Pollity Feature          & Available to Pollity subscribers as a constituency-level tool. Adds value to the core product. Limited public visibility. \\[4pt]
+Policy Research Tool     & Licensed to academic institutions, think tanks, and civil society organisations for independent roll auditing. Positions Pollity in the governance research space. \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+
+The most powerful option is the first: a fully public, openly accessible dashboard would generate significant media attention and establish Pollity as a serious player in Indian electoral governance, far beyond what our current MVP can do. It also fits with the legal landscape: there is no restriction on publishing analysis of public electoral data.
+
+\section{What Matdata Suraksha Is Not}
+
+\begin{tcolorbox}[colback=alertred!6, colframe=alertred, sharp corners, boxrule=0.6pt]
+\textbf{This platform does not allege wrongdoing.} It surfaces data patterns and lets users draw their own conclusions. The anomaly detection flags statistical outliers; it does not attribute motive. Any public-facing version of this platform would carry clear methodological disclosures, explaining what the statistics can and cannot establish.
+
+This distinction is not just ethical, it is strategic. An evidence-led, methodologically transparent platform is credible and defensible. A platform that makes direct accusations without individual-level verification would be legally and reputationally exposed.
+\end{tcolorbox}
+
+\section{Development Roadmap}
+
+\subsection{Phase 0: Proof of Concept (4 weeks)}
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item[$\rightarrow$] Build PDF parser for Bihar roll format
+  \item[$\rightarrow$] Ingest two Bihar roll versions (2024 Draft, 2025 Final) for one district (Patna)
+  \item[$\rightarrow$] Run comparison engine: generate addition/deletion table for Patna
+  \item[$\rightarrow$] Compute z-score anomaly flags for all Patna booths
+  \item[$\rightarrow$] Build minimal Streamlit dashboard showing results
+  \item[$\rightarrow$] Deliverable: working demo covering one district, 600--800 booths
+\end{itemize}
+
+\subsection{Phase 1: Bihar State Build (8 weeks)}
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item[$\rightarrow$] Scale ingestion to all 243 Bihar assembly segments
+  \item[$\rightarrow$] Add demographic overlay (Census 2011 SC/ST and religion data)
+  \item[$\rightarrow$] Run regression analysis: deletion rate vs demographic composition
+  \item[$\rightarrow$] Build full public dashboard with constituency map and booth heatmap
+  \item[$\rightarrow$] CSV export functionality
+  \item[$\rightarrow$] Deliverable: public Bihar dashboard; ready for press and civil society distribution
+\end{itemize}
+
+\subsection{Phase 2: Multi-State Expansion (ongoing)}
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item[$\rightarrow$] Extend to Delhi, Maharashtra, and UP
+  \item[$\rightarrow$] Add longitudinal tracking: compare across multiple SIR cycles (2019, 2022, 2024)
+  \item[$\rightarrow$] Add RTI filing integration: auto-generate RTI draft for booths with high anomaly scores
+  \item[$\rightarrow$] Integrate with Pollity representative dashboard (constituency-level alert for representatives)
+\end{itemize}
+
+\section{Resource Requirements}
+
+\subsection{People}
+
+The initial proof of concept requires:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=3pt]
+  \item One engineer (Python/data pipeline): 50--60 hours for Phase 0
+  \item One analyst (statistics, interpretation): 20--30 hours for Phase 0
+  \item One researcher familiar with Indian electoral law: advisory, 5--10 hours
+\end{itemize}
+
+\subsection{Infrastructure}
+
+Phase 0 infrastructure cost is under \$50 total:
+
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{Item} & \textbf{Estimated Cost} \\
+\midrule
+Cloud storage (100 GB, one month) & \$10 \\
+Compute (VM for processing, one week) & \$15 \\
+Supabase (free tier for Phase 0) & \$0 \\
+Streamlit Community Cloud & \$0 \\
+\bottomrule
+\end{tabularx}
+
+\section{Risks and Mitigations}
+
+\begin{tcolorbox}[colback=warnorange!8, colframe=warnorange, sharp corners, boxrule=0.6pt, title={\bfseries Risk 1: PDF Format Variability}]
+State CEO portals sometimes change their PDF format between roll versions, breaking the parser. \textbf{Mitigation:} Build a format-detection layer that handles multiple layouts; maintain manual override capability for edge cases.
+\end{tcolorbox}
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=warnorange!8, colframe=warnorange, sharp corners, boxrule=0.6pt, title={\bfseries Risk 2: Legal Challenge}]
+The ECI or a state government could argue that republishing or analysing electoral roll data violates the Representation of the People Act or data protection law. \textbf{Mitigation:} Electoral rolls are public documents. The Supreme Court has repeatedly held that roll data is publicly accessible. We publish analysis and aggregates, not individual voter records beyond what is already public. Consult election law counsel before launch.
+\end{tcolorbox}
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=warnorange!8, colframe=warnorange, sharp corners, boxrule=0.6pt, title={\bfseries Risk 3: Political Sensitivity}]
+Any finding of anomalous deletion patterns will be immediately weaponised by opposition parties. The platform will be accused of being partisan regardless of what it finds. \textbf{Mitigation:} Strict methodological transparency, pre-committed analysis plans, and disclosures that make clear this is a statistical tool, not a political one. Engage credible academic partners for external validation.
+\end{tcolorbox}
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=warnorange!8, colframe=warnorange, sharp corners, boxrule=0.6pt, title={\bfseries Risk 4: Data Completeness}]
+Not all historical roll versions are archived; some state portals delete old versions after the final roll is published. \textbf{Mitigation:} Begin downloading and archiving rolls immediately, before they are taken down. The window is short. This is a time-critical action.
+\end{tcolorbox}
+
+\vspace{0.5em}
+
+\begin{tcolorbox}[colback=safegreen!6, colframe=safegreen, sharp corners, boxrule=0.6pt, title={\bfseries Opportunity: Institutional Partnerships}]
+Several Indian academic institutions (Ashoka University's Trivedi Centre for Political Data, Lokniti at CSDS, the Election Data Hub at the Indian Statistical Institute) have existing datasets and researchers who would benefit from Matdata Suraksha and could provide external validation. Early conversations with these institutions would strengthen both credibility and data access.
+\end{tcolorbox}
+
+\section{The Broader Significance}
+
+The SIR controversy is not primarily a story about Bihar or about one election cycle. It is a story about the information asymmetry that underlies India's electoral administration. The Election Commission has data that no one else has. Citizens, elected representatives, political parties, and researchers all operate with vastly less information than the ECI possesses.
+
+This asymmetry is not inevitable. It is a function of what data is published and in what form. Electoral rolls are already public. The transformation from ``public in principle'' to ``public in practice'' requires engineering work, and that work has simply not been done at scale.
+
+Matdata Suraksha does that work. If the deletions in the 2024--2025 SIR were procedurally correct and demographically neutral, the data will show that, and the controversy will be put to rest. If the data shows patterns that warrant further investigation, that too will be visible, and the right institutions (courts, press, civil society) can act on it.
+
+That is what transparency means in practice: not a claim, but a verifiable state.
+
+\vspace{1.5em}
+
+\begin{center}
+{\color{pollityblue}\rule{0.5\linewidth}{0.4pt}}\\[0.5em]
+{\small Internal concept document. Not for public distribution without review.}\\[0.3em]
+{\small \textbf{piyush.zaware@pollity.in} \textbar{} \textbf{manavmutneja@pollity.in} \textbar{} \textbf{joe.ditommaso@pollity.in}}
+\end{center}
+
+\end{document}
