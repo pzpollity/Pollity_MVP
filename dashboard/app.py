@@ -32,7 +32,9 @@ def _get(key, default=""):
         return os.environ.get(key, default)
 
 SUPABASE_URL = _get("SUPABASE_URL")
-SUPABASE_ANON_KEY = _get("SUPABASE_ANON_KEY")
+# Phase 1 demo: service role key bypasses RLS so dashboard can read grievances.
+# Phase 2: switch back to SUPABASE_ANON_KEY + Supabase Auth session per user.
+SUPABASE_KEY = _get("SUPABASE_SERVICE_ROLE_KEY") or _get("SUPABASE_ANON_KEY")
 # For demo: hardcoded office_id — in Phase 2 this comes from Supabase Auth session
 DEMO_OFFICE_ID = _get("DEMO_OFFICE_ID")
 
@@ -50,7 +52,7 @@ URGENCY_COLORS = {
 
 @st.cache_resource
 def get_supabase():
-    return create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def load_grievances(office_id: str) -> pd.DataFrame:
