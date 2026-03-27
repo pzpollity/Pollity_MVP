@@ -34,7 +34,6 @@ async def verify_webhook(
     Meta sends a GET request to verify the webhook endpoint.
     We confirm the verify token and echo back the challenge.
     """
-    logger.info("DEBUG verify — received token: %r  settings token: %r", hub_verify_token, settings.WA_VERIFY_TOKEN)
     if hub_mode == "subscribe" and hub_verify_token == settings.WA_VERIFY_TOKEN:
         logger.info("Webhook verified by Meta")
         return Response(content=hub_challenge, media_type="text/plain")
