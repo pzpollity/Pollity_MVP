@@ -25,22 +25,23 @@ RESEND_URL = "https://api.resend.com/emails"
 def _build_wa_alert(grievance_id: str, category: str, summary: str, citizen_contact: str, channel: str) -> str:
     category_display = category.replace("_", " ").title()
     return (
-        f"🚨 *CRITICAL grievance filed*\n\n"
-        f"Ref: *{grievance_id}*\n"
+        f"🚨 *Urgent grievance filed — {grievance_id}*\n\n"
         f"Category: {category_display}\n"
         f"Summary: {summary}\n"
         f"Contact: {citizen_contact}\n"
-        f"Channel: {channel}"
+        f"Channel: {channel}\n\n"
+        f"Immediate attention required."
     )
 
 
 def _build_email_html(grievance_id: str, category: str, summary: str, citizen_contact: str, channel: str) -> str:
     category_display = category.replace("_", " ").title()
     return f"""
-    <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e74c3c;border-radius:8px;">
-      <h2 style="color:#e74c3c;margin-top:0;">🚨 CRITICAL Grievance Filed</h2>
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #c0392b;border-radius:8px;">
+      <p style="margin:0 0 16px 0;font-size:13px;color:#555;">Jan-Sunwai · Pollity.in — Urgent Grievance Alert</p>
+      <h2 style="color:#c0392b;margin:0 0 16px 0;font-size:18px;">Urgent: Grievance {grievance_id} Requires Immediate Attention</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:6px 0;color:#555;width:120px;">Reference ID</td>
+        <tr><td style="padding:6px 0;color:#555;width:130px;">Reference ID</td>
             <td style="padding:6px 0;font-weight:bold;">{grievance_id}</td></tr>
         <tr><td style="padding:6px 0;color:#555;">Category</td>
             <td style="padding:6px 0;">{category_display}</td></tr>
@@ -52,10 +53,26 @@ def _build_email_html(grievance_id: str, category: str, summary: str, citizen_co
             <td style="padding:6px 0;">{channel}</td></tr>
       </table>
       <p style="margin-top:20px;font-size:12px;color:#999;">
-        Sent by Jan-Sunwai · Pollity.in — this grievance requires immediate attention.
+        You are receiving this because you are listed as an alert contact for this constituency office.
+        To update alert recipients, contact your Pollity administrator.
       </p>
     </div>
     """
+
+
+def _build_email_text(grievance_id: str, category: str, summary: str, citizen_contact: str, channel: str) -> str:
+    """Plain-text fallback — improves deliverability and avoids spam filters."""
+    category_display = category.replace("_", " ").title()
+    return (
+        f"Jan-Sunwai Alert — Pollity.in\n\n"
+        f"Urgent: Grievance {grievance_id} requires immediate attention.\n\n"
+        f"Reference ID : {grievance_id}\n"
+        f"Category     : {category_display}\n"
+        f"Summary      : {summary}\n"
+        f"Contact      : {citizen_contact}\n"
+        f"Channel      : {channel}\n\n"
+        f"You are receiving this because you are listed as an alert contact for this constituency office."
+    )
 
 
 async def fire_critical_alerts(
@@ -73,7 +90,8 @@ async def fire_critical_alerts(
     """
     wa_text = _build_wa_alert(grievance_id, category, summary, citizen_contact, channel)
     email_html = _build_email_html(grievance_id, category, summary, citizen_contact, channel)
-    subject = f"🚨 CRITICAL Grievance — {grievance_id}"
+    email_text = _build_email_text(grievance_id, category, summary, citizen_contact, channel)
+    subject = f"[Jan-Sunwai] Urgent grievance filed — {grievance_id}"
 
     # ── WhatsApp alert ────────────────────────────────────────────────────────
     if alert_whatsapp:
@@ -96,6 +114,7 @@ async def fire_critical_alerts(
                             "to": email,
                             "subject": subject,
                             "html": email_html,
+                            "text": email_text,
                         },
                     )
                     if resp.status_code in (200, 201):
