@@ -19,6 +19,10 @@ create table if not exists offices (
 -- Sequence counter: one row per office, increments per new grievance
 alter table offices add column if not exists sequence_counter integer not null default 0;
 
+-- Critical alert contacts: notified immediately when a CRITICAL grievance is filed
+alter table offices add column if not exists alert_whatsapp text;
+alter table offices add column if not exists alert_emails   text[] default '{}';
+
 -- ── staff ─────────────────────────────────────────────────────────────────────
 -- Office staff who log in to the dashboard.
 create table if not exists staff (
@@ -173,3 +177,9 @@ values (
     'DMO',
     '1019410701261103'
 ) on conflict (short_code) do update set wa_phone_number_id = EXCLUDED.wa_phone_number_id;
+
+-- Set critical alert contacts for demo office
+update offices
+set alert_whatsapp = '+17739367759',
+    alert_emails   = ARRAY['joe.ditommaso@pollity.in', 'piyush.zaware@pollity.in']
+where short_code = 'DMO';

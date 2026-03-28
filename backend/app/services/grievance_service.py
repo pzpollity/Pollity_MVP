@@ -19,8 +19,10 @@ from app.models.grievance import (
     GrievanceChannel,
     GrievanceStatus,
     IncomingMessage,
+    UrgencyLevel,
 )
 from app.services.classifier import classify_grievance
+from app.services.notifications import fire_critical_alerts
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     # ── 1. Resolve office ────────────────────────────────────────────────────
     office_resp = (
         db.table("offices")
-        .select("id, short_code, sequence_counter")
+        .select("id, short_code, sequence_counter, alert_whatsapp, alert_emails")
         .eq("wa_phone_number_id", msg.office_phone_id)
         .single()
         .execute()
@@ -110,7 +112,21 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
         return None
 
     logger.info("Grievance registered: %s [%s/%s]", grievance_id, classification.category.value, classification.urgency.value)
-    return Grievance(**insert_resp.data[0])
+    grievance = Grievance(**insert_resp.data[0])
+
+    # ── Critical alert ────────────────────────────────────────────────────────
+    if classification.urgency == UrgencyLevel.CRITICAL:
+        await fire_critical_alerts(
+            grievance_id=grievance_id,
+            category=classification.category.value,
+            summary=classification.summary,
+            citizen_contact=msg.from_number,
+            channel=GrievanceChannel.WHATSAPP.value,
+            alert_whatsapp=office.get("alert_whatsapp"),
+            alert_emails=office.get("alert_emails") or [],
+        )
+
+    return grievance
 
 
 async def process_walkin_grievance(
@@ -130,7 +146,7 @@ async def process_walkin_grievance(
     # ── 1. Resolve office ────────────────────────────────────────────────────
     office_resp = (
         db.table("offices")
-        .select("id, short_code, sequence_counter")
+        .select("id, short_code, sequence_counter, alert_whatsapp, alert_emails")
         .eq("id", office_id)
         .single()
         .execute()
@@ -196,4 +212,18 @@ async def process_walkin_grievance(
         return None
 
     logger.info("Walk-in grievance registered: %s [%s/%s]", grievance_id, classification.category.value, classification.urgency.value)
-    return Grievance(**insert_resp.data[0])
+    grievance = Grievance(**insert_resp.data[0])
+
+    # ── Critical alert ────────────────────────────────────────────────────────
+    if classification.urgency == UrgencyLevel.CRITICAL:
+        await fire_critical_alerts(
+            grievance_id=grievance_id,
+            category=classification.category.value,
+            summary=classification.summary,
+            citizen_contact=citizen_contact,
+            channel=channel.value,
+            alert_whatsapp=office.get("alert_whatsapp"),
+            alert_emails=office.get("alert_emails") or [],
+        )
+
+    return grievance

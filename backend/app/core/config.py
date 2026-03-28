@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     WA_PHONE_NUMBER_ID: str
     WA_APP_SECRET: str
 
+    # Resend (email alerts)
+    RESEND_API_KEY: str = ""
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
