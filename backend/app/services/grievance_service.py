@@ -25,13 +25,13 @@ from app.services.classifier import classify_grievance
 logger = logging.getLogger(__name__)
 
 
-def _generate_grievance_id(office_short: str, sequence: int) -> str:
+def _generate_grievance_id(office_short: str, sequence: int, year_month: str) -> str:
     """
-    Human-readable ID: GR-{OFFICE}-{YEAR}-{SEQ:04d}
-    e.g. GR-DLN-2026-0042
+    Human-readable ID: GR-{OFFICE}-{YYYYMM}-{SEQ:05d}
+    e.g. GR-DMO-202603-00042
+    Monthly sequence reset prevents 4-digit cap; 5 digits supports 99,999/month.
     """
-    year = datetime.now(tz=timezone.utc).year
-    return f"GR-{office_short.upper()}-{year}-{sequence:04d}"
+    return f"GR-{office_short.upper()}-{year_month}-{sequence:05d}"
 
 
 async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
@@ -72,13 +72,17 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     # ── 3. Classify ───────────────────────────────────────────────────────────
     classification = await classify_grievance(msg.body, existing_summaries)
 
-    # ── 4. Increment sequence counter (simple approach for beta) ─────────────
+    # ── 4. Increment monthly sequence counter (atomic, resets each month) ────
+    year_month = datetime.now(tz=timezone.utc).strftime("%Y%m")
     seq_resp = (
-        db.rpc("increment_grievance_counter", {"office_id_param": office_id})
+        db.rpc("increment_monthly_counter", {
+            "office_id_param": office_id,
+            "year_month_param": year_month,
+        })
         .execute()
     )
     sequence: int = seq_resp.data if seq_resp.data else 1
-    grievance_id = _generate_grievance_id(short_code, sequence)
+    grievance_id = _generate_grievance_id(short_code, sequence, year_month)
 
     # ── 5. Persist ────────────────────────────────────────────────────────────
     now = datetime.now(tz=timezone.utc).isoformat()
@@ -153,13 +157,17 @@ async def process_walkin_grievance(
     # ── 3. Classify ───────────────────────────────────────────────────────────
     classification = await classify_grievance(raw_text, existing_summaries)
 
-    # ── 4. Increment sequence counter ────────────────────────────────────────
+    # ── 4. Increment monthly sequence counter (atomic, resets each month) ────
+    year_month = datetime.now(tz=timezone.utc).strftime("%Y%m")
     seq_resp = (
-        db.rpc("increment_grievance_counter", {"office_id_param": office_id})
+        db.rpc("increment_monthly_counter", {
+            "office_id_param": office_id,
+            "year_month_param": year_month,
+        })
         .execute()
     )
     sequence: int = seq_resp.data if seq_resp.data else 1
-    grievance_id = _generate_grievance_id(short_code, sequence)
+    grievance_id = _generate_grievance_id(short_code, sequence, year_month)
 
     # ── 5. Persist ────────────────────────────────────────────────────────────
     now = datetime.now(tz=timezone.utc).isoformat()

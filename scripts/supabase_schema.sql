@@ -112,8 +112,42 @@ create policy "staff see own profile"
     on staff for select
     using (auth_user_id = auth.uid());
 
+-- ── office_monthly_sequences ─────────────────────────────────────────────────
+-- One row per (office, year_month). Atomically incremented; auto-resets each
+-- month because each new year_month gets its own row starting at 1.
+-- Replaces the old sequence_counter column on offices.
+create table if not exists office_monthly_sequences (
+    office_id   uuid    not null references offices(id) on delete cascade,
+    year_month  text    not null,   -- e.g. '202603'
+    counter     integer not null default 0,
+    primary key (office_id, year_month)
+);
+
+-- ── increment_monthly_counter (RPC) ──────────────────────────────────────────
+-- Atomically inserts or increments the counter for (office, year_month).
+-- Returns the new sequence value. No race condition — uses ON CONFLICT DO UPDATE.
+create or replace function increment_monthly_counter(
+    office_id_param  uuid,
+    year_month_param text
+)
+returns integer
+language plpgsql
+security definer
+as $$
+declare
+    new_val integer;
+begin
+    insert into office_monthly_sequences (office_id, year_month, counter)
+    values (office_id_param, year_month_param, 1)
+    on conflict (office_id, year_month)
+    do update set counter = office_monthly_sequences.counter + 1
+    returning counter into new_val;
+    return new_val;
+end;
+$$;
+
 -- ── increment_grievance_counter (RPC) ────────────────────────────────────────
--- Called by the backend to atomically get the next sequence number.
+-- Legacy RPC kept for backwards compatibility during migration.
 create or replace function increment_grievance_counter(office_id_param uuid)
 returns integer
 language plpgsql
