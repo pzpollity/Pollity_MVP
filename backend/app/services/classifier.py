@@ -115,6 +115,11 @@ async def classify_grievance(
     )
 
     raw_json = response.content[0].text.strip()
+    # Strip markdown code fences — Haiku sometimes wraps JSON in ```json ... ```
+    start = raw_json.find("{")
+    end = raw_json.rfind("}")
+    if start != -1 and end != -1:
+        raw_json = raw_json[start : end + 1]
 
     try:
         data = json.loads(raw_json)
