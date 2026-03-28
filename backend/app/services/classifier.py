@@ -58,8 +58,12 @@ RULES:
    IMPORTANT: Detect the language being spoken, NOT the script being used.
    Indian languages are often written in Roman script (transliteration). Examples:
    - "Mere mohalle mein paani nahi aa raha" → "hi" (Hindi in Roman script)
+   - "Namashkar vidhayak ji, paani ki samasya hai" → "hi" (Hindi in Roman script)
    - "Amchya gaavat rasta kharab aahe" → "mr" (Marathi in Roman script)
-   - "Engal pகுதியில் தண்ணீர் இல்லை" → "ta" (Tamil)
+   - "Mazhya kshetra madhe paanycha vishay aahe nakki laksha dya" → "mr" (Marathi in Roman script)
+   - "Mazhya ward madhe kachara uthavla jat nahi" → "mr" (Marathi in Roman script)
+   Key Marathi markers in Roman script: mazhya/mazha, aahe/aahes, nakki, laksha dya, madhe, paanycha, kharab, uthavla.
+   Key Hindi markers in Roman script: mera/mere, hai/hain, kripya, nahi, chahiye, bol raha.
    If the vocabulary and grammar are from an Indian language, return that language code even if written in Latin script.
 4. Write the summary in English regardless of the input language.
 5. is_duplicate must always be false unless you are explicitly given a list of existing summaries to compare against.
