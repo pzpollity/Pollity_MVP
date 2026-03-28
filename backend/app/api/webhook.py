@@ -79,5 +79,6 @@ async def _handle_message(msg):
         grievance.grievance_id,
         grievance.urgency.value,
         grievance.category.value,
+        grievance.language_detected,
     )
     await send_text(msg.from_number, ack)

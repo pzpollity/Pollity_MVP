@@ -12,6 +12,7 @@ Deploy: Streamlit Community Cloud (free tier)
 
 import os
 
+import httpx
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -37,6 +38,8 @@ SUPABASE_URL = _get("SUPABASE_URL")
 SUPABASE_KEY = _get("SUPABASE_SERVICE_ROLE_KEY") or _get("SUPABASE_ANON_KEY")
 # For demo: hardcoded office_id — in Phase 2 this comes from Supabase Auth session
 DEMO_OFFICE_ID = _get("DEMO_OFFICE_ID")
+# Backend API URL for walk-in intake
+BACKEND_URL = _get("BACKEND_URL", "https://pollitymvp-production.up.railway.app")
 
 STATUS_ORDER = [
     "registered", "acknowledged", "assigned",
@@ -192,3 +195,44 @@ else:
         st.success(f"Updated {sel_id} → {new_status}")
         st.cache_data.clear()
         st.rerun()
+
+st.divider()
+
+# ── Walk-in / Phone Intake ─────────────────────────────────────────────────
+with st.expander("➕ Log a Walk-in / Phone / Letter Grievance"):
+    st.caption("Use this form to register grievances received in person, by phone, or by letter.")
+    with st.form("walkin_form"):
+        wi_name    = st.text_input("Citizen Name (optional)")
+        wi_contact = st.text_input("Citizen Phone Number (optional, with country code e.g. 919876543210)")
+        wi_channel = st.selectbox("Channel", ["walk_in", "phone", "letter"])
+        wi_text    = st.text_area("Grievance Description", height=120,
+                                   placeholder="Describe the grievance as told by the citizen...")
+        wi_submit  = st.form_submit_button("Register Grievance")
+
+    if wi_submit:
+        if not wi_text.strip():
+            st.error("Please enter a grievance description.")
+        else:
+            with st.spinner("Classifying and registering..."):
+                try:
+                    payload = {
+                        "office_id":       DEMO_OFFICE_ID,
+                        "citizen_name":    wi_name or None,
+                        "citizen_contact": wi_contact or None,
+                        "channel":         wi_channel,
+                        "raw_text":        wi_text.strip(),
+                    }
+                    resp = httpx.post(
+                        f"{BACKEND_URL}/grievances/walkin",
+                        json=payload,
+                        timeout=30,
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        st.success(f"Registered: **{data['grievance_id']}**")
+                        st.cache_data.clear()
+                        st.rerun()
+                    else:
+                        st.error(f"Backend error {resp.status_code}: {resp.text}")
+                except Exception as e:
+                    st.error(f"Could not reach backend: {e}")

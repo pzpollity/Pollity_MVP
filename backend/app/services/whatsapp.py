@@ -95,22 +95,130 @@ async def send_text(to: str, body: str) -> None:
             logger.info("WA message sent to %s", to)
 
 
-def build_ack_message(grievance_id: str, urgency: str, category: str) -> str:
+_ACK_TEMPLATES: dict[str, dict] = {
+    "en": {
+        "registered": "✅ Your grievance has been registered.",
+        "ref_id":     "Reference ID: *{grievance_id}*",
+        "category":   "Category: {category}",
+        "urgency": {
+            "critical": "⚠️ This has been flagged as CRITICAL and will be escalated immediately.",
+            "high":     "This has been marked HIGH priority.",
+            "medium":   "This has been marked MEDIUM priority.",
+            "low":      "This has been registered for review.",
+        },
+        "footer": (
+            "You will receive a status update once it is reviewed by the office. "
+            "Please quote your Reference ID in future communications."
+        ),
+    },
+    "hi": {
+        "registered": "✅ आपकी शिकायत दर्ज हो गई है।",
+        "ref_id":     "संदर्भ ID: *{grievance_id}*",
+        "category":   "श्रेणी: {category}",
+        "urgency": {
+            "critical": "⚠️ इसे अत्यावश्यक माना गया है और तुरंत कार्रवाई की जाएगी।",
+            "high":     "इसे उच्च प्राथमिकता दी गई है।",
+            "medium":   "इसे मध्यम प्राथमिकता दी गई है।",
+            "low":      "इसे समीक्षा के लिए दर्ज किया गया है।",
+        },
+        "footer": (
+            "समीक्षा के बाद आपको अपडेट मिलेगा। "
+            "भविष्य में संपर्क के लिए अपना संदर्भ ID उल्लेख करें।"
+        ),
+    },
+    "mr": {
+        "registered": "✅ तुमची तक्रार नोंदवली गेली आहे।",
+        "ref_id":     "संदर्भ ID: *{grievance_id}*",
+        "category":   "श्रेणी: {category}",
+        "urgency": {
+            "critical": "⚠️ ही तक्रार अत्यंत तातडीची आहे आणि त्वरित कार्यवाही केली जाईल।",
+            "high":     "ही उच्च प्राधान्याची तक्रार आहे।",
+            "medium":   "ही मध्यम प्राधान्याची तक्रार आहे।",
+            "low":      "ही तक्रार आढाव्यासाठी नोंदवली गेली आहे।",
+        },
+        "footer": (
+            "आढावा घेतल्यानंतर तुम्हाला अपडेट मिळेल। "
+            "पुढील संपर्कासाठी तुमची संदर्भ ID नमूद करा।"
+        ),
+    },
+}
+
+_STATUS_TEMPLATES: dict[str, dict[str, str]] = {
+    "en": {
+        "acknowledged": "📋 Update on your grievance *{grievance_id}*: your case has been acknowledged by the office.",
+        "assigned":     "📋 Update on your grievance *{grievance_id}*: your case has been assigned for action.",
+        "in_progress":  "📋 Update on your grievance *{grievance_id}*: your case is currently being worked on.",
+        "resolved":     "✅ Your grievance *{grievance_id}* has been resolved. Thank you for contacting our office.",
+        "verified":     "✅ Resolution of your grievance *{grievance_id}* has been verified. The matter is closed.",
+        "closed":       "✅ Your grievance *{grievance_id}* is now closed. Thank you for your patience.",
+    },
+    "hi": {
+        "acknowledged": "📋 आपकी शिकायत *{grievance_id}* अपडेट: आपकी शिकायत कार्यालय द्वारा स्वीकार कर ली गई है।",
+        "assigned":     "📋 आपकी शिकायत *{grievance_id}* अपडेट: आपकी शिकायत कार्रवाई के लिए सौंप दी गई है।",
+        "in_progress":  "📋 आपकी शिकायत *{grievance_id}* अपडेट: आपकी शिकायत पर काम चल रहा है।",
+        "resolved":     "✅ आपकी शिकायत *{grievance_id}* का समाधान हो गया है। हमारे कार्यालय से संपर्क करने के लिए धन्यवाद।",
+        "verified":     "✅ आपकी शिकायत *{grievance_id}* का समाधान सत्यापित हो गया है। यह मामला बंद है।",
+        "closed":       "✅ आपकी शिकायत *{grievance_id}* बंद कर दी गई है। आपके धैर्य के लिए धन्यवाद।",
+    },
+    "mr": {
+        "acknowledged": "📋 तुमच्या तक्रारीवर *{grievance_id}* अपडेट: तुमची तक्रार कार्यालयाने स्वीकारली आहे।",
+        "assigned":     "📋 तुमच्या तक्रारीवर *{grievance_id}* अपडेट: तुमची तक्रार कार्यवाहीसाठी सोपवली आहे।",
+        "in_progress":  "📋 तुमच्या तक्रारीवर *{grievance_id}* अपडेट: तुमच्या तक्रारीवर काम सुरू आहे।",
+        "resolved":     "✅ तुमची तक्रार *{grievance_id}* निराकरण झाली आहे। आमच्या कार्यालयाशी संपर्क साधल्याबद्दल धन्यवाद।",
+        "verified":     "✅ तुमच्या तक्रारीचे *{grievance_id}* निराकरण सत्यापित झाले आहे। हे प्रकरण बंद आहे।",
+        "closed":       "✅ तुमची तक्रार *{grievance_id}* बंद झाली आहे। तुमच्या संयमाबद्दल धन्यवाद।",
+    },
+}
+
+
+def _get_lang(language: str) -> str:
+    """Return a supported template language code, defaulting to English."""
+    return language if language in _ACK_TEMPLATES else "en"
+
+
+def build_ack_message(
+    grievance_id: str,
+    urgency: str,
+    category: str,
+    language: str = "en",
+) -> str:
     """
     Build the acknowledgement message sent to the citizen after registration.
+    Supports English (en), Hindi (hi), and Marathi (mr); falls back to English.
     """
-    urgency_note = {
-        "critical": "⚠️ This has been flagged as CRITICAL and will be escalated immediately.",
-        "high":     "This has been marked HIGH priority.",
-        "medium":   "This has been marked MEDIUM priority.",
-        "low":      "This has been registered for review.",
-    }.get(urgency, "")
+    lang = _get_lang(language)
+    t = _ACK_TEMPLATES[lang]
+    urgency_note = t["urgency"].get(urgency, "")
+    category_display = category.replace("_", " ").title()
 
-    return (
-        f"✅ Your grievance has been registered.\n\n"
-        f"Reference ID: *{grievance_id}*\n"
-        f"Category: {category.replace('_', ' ').title()}\n"
-        f"{urgency_note}\n\n"
-        f"You will receive a status update once it is reviewed by the office. "
-        f"Please quote your Reference ID in future communications."
-    )
+    return "\n".join([
+        t["registered"],
+        "",
+        t["ref_id"].format(grievance_id=grievance_id),
+        t["category"].format(category=category_display),
+        urgency_note,
+        "",
+        t["footer"],
+    ])
+
+
+def build_status_update_message(
+    grievance_id: str,
+    status: str,
+    language: str = "en",
+) -> str | None:
+    """
+    Build a status update message to send to the citizen when staff updates a grievance.
+    Returns None for statuses that should not trigger a citizen notification.
+    """
+    notify_statuses = {"acknowledged", "assigned", "in_progress", "resolved", "verified", "closed"}
+    if status not in notify_statuses:
+        return None
+
+    lang = _get_lang(language)
+    templates = _STATUS_TEMPLATES.get(lang, _STATUS_TEMPLATES["en"])
+    template = templates.get(status)
+    if not template:
+        return None
+
+    return template.format(grievance_id=grievance_id)

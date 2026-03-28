@@ -1,22 +1,36 @@
 """
 Grievance CRUD endpoints (called by the Streamlit dashboard)
 -------------------------------------------------------------
-GET  /grievances               — list, with filters
-GET  /grievances/{id}          — single grievance
-PATCH /grievances/{id}/status  — update status / assigned_to / next_action
+GET   /grievances               — list, with filters
+GET   /grievances/{id}          — single grievance
+PATCH /grievances/{id}/status   — update status / assigned_to / next_action
+POST  /grievances/walkin        — log a walk-in / phone / letter grievance
 """
 
 import logging
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from app.core.database import get_db
-from app.models.grievance import GrievanceStatus
+from app.models.grievance import GrievanceChannel, GrievanceStatus
+from app.services.grievance_service import process_walkin_grievance
+from app.services.whatsapp import build_status_update_message, send_text
 
 router = APIRouter(prefix="/grievances", tags=["grievances"])
 logger = logging.getLogger(__name__)
+
+# Statuses that trigger a WhatsApp notification to the citizen
+_NOTIFY_STATUSES = {
+    GrievanceStatus.ACKNOWLEDGED,
+    GrievanceStatus.ASSIGNED,
+    GrievanceStatus.IN_PROGRESS,
+    GrievanceStatus.RESOLVED,
+    GrievanceStatus.VERIFIED,
+    GrievanceStatus.CLOSED,
+}
 
 
 @router.get("")
@@ -56,11 +70,13 @@ class StatusUpdate(BaseModel):
 
 
 @router.patch("/{grievance_uuid}/status")
-def update_status(grievance_uuid: str, body: StatusUpdate):
+async def update_status(grievance_uuid: str, body: StatusUpdate):
     db = get_db()
-    from datetime import datetime, timezone
 
-    patch = {"status": body.status.value, "updated_at": datetime.now(tz=timezone.utc).isoformat()}
+    patch = {
+        "status": body.status.value,
+        "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+    }
     if body.assigned_to is not None:
         patch["assigned_to"] = body.assigned_to
     if body.next_action is not None:
@@ -71,4 +87,55 @@ def update_status(grievance_uuid: str, body: StatusUpdate):
     resp = db.table("grievances").update(patch).eq("id", grievance_uuid).execute()
     if not resp.data:
         raise HTTPException(status_code=404, detail="Grievance not found")
-    return resp.data[0]
+
+    row = resp.data[0]
+
+    # ── WhatsApp status notification to citizen ───────────────────────────────
+    if body.status in _NOTIFY_STATUSES:
+        citizen_contact = row.get("citizen_contact", "")
+        if citizen_contact and citizen_contact != "WALK-IN":
+            message = build_status_update_message(
+                grievance_id=row["grievance_id"],
+                status=body.status.value,
+                language=row.get("language_detected", "en"),
+            )
+            if message:
+                try:
+                    await send_text(citizen_contact, message)
+                except Exception:
+                    # Log but do not fail the status update if WA send fails
+                    logger.exception(
+                        "Failed to send WA status notification for %s", row["grievance_id"]
+                    )
+
+    return row
+
+
+# ── Walk-in / Phone / Letter intake ──────────────────────────────────────────
+
+class WalkInRequest(BaseModel):
+    office_id: str
+    citizen_name: str | None = None
+    citizen_contact: str | None = None   # phone number if known, else omit
+    channel: GrievanceChannel = GrievanceChannel.WALK_IN
+    raw_text: str
+
+
+@router.post("/walkin")
+async def walkin_intake(body: WalkInRequest):
+    """
+    Log a grievance received in person, by phone, or by letter.
+    Runs through the same Claude Haiku classification pipeline as WhatsApp intake.
+    """
+    grievance = await process_walkin_grievance(
+        office_id=body.office_id,
+        citizen_name=body.citizen_name,
+        citizen_contact=body.citizen_contact or "WALK-IN",
+        channel=body.channel,
+        raw_text=body.raw_text,
+    )
+    if grievance is None:
+        raise HTTPException(status_code=404, detail="Office not found")
+
+    logger.info("Walk-in grievance registered: %s", grievance.grievance_id)
+    return {"grievance_id": grievance.grievance_id, "id": grievance.id}

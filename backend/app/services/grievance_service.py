@@ -107,3 +107,85 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
 
     logger.info("Grievance registered: %s [%s/%s]", grievance_id, classification.category.value, classification.urgency.value)
     return Grievance(**insert_resp.data[0])
+
+
+async def process_walkin_grievance(
+    office_id: str,
+    citizen_name: str | None,
+    citizen_contact: str,
+    channel: "GrievanceChannel",
+    raw_text: str,
+) -> Grievance | None:
+    """
+    Intake pipeline for walk-in, phone, or letter grievances logged by office staff.
+    Runs through the same Claude Haiku classification as WhatsApp intake.
+    Returns the persisted Grievance or None if the office is not found.
+    """
+    db = get_db()
+
+    # ── 1. Resolve office ────────────────────────────────────────────────────
+    office_resp = (
+        db.table("offices")
+        .select("id, short_code, sequence_counter")
+        .eq("id", office_id)
+        .single()
+        .execute()
+    )
+    if not office_resp.data:
+        logger.warning("Walk-in: no office found for office_id=%s", office_id)
+        return None
+
+    office = office_resp.data
+    short_code: str = office["short_code"]
+
+    # ── 2. Fetch recent open summaries for duplicate detection ────────────────
+    recent_resp = (
+        db.table("grievances")
+        .select("id, summary")
+        .eq("office_id", office_id)
+        .neq("status", "closed")
+        .order("filed_at", desc=True)
+        .limit(20)
+        .execute()
+    )
+    existing_summaries = recent_resp.data or []
+
+    # ── 3. Classify ───────────────────────────────────────────────────────────
+    classification = await classify_grievance(raw_text, existing_summaries)
+
+    # ── 4. Increment sequence counter ────────────────────────────────────────
+    seq_resp = (
+        db.rpc("increment_grievance_counter", {"office_id_param": office_id})
+        .execute()
+    )
+    sequence: int = seq_resp.data if seq_resp.data else 1
+    grievance_id = _generate_grievance_id(short_code, sequence)
+
+    # ── 5. Persist ────────────────────────────────────────────────────────────
+    now = datetime.now(tz=timezone.utc).isoformat()
+    row = {
+        "id": str(uuid.uuid4()),
+        "grievance_id": grievance_id,
+        "office_id": office_id,
+        "citizen_name": citizen_name,
+        "citizen_contact": citizen_contact,
+        "channel": channel.value,
+        "raw_text": raw_text,
+        "category": classification.category.value,
+        "urgency": classification.urgency.value,
+        "summary": classification.summary,
+        "language_detected": classification.language_detected,
+        "status": GrievanceStatus.REGISTERED.value,
+        "is_duplicate": classification.is_duplicate,
+        "duplicate_of_id": classification.duplicate_of_id,
+        "filed_at": now,
+        "updated_at": now,
+    }
+
+    insert_resp = db.table("grievances").insert(row).execute()
+    if not insert_resp.data:
+        logger.error("Failed to insert walk-in grievance: %s", insert_resp)
+        return None
+
+    logger.info("Walk-in grievance registered: %s [%s/%s]", grievance_id, classification.category.value, classification.urgency.value)
+    return Grievance(**insert_resp.data[0])
