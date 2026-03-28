@@ -77,17 +77,14 @@ def load_grievances(office_id: str) -> pd.DataFrame:
 
 
 def update_status(grievance_uuid: str, new_status: str, assigned_to: str, next_action: str):
-    db = get_supabase()
-    from datetime import datetime, timezone
-    patch = {
-        "status": new_status,
-        "assigned_to": assigned_to,
-        "next_action": next_action,
-        "updated_at": datetime.now(tz=timezone.utc).isoformat(),
-    }
-    if new_status == "closed":
-        patch["closed_at"] = patch["updated_at"]
-    db.table("grievances").update(patch).eq("id", grievance_uuid).execute()
+    # Call the backend API so the WA citizen notification fires
+    resp = httpx.patch(
+        f"{BACKEND_URL}/grievances/{grievance_uuid}/status",
+        json={"status": new_status, "assigned_to": assigned_to, "next_action": next_action},
+        timeout=15,
+    )
+    if resp.status_code != 200:
+        st.error(f"Status update failed: {resp.text}")
 
 
 # ── Layout ────────────────────────────────────────────────────────────────────

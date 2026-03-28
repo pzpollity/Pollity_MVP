@@ -76,6 +76,11 @@ alter table grievances enable row level security;
 -- The backend uses the service_role key (bypasses RLS) for webhook writes.
 -- The dashboard uses the anon key with these policies for reads.
 
+drop policy if exists "staff see own office grievances"  on grievances;
+drop policy if exists "staff update own office grievances" on grievances;
+drop policy if exists "staff see own office"               on offices;
+drop policy if exists "staff see own profile"              on staff;
+
 create policy "staff see own office grievances"
     on grievances for select
     using (
@@ -132,5 +137,5 @@ values (
     '00000000-0000-0000-0000-000000000001',
     'Demo Constituency Office',
     'DMO',
-    'REPLACE_WITH_YOUR_PHONE_NUMBER_ID'
-) on conflict (short_code) do nothing;
+    '1019410701261103'
+) on conflict (short_code) do update set wa_phone_number_id = EXCLUDED.wa_phone_number_id;
