@@ -23,6 +23,9 @@ from app.models.grievance import (
 )
 from app.services.classifier import classify_grievance
 from app.services.notifications import fire_critical_alerts
+from app.services.ocr import extract_text_from_image
+from app.services.transcription import transcribe_audio
+from app.services.whatsapp import download_media
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +74,39 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     )
     existing_summaries = recent_resp.data or []
 
-    # ── 3. Classify ───────────────────────────────────────────────────────────
-    classification = await classify_grievance(msg.body, existing_summaries)
+    # ── 3. Resolve raw text (text / image OCR / audio transcription) ─────────
+    channel = GrievanceChannel.WHATSAPP
+    raw_text = msg.body
 
-    # ── 4. Increment monthly sequence counter (atomic, resets each month) ────
+    if msg.media_id and msg.media_type == "image":
+        try:
+            media_bytes, mime = await download_media(msg.media_id)
+            raw_text = await extract_text_from_image(media_bytes, media_type=mime.split(";")[0].strip())
+            channel = GrievanceChannel.LETTER
+        except Exception:
+            logger.exception("Image OCR failed for media_id=%s", msg.media_id)
+            raw_text = msg.body or "[Image — could not extract text]"
+
+    elif msg.media_id and msg.media_type == "audio":
+        try:
+            media_bytes, mime = await download_media(msg.media_id)
+            raw_text = await transcribe_audio(media_bytes, mime_type=mime)
+        except RuntimeError:
+            # OPENAI_API_KEY not set
+            logger.warning("Voice message received but OPENAI_API_KEY not configured")
+            return None   # caller will send "voice not supported" reply
+        except Exception:
+            logger.exception("Audio transcription failed for media_id=%s", msg.media_id)
+            raw_text = "[Voice message — could not transcribe]"
+
+    if not raw_text or raw_text.startswith("["):
+        logger.warning("Empty or unreadable content from media_id=%s, skipping", msg.media_id)
+        return None
+
+    # ── 4. Classify ───────────────────────────────────────────────────────────
+    classification = await classify_grievance(raw_text, existing_summaries)
+
+    # ── 5. Increment monthly sequence counter (atomic, resets each month) ────
     year_month = datetime.now(tz=timezone.utc).strftime("%Y%m")
     seq_resp = (
         db.rpc("increment_monthly_counter", {
@@ -86,15 +118,15 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     sequence: int = seq_resp.data if seq_resp.data else 1
     grievance_id = _generate_grievance_id(short_code, sequence, year_month)
 
-    # ── 5. Persist ────────────────────────────────────────────────────────────
+    # ── 6. Persist ────────────────────────────────────────────────────────────
     now = datetime.now(tz=timezone.utc).isoformat()
     row = {
         "id": str(uuid.uuid4()),
         "grievance_id": grievance_id,
         "office_id": office_id,
         "citizen_contact": msg.from_number,
-        "channel": GrievanceChannel.WHATSAPP.value,
-        "raw_text": msg.body,
+        "channel": channel.value,
+        "raw_text": raw_text,
         "category": classification.category.value,
         "urgency": classification.urgency.value,
         "summary": classification.summary,

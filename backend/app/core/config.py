@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Resend (email alerts)
     RESEND_API_KEY: str = ""
 
+    # OpenAI (Whisper — for WhatsApp voice message transcription)
+    OPENAI_API_KEY: str = ""
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"

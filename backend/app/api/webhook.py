@@ -70,9 +70,21 @@ async def receive_message(request: Request, background_tasks: BackgroundTasks):
     return {"status": "ok"}
 
 
+_VOICE_NOT_SUPPORTED = {
+    "en": "We received your voice message but voice processing is not yet enabled. Please send your grievance as a text message or photograph of a letter.",
+    "hi": "हमें आपका वॉइस संदेश मिला, लेकिन अभी वॉइस प्रोसेसिंग उपलब्ध नहीं है। कृपया अपनी शिकायत टेक्स्ट संदेश या पत्र की फ़ोटो के रूप में भेजें।",
+    "mr": "आम्हाला तुमचा व्हॉइस मेसेज मिळाला, पण आत्ता व्हॉइस प्रोसेसिंग उपलब्ध नाही. कृपया तुमची तक्रार मजकूर संदेश किंवा पत्राच्या फोटोद्वारे पाठवा.",
+}
+
+
 async def _handle_message(msg):
     grievance = await process_whatsapp_message(msg)
+
     if grievance is None:
+        # Voice message arrived but OPENAI_API_KEY not set — tell the citizen
+        if msg.media_type == "audio":
+            reply = _VOICE_NOT_SUPPORTED.get("en")  # default; language unknown at this point
+            await send_text(msg.from_number, reply)
         return
 
     ack = build_ack_message(

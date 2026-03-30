@@ -48,8 +48,12 @@ class IncomingMessage(BaseModel):
     wa_message_id: str
     from_number: str      # citizen's WhatsApp number (E.164)
     office_phone_id: str  # WA Business phone number ID (maps to an office)
-    body: str
+    body: str             # text body, or empty string for pure media messages
     timestamp: datetime
+    # Media fields — set for image / audio messages, None for plain text
+    media_id: str | None = None    # Meta media object ID (used to download)
+    media_type: str | None = None  # "image" | "audio"
+    media_mime: str | None = None  # e.g. "image/jpeg", "audio/ogg; codecs=opus"
 
 
 # ── Classification result from Claude ────────────────────────────────────────

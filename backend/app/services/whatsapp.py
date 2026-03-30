@@ -41,8 +41,8 @@ def verify_signature(payload_bytes: bytes, x_hub_signature: str) -> bool:
 
 def parse_incoming(payload: dict) -> list[IncomingMessage]:
     """
-    Extract text messages from a Meta WhatsApp webhook payload.
-    Skips non-text messages (images, audio, etc.) silently.
+    Extract text, image, and audio messages from a Meta WhatsApp webhook payload.
+    Silently skips unsupported types (stickers, documents, location, etc.).
     """
     messages: list[IncomingMessage] = []
 
@@ -52,21 +52,70 @@ def parse_incoming(payload: dict) -> list[IncomingMessage]:
             phone_number_id = value.get("metadata", {}).get("phone_number_id", "")
 
             for msg in value.get("messages", []):
-                if msg.get("type") != "text":
-                    continue
-                messages.append(
-                    IncomingMessage(
+                msg_type = msg.get("type")
+                ts = datetime.fromtimestamp(int(msg["timestamp"]), tz=timezone.utc)
+
+                if msg_type == "text":
+                    messages.append(IncomingMessage(
                         wa_message_id=msg["id"],
                         from_number=msg["from"],
                         office_phone_id=phone_number_id,
                         body=msg["text"]["body"],
-                        timestamp=datetime.fromtimestamp(
-                            int(msg["timestamp"]), tz=timezone.utc
-                        ),
-                    )
-                )
+                        timestamp=ts,
+                    ))
+
+                elif msg_type == "image":
+                    img = msg.get("image", {})
+                    messages.append(IncomingMessage(
+                        wa_message_id=msg["id"],
+                        from_number=msg["from"],
+                        office_phone_id=phone_number_id,
+                        body=img.get("caption", ""),   # optional caption as body
+                        timestamp=ts,
+                        media_id=img.get("id"),
+                        media_type="image",
+                        media_mime=img.get("mime_type", "image/jpeg"),
+                    ))
+
+                elif msg_type == "audio":
+                    audio = msg.get("audio", {})
+                    messages.append(IncomingMessage(
+                        wa_message_id=msg["id"],
+                        from_number=msg["from"],
+                        office_phone_id=phone_number_id,
+                        body="",
+                        timestamp=ts,
+                        media_id=audio.get("id"),
+                        media_type="audio",
+                        media_mime=audio.get("mime_type", "audio/ogg; codecs=opus"),
+                    ))
+
+                # stickers, documents, location, contacts — silently ignored
 
     return messages
+
+
+async def download_media(media_id: str) -> tuple[bytes, str]:
+    """
+    Download a media file from Meta's CDN.
+
+    Step 1: GET /{media_id} → {"url": "...", "mime_type": "..."}
+    Step 2: GET that URL with Authorization header → raw bytes
+
+    Returns (file_bytes, mime_type).
+    """
+    headers = {"Authorization": f"Bearer {settings.WA_ACCESS_TOKEN}"}
+    async with httpx.AsyncClient(timeout=30) as client:
+        meta_resp = await client.get(f"{WA_API_BASE}/{media_id}", headers=headers)
+        meta_resp.raise_for_status()
+        media_info = meta_resp.json()
+
+        dl_resp = await client.get(media_info["url"], headers=headers)
+        dl_resp.raise_for_status()
+
+    mime = media_info.get("mime_type", "application/octet-stream")
+    logger.info("Downloaded media %s (%d bytes, %s)", media_id, len(dl_resp.content), mime)
+    return dl_resp.content, mime
 
 
 # ── Outbound messages ──────────────────────────────────────────────────────
