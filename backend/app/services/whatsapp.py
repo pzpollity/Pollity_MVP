@@ -90,7 +90,21 @@ def parse_incoming(payload: dict) -> list[IncomingMessage]:
                         media_mime=audio.get("mime_type", "audio/ogg; codecs=opus"),
                     ))
 
-                # stickers, documents, location, contacts — silently ignored
+                elif msg_type == "location":
+                    loc = msg.get("location", {})
+                    messages.append(IncomingMessage(
+                        wa_message_id=msg["id"],
+                        from_number=msg["from"],
+                        office_phone_id=phone_number_id,
+                        body=loc.get("name", "") or loc.get("address", ""),
+                        timestamp=ts,
+                        media_type="location",
+                        latitude=loc.get("latitude"),
+                        longitude=loc.get("longitude"),
+                        location_name=loc.get("name") or loc.get("address"),
+                    ))
+
+                # stickers, documents, contacts — silently ignored
 
     return messages
 

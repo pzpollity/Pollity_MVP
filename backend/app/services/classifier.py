@@ -67,6 +67,14 @@ RULES:
    If the vocabulary and grammar are from an Indian language, return that language code even if written in Latin script.
 4. Write the summary in English regardless of the input language.
 5. is_duplicate must always be false unless you are explicitly given a list of existing summaries to compare against.
+6. If the message mentions a specific location (area, locality, landmark, ward, village,
+   street, colony, chowk, nagar, gram), extract it as location_text in English.
+   Examples:
+   - "Ward 5 mein nala bhara hua hai" → "Ward 5"
+   - "Ram Mandir ke paas sadak toot gayi" → "near Ram Mandir"
+   - "Shivaji Nagar colony mein paani nahi" → "Shivaji Nagar colony"
+   - "Amchya gaavat rasta kharab aahe" → extract the village/area if named, else null
+   If no specific location is mentioned, set location_text to null.
 
 REQUIRED JSON SCHEMA:
 {
@@ -74,6 +82,7 @@ REQUIRED JSON SCHEMA:
   "urgency": "<critical|high|medium|low>",
   "summary": "<1-2 sentence English summary of the grievance>",
   "language_detected": "<ISO 639-1>",
+  "location_text": "<extracted area/landmark in English, or null>",
   "is_duplicate": false,
   "duplicate_of_id": null
 }
@@ -150,6 +159,7 @@ async def classify_grievance(
         urgency=UrgencyLevel(data["urgency"]),
         summary=data["summary"],
         language_detected=data.get("language_detected", "en"),
+        location_text=data.get("location_text") or None,
         is_duplicate=data.get("is_duplicate", False),
         duplicate_of_id=data.get("duplicate_of_id"),
     )

@@ -52,8 +52,12 @@ class IncomingMessage(BaseModel):
     timestamp: datetime
     # Media fields — set for image / audio messages, None for plain text
     media_id: str | None = None    # Meta media object ID (used to download)
-    media_type: str | None = None  # "image" | "audio"
+    media_type: str | None = None  # "image" | "audio" | "location"
     media_mime: str | None = None  # e.g. "image/jpeg", "audio/ogg; codecs=opus"
+    # Location fields — set when citizen shares a WhatsApp location pin
+    latitude: float | None = None
+    longitude: float | None = None
+    location_name: str | None = None  # WhatsApp-provided place name (optional)
 
 
 # ── Classification result from Claude ────────────────────────────────────────
@@ -61,8 +65,9 @@ class IncomingMessage(BaseModel):
 class ClassificationResult(BaseModel):
     category: GrievanceCategory
     urgency: UrgencyLevel
-    summary: str           # 1–2 sentence summary in English
-    language_detected: str # ISO 639-1 (e.g. "hi", "mr", "en")
+    summary: str              # 1–2 sentence summary in English
+    language_detected: str    # ISO 639-1 (e.g. "hi", "mr", "en")
+    location_text: str | None = None  # extracted area/landmark from message text
     is_duplicate: bool
     duplicate_of_id: str | None = None
 
@@ -86,6 +91,9 @@ class Grievance(BaseModel):
     next_action: str | None = None
     is_duplicate: bool = False
     duplicate_of_id: str | None = None
+    location_text: str | None = None  # human-readable area (from text or geocoding)
+    latitude: float | None = None
+    longitude: float | None = None
     filed_at: datetime
     updated_at: datetime
     closed_at: datetime | None = None
