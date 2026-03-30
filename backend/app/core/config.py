@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     # OpenAI (Whisper — for WhatsApp voice message transcription)
     OPENAI_API_KEY: str = ""
 
+    # Mailgun (inbound email intake)
+    MAILGUN_WEBHOOK_SIGNING_KEY: str = ""   # from Mailgun dashboard → Webhooks → Signing key
+    EMAIL_INTAKE_OFFICE_ID: str = ""        # office_id that receives emailed grievances
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"

@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import grievances, webhook
+from app.api import grievances, webhook, email_intake
 from app.core.config import settings
 
 logging.basicConfig(
@@ -30,6 +30,7 @@ app.add_middleware(
 
 app.include_router(webhook.router)
 app.include_router(grievances.router)
+app.include_router(email_intake.router)
 
 
 @app.get("/health")
