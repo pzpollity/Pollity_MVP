@@ -36,6 +36,7 @@ class GrievanceChannel(str, Enum):
     WHATSAPP = "whatsapp"
     WALK_IN = "walk_in"
     PHONE = "phone"
+    LETTER = "letter"
     EMAIL = "email"
     SOCIAL_MEDIA = "social_media"
     CPGRAMS = "cpgrams"

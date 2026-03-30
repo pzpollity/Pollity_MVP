@@ -202,31 +202,54 @@ with st.expander("➕ Log a Walk-in / Phone / Letter Grievance"):
         wi_name    = st.text_input("Citizen Name (optional)")
         wi_contact = st.text_input("Citizen Phone Number (optional, with country code e.g. 919876543210)")
         wi_channel = st.selectbox("Channel", ["walk_in", "phone", "letter"])
+        wi_image   = st.file_uploader(
+            "Upload Letter Image (JPEG / PNG, max 5 MB) — required for Letter channel",
+            type=["jpg", "jpeg", "png", "gif", "webp"],
+            help="Photograph or scan of the typed/handwritten letter. OCR will extract the text automatically.",
+        )
         wi_text    = st.text_area("Grievance Description", height=120,
-                                   placeholder="Describe the grievance as told by the citizen...")
+                                   placeholder="For Letter channel: type text here if not uploading an image. For Walk-in / Phone: describe the grievance.")
         wi_submit  = st.form_submit_button("Register Grievance")
 
     if wi_submit:
-        if not wi_text.strip():
-            st.error("Please enter a grievance description.")
+        use_ocr = wi_channel == "letter" and wi_image is not None
+
+        if not use_ocr and not wi_text.strip():
+            st.error("Please enter a grievance description, or upload a letter image (for Letter channel).")
         else:
-            with st.spinner("Classifying and registering..."):
+            with st.spinner("Processing and registering..."):
                 try:
-                    payload = {
-                        "office_id":       DEMO_OFFICE_ID,
-                        "citizen_name":    wi_name or None,
-                        "citizen_contact": wi_contact or None,
-                        "channel":         wi_channel,
-                        "raw_text":        wi_text.strip(),
-                    }
-                    resp = httpx.post(
-                        f"{BACKEND_URL}/grievances/walkin",
-                        json=payload,
-                        timeout=30,
-                    )
+                    if use_ocr:
+                        # Multipart upload → OCR → classify
+                        resp = httpx.post(
+                            f"{BACKEND_URL}/grievances/letter-ocr",
+                            data={
+                                "office_id":       DEMO_OFFICE_ID,
+                                "citizen_name":    wi_name or "",
+                                "citizen_contact": wi_contact or "",
+                            },
+                            files={"image": (wi_image.name, wi_image.getvalue(), wi_image.type)},
+                            timeout=60,
+                        )
+                    else:
+                        resp = httpx.post(
+                            f"{BACKEND_URL}/grievances/walkin",
+                            json={
+                                "office_id":       DEMO_OFFICE_ID,
+                                "citizen_name":    wi_name or None,
+                                "citizen_contact": wi_contact or None,
+                                "channel":         wi_channel,
+                                "raw_text":        wi_text.strip(),
+                            },
+                            timeout=30,
+                        )
+
                     if resp.status_code == 200:
                         data = resp.json()
                         st.success(f"Registered: **{data['grievance_id']}**")
+                        if use_ocr and data.get("ocr_text"):
+                            with st.expander("OCR extracted text"):
+                                st.text(data["ocr_text"])
                         st.cache_data.clear()
                         st.rerun()
                     else:

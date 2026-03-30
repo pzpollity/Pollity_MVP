@@ -11,12 +11,13 @@ import logging
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.models.grievance import GrievanceChannel, GrievanceStatus
 from app.services.grievance_service import process_walkin_grievance
+from app.services.ocr import extract_text_from_image
 from app.services.whatsapp import build_status_update_message, send_text
 
 router = APIRouter(prefix="/grievances", tags=["grievances"])
@@ -139,3 +140,69 @@ async def walkin_intake(body: WalkInRequest):
 
     logger.info("Walk-in grievance registered: %s", grievance.grievance_id)
     return {"grievance_id": grievance.grievance_id, "id": grievance.id}
+
+
+# ── Letter / OCR intake ───────────────────────────────────────────────────────
+
+_ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+_MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+@router.post("/letter-ocr")
+async def letter_ocr_intake(
+    office_id: str = Form(...),
+    citizen_name: str | None = Form(None),
+    citizen_contact: str | None = Form(None),
+    image: UploadFile = File(...),
+):
+    """
+    Scan a typed/handwritten letter image → OCR → classify → register grievance.
+
+    Accepts multipart/form-data with:
+      - office_id       (required)
+      - citizen_name    (optional)
+      - citizen_contact (optional, E.164 phone)
+      - image           (required, JPEG/PNG/GIF/WEBP, ≤5 MB)
+
+    Returns grievance_id, internal id, and the OCR-extracted text.
+    """
+    if image.content_type not in _ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported file type '{image.content_type}'. Upload JPEG, PNG, GIF, or WEBP.",
+        )
+
+    image_bytes = await image.read()
+    if len(image_bytes) > _MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image exceeds 5 MB limit.")
+
+    # ── OCR ──────────────────────────────────────────────────────────────────
+    try:
+        raw_text = await extract_text_from_image(image_bytes, media_type=image.content_type)
+    except Exception:
+        logger.exception("OCR failed for uploaded letter image")
+        raise HTTPException(status_code=500, detail="OCR processing failed. Try a clearer image.")
+
+    if not raw_text or raw_text.startswith("[UNREADABLE"):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Could not read text from image: {raw_text or 'empty response'}",
+        )
+
+    # ── Classification + persist (same pipeline as walk-in) ──────────────────
+    grievance = await process_walkin_grievance(
+        office_id=office_id,
+        citizen_name=citizen_name,
+        citizen_contact=citizen_contact or "WALK-IN",
+        channel=GrievanceChannel.LETTER,
+        raw_text=raw_text,
+    )
+    if grievance is None:
+        raise HTTPException(status_code=404, detail="Office not found")
+
+    logger.info("Letter-OCR grievance registered: %s", grievance.grievance_id)
+    return {
+        "grievance_id": grievance.grievance_id,
+        "id": grievance.id,
+        "ocr_text": raw_text,
+    }

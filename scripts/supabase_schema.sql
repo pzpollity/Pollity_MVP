@@ -71,6 +71,10 @@ create index if not exists idx_grievances_office_status  on grievances(office_id
 create index if not exists idx_grievances_office_filed   on grievances(office_id, filed_at desc);
 create index if not exists idx_grievances_urgency        on grievances(urgency);
 
+-- ── Migration: OCR letter support (run once on existing deployments) ──────────
+-- Stores the Supabase Storage URL of the original scanned letter image (nullable).
+-- alter table grievances add column if not exists image_url text;
+
 -- ── Row Level Security ────────────────────────────────────────────────────────
 alter table offices    enable row level security;
 alter table staff      enable row level security;
