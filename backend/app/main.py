@@ -11,6 +11,10 @@ logging.basicConfig(
     format="%(asctime)s  %(levelname)-8s  %(name)s: %(message)s",
 )
 
+_logger = logging.getLogger(__name__)
+_logger.info("STARTUP — OPENAI_API_KEY configured: %s", bool(settings.OPENAI_API_KEY))
+_logger.info("STARTUP — RESEND_API_KEY configured: %s", bool(settings.RESEND_API_KEY))
+
 app = FastAPI(
     title="Jan-Sunwai API",
     version="0.1.0",
