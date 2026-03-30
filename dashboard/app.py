@@ -105,10 +105,36 @@ footer    { visibility: hidden; }
 }
 .detail-card b { color: #444; }
 
-/* Sidebar */
-section[data-testid="stSidebar"] > div:first-child {
-    background: #F8FAFF;
-    border-right: 1px solid #E3F2FD;
+/* Sidebar — force light regardless of user theme setting */
+section[data-testid="stSidebar"] {
+    background-color: #EEF2FF !important;
+}
+section[data-testid="stSidebar"] * {
+    color: #1a1a1a !important;
+}
+section[data-testid="stSidebar"] h3 {
+    color: #1565C0 !important;
+    font-weight: 700 !important;
+}
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] caption {
+    color: #333 !important;
+}
+/* Force light background on sidebar selectboxes */
+section[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    border-color: #CBD5E0 !important;
+    color: #1a1a1a !important;
+}
+section[data-testid="stSidebar"] [data-baseweb="select"] span {
+    color: #1a1a1a !important;
+}
+/* Selectbox dropdown menu */
+[data-baseweb="popover"] * {
+    color: #1a1a1a !important;
+    background-color: #ffffff !important;
 }
 </style>
 """, unsafe_allow_html=True)
