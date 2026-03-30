@@ -103,21 +103,19 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     existing_summaries = recent_resp.data or []
 
     # ── 3. Resolve raw text + GPS ─────────────────────────────────────────────
-    channel  = GrievanceChannel.WHATSAPP
-    raw_text = msg.body
-    lat, lon = msg.latitude, msg.longitude
+    channel          = GrievanceChannel.WHATSAPP
+    raw_text         = msg.body
+    lat, lon         = msg.latitude, msg.longitude
+    _geocoded_place  = None   # cache to avoid calling Nominatim twice
 
     if msg.media_type == "location":
-        # Citizen shared a location pin — reverse-geocode to get area name
-        # We'll still run it through the classifier with the place name as text
         if lat is not None and lon is not None:
-            place = await reverse_geocode(lat, lon)
-            raw_text = (
-                f"Citizen shared their location: {place or msg.location_name or 'unknown area'}. "
-                f"GPS: {lat:.4f}, {lon:.4f}"
-            )
-        else:
-            raw_text = msg.body or "Citizen shared a location pin."
+            _geocoded_place = await reverse_geocode(lat, lon)
+        raw_text = (
+            f"Citizen shared their location: "
+            f"{_geocoded_place or msg.location_name or 'unknown area'}. "
+            f"GPS: {lat:.4f}, {lon:.4f}"
+        ) if lat is not None else (msg.body or "Citizen shared a location pin.")
 
     elif msg.media_id and msg.media_type == "image":
         try:
@@ -148,10 +146,11 @@ async def process_whatsapp_message(msg: IncomingMessage) -> Grievance | None:
     # ── 4. Classify ───────────────────────────────────────────────────────────
     classification = await classify_grievance(raw_text, existing_summaries)
 
-    # ── 5. Resolve location_text ──────────────────────────────────────────────
-    # Priority: GPS reverse-geocode > Claude NLP extraction > WhatsApp place name
+    # ── 5. Resolve location_text (use cached geocode — no second Nominatim call)
     location_text = None
-    if lat is not None and lon is not None:
+    if _geocoded_place:
+        location_text = _geocoded_place
+    elif lat is not None and lon is not None:
         location_text = await reverse_geocode(lat, lon)
     if not location_text:
         location_text = classification.location_text
