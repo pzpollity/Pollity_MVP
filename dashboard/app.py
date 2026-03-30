@@ -10,7 +10,7 @@ Run locally:
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import httpx
 import pandas as pd
@@ -207,7 +207,8 @@ def update_status(grievance_uuid: str, new_status: str, assigned_to: str, next_a
 
 
 # ── Header ────────────────────────────────────────────────────────────────────
-now_str = datetime.now().strftime("%d %b %Y · %I:%M %p")
+IST = timezone(timedelta(hours=5, minutes=30))
+now_str = datetime.now(tz=IST).strftime("%d %b %Y · %I:%M %p IST")
 st.markdown(f"""
 <div class="top-banner">
   <div>
