@@ -355,14 +355,15 @@ with col_left:
         text="Count",
     )
     fig.update_layout(
-        margin=dict(l=0, r=0, t=4, b=0), height=280,
+        margin=dict(l=0, r=20, t=4, b=0), height=280,
         plot_bgcolor="white", paper_bgcolor="white",
         coloraxis_showscale=False,
-        xaxis=dict(gridcolor="#F0F4F8", title=""),
-        yaxis=dict(title=""),
-        font=dict(family="Inter", size=12),
+        xaxis=dict(gridcolor="#F0F4F8", title="", color="#333"),
+        yaxis=dict(title="", color="#333"),
+        font=dict(family="Inter", size=12, color="#333"),
     )
-    fig.update_traces(textposition="outside", marker_line_width=0, textfont_size=11)
+    fig.update_traces(textposition="outside", marker_line_width=0,
+                      textfont=dict(size=11, color="#333"))
     st.plotly_chart(fig, use_container_width=True)
 
 with col_right:
@@ -376,10 +377,18 @@ with col_right:
     fig2.update_layout(
         margin=dict(l=0, r=0, t=4, b=0), height=280,
         paper_bgcolor="white",
-        legend=dict(orientation="v", x=1.02, y=0.5, font=dict(size=11)),
-        font=dict(family="Inter"),
+        legend=dict(
+            orientation="v", x=1.0, y=0.5,
+            font=dict(size=11, color="#333"),
+            bgcolor="white",
+        ),
+        font=dict(family="Inter", color="#333"),
     )
-    fig2.update_traces(textposition="inside", textfont_size=11)
+    fig2.update_traces(
+        textposition="inside",
+        textfont=dict(size=11, color="white"),
+        insidetextorientation="radial",
+    )
     st.plotly_chart(fig2, use_container_width=True)
 
 # ── Grievance Table ───────────────────────────────────────────────────────────
