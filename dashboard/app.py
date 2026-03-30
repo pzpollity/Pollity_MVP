@@ -190,7 +190,7 @@ def load_grievances(office_id: str) -> pd.DataFrame:
     if not resp.data:
         return pd.DataFrame()
     df = pd.DataFrame(resp.data)
-    df["filed_at"] = pd.to_datetime(df["filed_at"])
+    df["filed_at"] = pd.to_datetime(df["filed_at"], utc=True).dt.tz_convert("Asia/Kolkata")
     df["status"] = pd.Categorical(df["status"], categories=STATUS_ORDER, ordered=True)
     df["category_label"] = df["category"].map(CATEGORY_LABELS).fillna(df["category"])
     return df
