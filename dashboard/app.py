@@ -161,7 +161,7 @@ STATUS_ORDER = [
 ]
 
 # SLA targets in hours per urgency (based on CPGRAMS + state helpline benchmarks)
-SLA_HOURS = {"critical": 24, "high": 72, "medium": 168, "low": 720}
+SLA_HOURS = {"critical": 24, "high": 72, "medium": 168, "low": 504}
 CATEGORY_LABELS = {
     "infrastructure":  "Infrastructure",
     "welfare_schemes": "Welfare Schemes",
