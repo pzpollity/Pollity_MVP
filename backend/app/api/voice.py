@@ -43,17 +43,11 @@ logger = logging.getLogger(__name__)
 
 
 def _say_fragment(text: str, language: str) -> str:
-    """
-    Build a Twilio <Say> fragment using Amazon Polly neural voices where available.
-    - Hindi / English → Polly.Kajal (neural, Indian accent)
-    - Marathi         → standard Twilio <Say> with mr-IN (no Polly voice available)
-    """
+    """Build a Twilio <Say> fragment with the appropriate language tag."""
+    lang_map = {"hi": "hi-IN", "mr": "mr-IN", "en": "en-IN"}
+    twilio_lang = lang_map.get(language, "hi-IN")
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    if language in ("hi", "en"):
-        polly_lang = "hi-IN" if language == "hi" else "en-IN"
-        return f'<Say voice="Polly.Kajal" language="{polly_lang}">{safe_text}</Say>'
-    # Marathi fallback — standard Twilio voice
-    return f'<Say language="mr-IN">{safe_text}</Say>'
+    return f'<Say language="{twilio_lang}">{safe_text}</Say>'
 
 
 def _make_response_twiml(
