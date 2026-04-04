@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     VOICE_OFFICE_ID: str = ""              # office_id that receives phone grievances
     BASE_URL: str = "https://your-backend.railway.app"  # public base URL of this server (no trailing slash)
 
+    # Weekly briefing
+    BRIEFING_SECRET: str = ""   # Secret token to protect /api/briefing/trigger
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
