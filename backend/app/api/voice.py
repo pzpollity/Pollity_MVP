@@ -106,10 +106,10 @@ def _make_response_twiml(
 async def incoming_call(request: Request):
     """
     Entry point: Twilio calls this when someone dials the Jan-Sunwai number.
-    Creates a session, plays the greeting, starts recording.
+    Plays a trilingual language selection menu (1=Hindi, 2=Marathi, 3=English).
     """
     form = await request.form()
-    call_sid   = form.get("CallSid", "unknown")
+    call_sid    = form.get("CallSid", "unknown")
     from_number = form.get("From", "unknown")
 
     logger.info("Incoming call: call_sid=%s from=%s", call_sid, from_number)
@@ -120,7 +120,7 @@ async def incoming_call(request: Request):
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            '<Say language="hi-IN">Khed aahe, seva uplabdha nahi. Nantar call kara.</Say>'
+            '<Say language="hi-IN">Seva uplabdha nahi. Baad mein call karein.</Say>'
             "<Hangup/>"
             "</Response>"
         )
@@ -128,10 +128,52 @@ async def incoming_call(request: Request):
 
     voice_agent.create_session(call_sid, office_id, from_number)
 
-    greeting = voice_agent.get_greeting()
+    action_url = f"{settings.BASE_URL}/api/voice/language"
+    twiml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<Response>"
+        f'<Gather input="dtmf" numDigits="1" timeout="8" action="{action_url}">'
+        '<Say language="hi-IN">'
+        "नमस्कार! जन-सुनवाई हेल्पलाइन में आपका स्वागत है। "
+        "हिंदी के लिए 1 दबाएं। "
+        "मराठीसाठी 2 दाबा। "
+        "For English press 3."
+        "</Say>"
+        "</Gather>"
+        # No digit pressed — default to Hindi
+        f'<Redirect>{action_url}</Redirect>'
+        "</Response>"
+    )
+    return FastAPIResponse(content=twiml, media_type="application/xml")
+
+
+@router.post("/language")
+async def select_language(request: Request):
+    """
+    Receives DTMF digit from language menu.
+    Sets session language and redirects into the main conversation.
+    """
+    form = await request.form()
+    call_sid = form.get("CallSid", "unknown")
+    digit    = form.get("Digits", "").strip()
+
+    lang_map = {"1": "hi", "2": "mr", "3": "en"}
+    language = lang_map.get(digit, "hi")  # default Hindi if no/invalid digit
+
+    session = voice_agent.get_session(call_sid)
+    if session:
+        session.language = language
+        logger.info("Language selected: call_sid=%s digit=%s lang=%s", call_sid, digit, language)
+
+    # Play confirmation + start conversation
+    confirms = {
+        "hi": "हिंदी चुना गया। कृपया अपनी समस्या बताइए।",
+        "mr": "मराठी निवडले. कृपया तुमची समस्या सांगा.",
+        "en": "English selected. Please tell me your problem.",
+    }
     twiml = _make_response_twiml(
-        response_text=greeting["response_text"],
-        language=greeting["language"],
+        response_text=confirms[language],
+        language=language,
         next_action="/api/voice/gather",
     )
     return FastAPIResponse(content=twiml, media_type="application/xml")
