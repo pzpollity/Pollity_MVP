@@ -285,3 +285,91 @@ def build_status_update_message(
         return None
 
     return template.format(grievance_id=grievance_id)
+
+
+# ── Status Inquiry ─────────────────────────────────────────────────────────────
+
+_STATUS_INQUIRY_PREFIXES = {"status", "स्थिति", "sthiti"}  # en / hi
+
+_STATUS_INQUIRY_REPLY = {
+    "en": (
+        "📋 *Status of {grievance_id}*\n\n"
+        "Category: {category}\n"
+        "Urgency: {urgency}\n"
+        "Status: *{status}*\n"
+        "Filed: {filed}\n\n"
+        "{footer}"
+    ),
+    "hi": (
+        "📋 *{grievance_id} की स्थिति*\n\n"
+        "श्रेणी: {category}\n"
+        "प्राथमिकता: {urgency}\n"
+        "स्थिति: *{status}*\n"
+        "दर्ज: {filed}\n\n"
+        "{footer}"
+    ),
+}
+
+_STATUS_INQUIRY_FOOTER = {
+    "en": {
+        "open":   "Your case is still being processed. We will notify you when there is an update.",
+        "closed": "This grievance has been closed. Thank you for your patience.",
+    },
+    "hi": {
+        "open":   "आपकी शिकायत पर काम जारी है। अपडेट होने पर आपको सूचित किया जाएगा।",
+        "closed": "यह शिकायत बंद कर दी गई है। आपके धैर्य के लिए धन्यवाद।",
+    },
+}
+
+_NOT_FOUND = {
+    "en": "❌ We couldn't find a grievance with ID *{gid}*. Please check the reference and try again.",
+    "hi": "❌ हमें *{gid}* ID वाली कोई शिकायत नहीं मिली। कृपया संदर्भ जांचें और पुनः प्रयास करें।",
+}
+
+
+def is_status_inquiry(text: str) -> tuple[bool, str]:
+    """
+    Returns (True, grievance_id) if message is a status inquiry like 'STATUS GR-DMO-...',
+    otherwise (False, '').
+    """
+    parts = text.strip().split()
+    if len(parts) >= 2 and parts[0].lower() in _STATUS_INQUIRY_PREFIXES:
+        return True, parts[1].upper()
+    # Also accept bare grievance ID (e.g. "GR-DMO-202604-00001")
+    if len(parts) == 1 and parts[0].upper().startswith("GR-"):
+        return True, parts[0].upper()
+    return False, ""
+
+
+def build_status_inquiry_reply(row: dict, language: str = "en") -> str:
+    """Build a WhatsApp reply for a status inquiry from a grievance DB row."""
+    lang = language if language in _STATUS_INQUIRY_REPLY else "en"
+    tmpl = _STATUS_INQUIRY_REPLY[lang]
+    footer_map = _STATUS_INQUIRY_FOOTER[lang]
+
+    status_val  = row.get("status", "")
+    filed_at    = row.get("filed_at", "")
+    try:
+        from datetime import datetime, timezone, timedelta
+        IST = timezone(timedelta(hours=5, minutes=30))
+        filed_dt = datetime.fromisoformat(filed_at.replace("Z", "+00:00")).astimezone(IST)
+        filed_str = filed_dt.strftime("%d %b %Y, %I:%M %p IST")
+    except Exception:
+        filed_str = filed_at
+
+    is_closed = status_val in ("resolved", "verified", "closed")
+    footer = footer_map["closed"] if is_closed else footer_map["open"]
+
+    return tmpl.format(
+        grievance_id=row.get("grievance_id", ""),
+        category=row.get("category", "").replace("_", " ").title(),
+        urgency=row.get("urgency", "").upper(),
+        status=status_val.replace("_", " ").title(),
+        filed=filed_str,
+        footer=footer,
+    )
+
+
+def build_not_found_reply(grievance_id: str, language: str = "en") -> str:
+    lang = language if language in _NOT_FOUND else "en"
+    return _NOT_FOUND[lang].format(gid=grievance_id)

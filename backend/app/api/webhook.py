@@ -13,8 +13,12 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request, R
 
 from app.core.config import settings
 from app.services.grievance_service import process_whatsapp_message
+from app.core.database import get_db
 from app.services.whatsapp import (
     build_ack_message,
+    build_not_found_reply,
+    build_status_inquiry_reply,
+    is_status_inquiry,
     parse_incoming,
     send_text,
     verify_signature,
@@ -78,12 +82,33 @@ _VOICE_NOT_SUPPORTED = {
 
 
 async def _handle_message(msg):
+    # ── Status inquiry: "STATUS GR-DMO-..." or bare "GR-DMO-..." ─────────────
+    if msg.text:
+        inquiry, grievance_id = is_status_inquiry(msg.text)
+        if inquiry:
+            db = get_db()
+            resp = (
+                db.table("grievances")
+                .select("grievance_id,category,urgency,status,filed_at,language_detected")
+                .ilike("grievance_id", grievance_id)
+                .limit(1)
+                .execute()
+            )
+            if resp.data:
+                row = resp.data[0]
+                reply = build_status_inquiry_reply(row, row.get("language_detected", "en"))
+            else:
+                reply = build_not_found_reply(grievance_id)
+            await send_text(msg.from_number, reply)
+            return
+
+    # ── Normal grievance intake ───────────────────────────────────────────────
     grievance = await process_whatsapp_message(msg)
 
     if grievance is None:
         # Voice message arrived but OPENAI_API_KEY not set — tell the citizen
         if msg.media_type == "audio":
-            reply = _VOICE_NOT_SUPPORTED.get("en")  # default; language unknown at this point
+            reply = _VOICE_NOT_SUPPORTED.get("en")
             await send_text(msg.from_number, reply)
         return
 
