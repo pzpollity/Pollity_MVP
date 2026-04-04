@@ -28,6 +28,7 @@ Twilio configuration required:
 import asyncio
 import logging
 
+import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import Response as FastAPIResponse
 
@@ -239,10 +240,41 @@ async def call_status(request: Request):
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
+_SMS_ACK = {
+    "hi": "आपकी शिकायत दर्ज हो गई है। संदर्भ संख्या: {gid}। Jan-Sunwai - Pollity.in",
+    "mr": "तुमची तक्रार नोंदवली गेली आहे। संदर्भ क्रमांक: {gid}। Jan-Sunwai - Pollity.in",
+    "en": "Your grievance has been registered. Reference: {gid}. Jan-Sunwai - Pollity.in",
+}
+
+
+async def _send_sms_ack(to: str, grievance_id: str, language: str) -> None:
+    """Send an SMS confirmation to the citizen with their grievance reference number."""
+    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_FROM_NUMBER):
+        logger.debug("SMS ACK skipped — TWILIO_FROM_NUMBER not configured")
+        return
+    if not to or to == "unknown":
+        return
+
+    body = _SMS_ACK.get(language, _SMS_ACK["hi"]).format(gid=grievance_id)
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.TWILIO_ACCOUNT_SID}/Messages.json"
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                url,
+                auth=(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN),
+                data={"From": settings.TWILIO_FROM_NUMBER, "To": to, "Body": body},
+            )
+            resp.raise_for_status()
+        logger.info("SMS ACK sent to %s for grievance %s", to, grievance_id)
+    except Exception:
+        logger.exception("Failed to send SMS ACK to %s for %s", to, grievance_id)
+
+
 async def _save_grievance(call_sid: str) -> None:
     """
     Finalize and persist the grievance from a completed/ended call.
-    Removes the session after saving.
+    Removes the session after saving, then sends SMS ACK to citizen.
     """
     session = voice_agent.remove_session(call_sid)
     if not session:
@@ -269,6 +301,7 @@ async def _save_grievance(call_sid: str) -> None:
                 "Phone grievance saved: %s from call_sid=%s",
                 grievance.grievance_id, call_sid,
             )
+            await _send_sms_ack(session.from_number, grievance.grievance_id, session.language)
         else:
             logger.warning("process_walkin_grievance returned None for call_sid=%s", call_sid)
     except Exception:
