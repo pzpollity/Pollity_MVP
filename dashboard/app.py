@@ -19,9 +19,6 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from supabase import create_client
 
-# ── Auto-refresh every 60 s (keeps app alive + data current) ─────────────────
-st_autorefresh(interval=60_000, key="dashboard_refresh")
-
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Jan-Sunwai | Pollity.in",
@@ -29,6 +26,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ── Auto-refresh every 60 s (keeps app alive + data current) ─────────────────
+st_autorefresh(interval=60_000, key="dashboard_refresh")
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
