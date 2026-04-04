@@ -16,7 +16,11 @@ import httpx
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 from supabase import create_client
+
+# ── Auto-refresh every 60 s (keeps app alive + data current) ─────────────────
+st_autorefresh(interval=60_000, key="dashboard_refresh")
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -240,7 +244,7 @@ with st.sidebar:
     if st.button("🔄 Refresh Data", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
-    st.caption(f"Auto-refreshes every 60 s")
+    st.caption("Auto-refreshes every 60 s")
 
     st.divider()
     st.markdown("### ➕ Log a Grievance")
