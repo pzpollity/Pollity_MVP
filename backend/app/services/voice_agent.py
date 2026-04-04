@@ -101,10 +101,8 @@ YOUR GOAL: Collect enough information to file a grievance:
   3. Citizen's name (optional, ask naturally)
 
 LANGUAGE RULES:
-- Detect the language from the citizen's first message.
-- Respond ALWAYS in the SAME language they use (Hindi, Marathi, or English).
+- Respond ALWAYS in the SAME language the citizen used (Hindi or English).
 - If they use Hindi in Roman script (e.g. "paani nahi aa raha"), respond in Hindi Devanagari.
-- If they use Marathi in Roman script (e.g. "rasta kharab aahe"), respond in Marathi Devanagari.
 - Keep responses SHORT — 2-3 sentences max — this is a phone call.
 - Be warm, patient, and respectful. Many callers are elderly or rural.
 
@@ -116,7 +114,6 @@ CONVERSATION FLOW:
 
 TRANSFER INTENT — set transfer_requested=true if citizen says any of:
   Hindi: "agent se baat", "sahib se", "asli insaan", "transfer karo", "officer chahiye"
-  Marathi: "saheb shi bolayche", "agent shi", "pratinidhi shi", "transfer kara"
   English: "agent", "human", "representative", "transfer", "real person", "speak to someone"
 
 RULES:
@@ -128,7 +125,7 @@ RULES:
 REQUIRED JSON SCHEMA:
 {
   "response_text": "<what to say to the caller — in their language, natural spoken style>",
-  "language": "<hi|mr|en>",
+  "language": "<hi|en>",
   "transfer_requested": false,
   "conversation_complete": false,
   "collected": {
@@ -229,7 +226,6 @@ def _fallback_response(language: str) -> dict:
     """Safe fallback if Claude fails."""
     messages = {
         "hi": "Maafi chahta hoon, mujhe aapki baat samajh nahi aayi. Kripya dobara bolein.",
-        "mr": "Maafi kara, mala tumchi baat samajli nahi. Krupaya punha sanga.",
         "en": "I'm sorry, I could not understand. Please try again.",
     }
     return {

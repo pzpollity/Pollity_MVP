@@ -42,13 +42,8 @@ logger = logging.getLogger(__name__)
 
 
 def _say_fragment(text: str, language: str) -> str:
-    """
-    Build a Twilio <Say> fragment.
-    Marathi uses hi-IN engine: Twilio mr-IN TTS is unreliable; both languages
-    share Devanagari script so Hindi TTS renders Marathi text adequately.
-    """
-    lang_map = {"hi": "hi-IN", "mr": "hi-IN", "en": "en-IN"}
-    twilio_lang = lang_map.get(language, "hi-IN")
+    """Build a Twilio <Say> fragment with the appropriate language tag."""
+    twilio_lang = "en-IN" if language == "en" else "hi-IN"
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return f'<Say language="{twilio_lang}">{safe_text}</Say>'
 
@@ -86,10 +81,8 @@ def _make_response_twiml(
         )
 
     # Continue conversation — gather next speech input via Twilio STT
-    # Marathi uses hi-IN STT: better Devanagari recognition than mr-IN
     action_url = f"{settings.BASE_URL}{next_action}"
-    lang_map = {"hi": "hi-IN", "mr": "hi-IN", "en": "en-IN"}
-    gather_lang = lang_map.get(language, "hi-IN")
+    gather_lang = "en-IN" if language == "en" else "hi-IN"
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
@@ -141,8 +134,7 @@ async def incoming_call(request: Request):
         '<Say language="hi-IN">'
         "नमस्कार! जन-सुनवाई हेल्पलाइन में आपका स्वागत है। "
         "हिंदी के लिए 1 दबाएं। "
-        "मराठीसाठी 2 दाबा। "
-        "For English press 3."
+        "For English press 2."
         "</Say>"
         "</Gather>"
         # No digit pressed — default to Hindi
@@ -162,7 +154,7 @@ async def select_language(request: Request):
     call_sid = form.get("CallSid", "unknown")
     digit    = form.get("Digits", "").strip()
 
-    lang_map = {"1": "hi", "2": "mr", "3": "en"}
+    lang_map = {"1": "hi", "2": "en"}
     language = lang_map.get(digit, "hi")  # default Hindi if no/invalid digit
 
     session = voice_agent.get_session(call_sid)
@@ -173,7 +165,6 @@ async def select_language(request: Request):
     # Play confirmation + start conversation
     confirms = {
         "hi": "हिंदी चुना गया। कृपया अपनी समस्या बताइए।",
-        "mr": "मराठी निवडले. कृपया तुमची समस्या सांगा.",
         "en": "English selected. Please tell me your problem.",
     }
     twiml = _make_response_twiml(
@@ -289,7 +280,6 @@ async def call_status(request: Request):
 
 _SMS_ACK = {
     "hi": "आपकी शिकायत दर्ज हो गई है। संदर्भ संख्या: {gid}। Jan-Sunwai - Pollity.in",
-    "mr": "तुमची तक्रार नोंदवली गेली आहे। संदर्भ क्रमांक: {gid}। Jan-Sunwai - Pollity.in",
     "en": "Your grievance has been registered. Reference: {gid}. Jan-Sunwai - Pollity.in",
 }
 
