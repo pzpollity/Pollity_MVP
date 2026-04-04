@@ -28,7 +28,6 @@ Twilio configuration required:
 import asyncio
 import logging
 
-import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import Response as FastAPIResponse
 
@@ -36,7 +35,6 @@ from app.core.config import settings
 from app.models.grievance import GrievanceChannel
 from app.services import voice_agent
 from app.services.grievance_service import process_walkin_grievance
-from app.services.transcription import transcribe_audio
 
 router = APIRouter(prefix="/api/voice", tags=["voice"])
 logger = logging.getLogger(__name__)
@@ -82,19 +80,21 @@ def _make_response_twiml(
             "</Response>"
         )
 
-    # Continue conversation — record next user input
+    # Continue conversation — gather next speech input via Twilio STT
     action_url = f"{settings.BASE_URL}{next_action}"
-    status_url = f"{settings.BASE_URL}/api/voice/status"
+    lang_map = {"hi": "hi-IN", "mr": "mr-IN", "en": "en-IN"}
+    gather_lang = lang_map.get(language, "hi-IN")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
+        f'<Gather input="speech" action="{action_url}" '
+        f'language="{gather_lang}" '
+        'speechTimeout="auto" '
+        'timeout="10">'
         f"{say_fragment}"
-        f'<Record action="{action_url}" '
-        f'statusCallback="{status_url}" '
-        'maxLength="60" '
-        'timeout="5" '
-        'playBeep="true" '
-        'trim="trim-silence"/>'
+        "</Gather>"
+        # Fallback if no speech detected — loop back
+        f'<Redirect>{action_url}</Redirect>'
         "</Response>"
     )
 
@@ -139,19 +139,19 @@ async def incoming_call(request: Request):
 @router.post("/gather")
 async def gather(request: Request):
     """
-    Called by Twilio after each recording.
-    Downloads the audio → Whisper transcription → Claude response → TTS → TwiML.
+    Called by Twilio after <Gather input="speech"> captures speech.
+    Reads SpeechResult (Twilio STT) → Claude response → TwiML.
+    No external transcription API needed.
     """
     form = await request.form()
-    call_sid      = form.get("CallSid", "unknown")
-    recording_url = form.get("RecordingUrl")
-    call_status   = form.get("CallStatus", "")
+    call_sid    = form.get("CallSid", "unknown")
+    user_text   = form.get("SpeechResult", "").strip()
+    confidence  = form.get("Confidence", "")
 
-    logger.info("Gather: call_sid=%s status=%s recording_url=%s", call_sid, call_status, recording_url)
+    logger.info("Gather: call_sid=%s confidence=%s speech=%r", call_sid, confidence, user_text[:80])
 
     session = voice_agent.get_session(call_sid)
     if session is None:
-        # Session lost (restart or crash) — hang up gracefully
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
@@ -161,32 +161,8 @@ async def gather(request: Request):
         )
         return FastAPIResponse(content=twiml, media_type="application/xml")
 
-    # ── Download and transcribe recording ────────────────────────────────────
-    user_text = ""
-    if recording_url:
-        mp3_url = recording_url.rstrip("/") + ".mp3"
-        try:
-            # Twilio requires auth to download recordings
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.get(
-                    mp3_url,
-                    auth=(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN),
-                )
-                resp.raise_for_status()
-                audio_bytes = resp.content
-
-            user_text = await transcribe_audio(
-                audio_bytes,
-                mime_type="audio/mpeg",
-                language_hint=session.language if session.language in {"hi", "mr", "en"} else None,
-            )
-            logger.info("Transcribed: %r", user_text[:100])
-        except Exception:
-            logger.exception("Failed to transcribe recording for call_sid=%s", call_sid)
-            user_text = ""
-
-    # If nothing was said (silence / very short recording), prompt again
-    if not user_text.strip():
+    # If nothing was said (silence / timeout), prompt again
+    if not user_text:
         silence_msgs = {
             "hi": "Maafi karein, mujhe kuch sunai nahi diya. Kripya dobara bolein.",
             "mr": "Maafi kara, mala aikale nahi. Krupaya punha sanga.",
