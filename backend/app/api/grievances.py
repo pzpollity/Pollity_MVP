@@ -18,6 +18,7 @@ from app.core.database import get_db
 from app.models.grievance import GrievanceChannel, GrievanceStatus
 from app.services.grievance_service import process_walkin_grievance
 from app.services.ocr import extract_text_from_image
+from app.services.sms import build_sms_status_message, send_sms
 from app.services.whatsapp import build_status_update_message, send_text
 
 router = APIRouter(prefix="/grievances", tags=["grievances"])
@@ -91,23 +92,27 @@ async def update_status(grievance_uuid: str, body: StatusUpdate):
 
     row = resp.data[0]
 
-    # ── WhatsApp status notification to citizen ───────────────────────────────
+    # ── Status notification to citizen ───────────────────────────────────────
     if body.status in _NOTIFY_STATUSES:
         citizen_contact = row.get("citizen_contact", "")
-        if citizen_contact and citizen_contact != "WALK-IN":
-            message = build_status_update_message(
-                grievance_id=row["grievance_id"],
-                status=body.status.value,
-                language=row.get("language_detected", "en"),
-            )
-            if message:
-                try:
-                    await send_text(citizen_contact, message)
-                except Exception:
-                    # Log but do not fail the status update if WA send fails
-                    logger.exception(
-                        "Failed to send WA status notification for %s", row["grievance_id"]
-                    )
+        channel         = row.get("channel", "")
+        language        = row.get("language_detected", "en")
+        grievance_id    = row["grievance_id"]
+
+        if citizen_contact and citizen_contact not in ("WALK-IN", ""):
+            try:
+                if channel == "phone":
+                    # Phone-filed grievances: notify via SMS (citizen has no WhatsApp)
+                    msg = build_sms_status_message(grievance_id, body.status.value, language)
+                    if msg:
+                        await send_sms(citizen_contact, msg)
+                else:
+                    # WhatsApp / email / other: notify via WhatsApp
+                    msg = build_status_update_message(grievance_id, body.status.value, language)
+                    if msg:
+                        await send_text(citizen_contact, msg)
+            except Exception:
+                logger.exception("Failed to send status notification for %s", grievance_id)
 
     return row
 

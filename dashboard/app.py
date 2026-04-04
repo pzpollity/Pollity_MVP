@@ -159,6 +159,9 @@ STATUS_ORDER = [
     "registered", "acknowledged", "assigned",
     "in_progress", "resolved", "verified", "closed",
 ]
+
+# SLA targets in hours per urgency (based on CPGRAMS + state helpline benchmarks)
+SLA_HOURS = {"critical": 24, "high": 72, "medium": 168, "low": 720}
 CATEGORY_LABELS = {
     "infrastructure":  "Infrastructure",
     "welfare_schemes": "Welfare Schemes",
@@ -197,6 +200,18 @@ def load_grievances(office_id: str) -> pd.DataFrame:
     df["filed_at"] = pd.to_datetime(df["filed_at"], utc=True).dt.tz_convert("Asia/Kolkata")
     df["status"] = pd.Categorical(df["status"], categories=STATUS_ORDER, ordered=True)
     df["category_label"] = df["category"].map(CATEGORY_LABELS).fillna(df["category"])
+
+    # SLA: compute deadline and status for open grievances
+    now_ist = pd.Timestamp.now(tz="Asia/Kolkata")
+    df["sla_hours"] = df["urgency"].map(SLA_HOURS).fillna(168)
+    df["sla_deadline"] = df["filed_at"] + pd.to_timedelta(df["sla_hours"], unit="h")
+    df["hours_open"] = (now_ist - df["filed_at"]).dt.total_seconds() / 3600
+    is_open = ~df["status"].isin(["resolved", "verified", "closed"])
+    df["sla_status"] = "closed"
+    df.loc[is_open & (df["hours_open"] <= df["sla_hours"] * 0.75), "sla_status"] = "on_time"
+    df.loc[is_open & (df["hours_open"] >  df["sla_hours"] * 0.75) &
+                     (df["hours_open"] <= df["sla_hours"]),           "sla_status"] = "at_risk"
+    df.loc[is_open & (df["hours_open"] >  df["sla_hours"]),          "sla_status"] = "breached"
     return df
 
 
@@ -307,13 +322,15 @@ with st.sidebar:
                         st.error(f"Could not reach backend: {e}")
 
 # ── Compute KPIs ──────────────────────────────────────────────────────────────
-open_df        = df[df["status"] != "closed"]
+open_df        = df[~df["status"].isin(["resolved", "verified", "closed"])]
 critical_count = int((open_df["urgency"] == "critical").sum())
 high_count     = int((open_df["urgency"] == "high").sum())
 resolved_today = df[
     df["status"].isin(["resolved","verified","closed"]) &
     (df["filed_at"].dt.date == pd.Timestamp.today().date())
 ].shape[0]
+sla_breached   = int((open_df["sla_status"] == "breached").sum())
+sla_at_risk    = int((open_df["sla_status"] == "at_risk").sum())
 
 # Apply filters
 filtered = df.copy()
@@ -343,6 +360,11 @@ st.markdown(f"""
     <div class="kpi-label">Resolved Today</div>
     <div class="kpi-value">{resolved_today}</div>
     <div class="kpi-sub">verified + closed</div>
+  </div>
+  <div class="kpi-card red">
+    <div class="kpi-label">SLA Breached</div>
+    <div class="kpi-value">{sla_breached}</div>
+    <div class="kpi-sub">{sla_at_risk} at risk</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -400,17 +422,22 @@ with col_right:
 st.markdown('<div class="sec-title">Grievances</div>', unsafe_allow_html=True)
 st.caption(f"Showing **{len(filtered)}** of **{len(df)}** total")
 
+_SLA_LABEL = {"on_time": "✅ On Time", "at_risk": "⚠️ At Risk", "breached": "🔴 Breached", "closed": "—"}
+
 display_cols = [
     "grievance_id","filed_at","urgency","category_label",
-    "status","summary","citizen_contact","assigned_to",
+    "status","sla_status","summary","citizen_contact","assigned_to",
 ]
+table_df = filtered[display_cols].copy()
+table_df["sla_status"] = table_df["sla_status"].map(_SLA_LABEL)
 st.dataframe(
-    filtered[display_cols].rename(columns={
+    table_df.rename(columns={
         "grievance_id":    "Ref ID",
         "filed_at":        "Filed",
         "urgency":         "Urgency",
         "category_label":  "Category",
         "status":          "Status",
+        "sla_status":      "SLA",
         "summary":         "Summary",
         "citizen_contact": "Contact",
         "assigned_to":     "Assigned To",
@@ -424,6 +451,7 @@ st.dataframe(
         "Urgency":    st.column_config.TextColumn("Urgency",   width="small"),
         "Category":   st.column_config.TextColumn("Category",  width="medium"),
         "Status":     st.column_config.TextColumn("Status",    width="medium"),
+        "SLA":        st.column_config.TextColumn("SLA",       width="small"),
         "Summary":    st.column_config.TextColumn("Summary",   width="large"),
         "Contact":    st.column_config.TextColumn("Contact",   width="medium"),
         "Assigned To":st.column_config.TextColumn("Assigned To", width="medium"),
