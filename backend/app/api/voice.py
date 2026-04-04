@@ -7,14 +7,15 @@ Endpoints:
   POST /api/voice/incoming   — Twilio calls this when a new call arrives
   POST /api/voice/gather     — Twilio calls this after each recording
   POST /api/voice/status     — Twilio calls this when the call ends (status callback)
-  GET  /api/voice/tts/{token} — Serves generated TTS audio to Twilio <Play>
 
 Flow:
   1. /incoming  → greet caller, start recording
-  2. /gather    → transcribe (Whisper) → Claude response → TTS → play & re-record
+  2. /gather    → transcribe (Whisper) → Claude response → Twilio <Say> → re-record
                   (loops until grievance complete or transfer requested)
   3. /status    → save finalized grievance to Supabase
-  4. /tts/{id}  → streams MP3 audio bytes for Twilio <Play>
+
+TTS: Uses Twilio's built-in neural voices (Amazon Polly.Kajal for Hindi/English,
+     standard <Say> for Marathi). No external TTS API required.
 
 Call forwarding:
   When the citizen asks for a human, Twilio <Dial> forwards to VOICE_FORWARD_NUMBER.
@@ -26,57 +27,36 @@ Twilio configuration required:
 
 import asyncio
 import logging
-import secrets
-import time
 
 import httpx
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from fastapi.responses import Response as FastAPIResponse
-from twilio.twiml.voice_response import Dial, VoiceResponse
 
 from app.core.config import settings
 from app.models.grievance import GrievanceChannel
 from app.services import voice_agent
 from app.services.grievance_service import process_walkin_grievance
-from app.services.tts import synthesize_speech
 from app.services.transcription import transcribe_audio
 
 router = APIRouter(prefix="/api/voice", tags=["voice"])
 logger = logging.getLogger(__name__)
 
-# ── TTS audio cache ─────────────────────────────────────────────────────────
-# Maps short-lived token → (mp3_bytes, expires_at_unix)
-# Tokens expire after 5 minutes — enough time for Twilio to fetch them.
-_tts_cache: dict[str, tuple[bytes, float]] = {}
-_TTS_TTL_SECONDS = 300
 
-
-def _store_tts(audio_bytes: bytes) -> str:
-    """Cache audio bytes and return a one-time token."""
-    token = secrets.token_urlsafe(16)
-    _tts_cache[token] = (audio_bytes, time.time() + _TTS_TTL_SECONDS)
-    # Opportunistically clean up expired entries
-    expired = [k for k, (_, exp) in _tts_cache.items() if time.time() > exp]
-    for k in expired:
-        _tts_cache.pop(k, None)
-    return token
-
-
-def _twiml_play_or_say(text: str, language: str, audio_token: str | None) -> str:
+def _say_fragment(text: str, language: str) -> str:
     """
-    Return the XML fragment that either plays a TTS audio file or falls back
-    to Twilio's built-in <Say> if TTS generation failed.
+    Build a Twilio <Say> fragment using Amazon Polly neural voices where available.
+    - Hindi / English → Polly.Kajal (neural, Indian accent)
+    - Marathi         → standard Twilio <Say> with mr-IN (no Polly voice available)
     """
-    if audio_token:
-        return f'<Play>{settings.BASE_URL}/api/voice/tts/{audio_token}</Play>'
-    # Fallback: Twilio built-in TTS
-    lang_map = {"hi": "hi-IN", "mr": "mr-IN", "en": "en-IN"}
-    twilio_lang = lang_map.get(language, "hi-IN")
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    return f'<Say language="{twilio_lang}">{safe_text}</Say>'
+    if language in ("hi", "en"):
+        polly_lang = "hi-IN" if language == "hi" else "en-IN"
+        return f'<Say voice="Polly.Kajal" language="{polly_lang}">{safe_text}</Say>'
+    # Marathi fallback — standard Twilio voice
+    return f'<Say language="mr-IN">{safe_text}</Say>'
 
 
-async def _make_response_twiml(
+def _make_response_twiml(
     response_text: str,
     language: str,
     next_action: str,
@@ -84,28 +64,17 @@ async def _make_response_twiml(
     forward_number: str | None = None,
 ) -> str:
     """
-    Build a complete TwiML response string:
-      - Generate TTS audio (falls back to <Say> if OpenAI TTS fails)
-      - Play audio
-      - Then either: <Record> for next turn | <Dial> for transfer | <Hangup>
+    Build a complete TwiML response string using Twilio neural <Say>.
+    Then either: <Record> for next turn | <Dial> for transfer | <Hangup>
     """
-    # Try to generate TTS audio
-    audio_token: str | None = None
-    if settings.OPENAI_API_KEY:
-        try:
-            audio_bytes = await synthesize_speech(response_text, language)
-            audio_token = _store_tts(audio_bytes)
-        except Exception:
-            logger.warning("TTS generation failed, falling back to Twilio <Say>")
-
-    play_fragment = _twiml_play_or_say(response_text, language, audio_token)
+    say_fragment = _say_fragment(response_text, language)
 
     if forward_number:
         safe_number = forward_number.replace("&", "&amp;")
         return (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            f"{play_fragment}"
+            f"{say_fragment}"
             f"<Dial>{safe_number}</Dial>"
             "</Response>"
         )
@@ -114,7 +83,7 @@ async def _make_response_twiml(
         return (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            f"{play_fragment}"
+            f"{say_fragment}"
             "<Hangup/>"
             "</Response>"
         )
@@ -125,7 +94,7 @@ async def _make_response_twiml(
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
-        f"{play_fragment}"
+        f"{say_fragment}"
         f'<Record action="{action_url}" '
         f'statusCallback="{status_url}" '
         'maxLength="60" '
@@ -165,7 +134,7 @@ async def incoming_call(request: Request):
     voice_agent.create_session(call_sid, office_id, from_number)
 
     greeting = voice_agent.get_greeting()
-    twiml = await _make_response_twiml(
+    twiml = _make_response_twiml(
         response_text=greeting["response_text"],
         language=greeting["language"],
         next_action="/api/voice/gather",
@@ -230,7 +199,7 @@ async def gather(request: Request):
             "en": "Sorry, I did not hear anything. Please speak again.",
         }
         msg = silence_msgs.get(session.language, silence_msgs["en"])
-        twiml = await _make_response_twiml(
+        twiml = _make_response_twiml(
             response_text=msg,
             language=session.language,
             next_action="/api/voice/gather",
@@ -248,7 +217,7 @@ async def gather(request: Request):
     # ── Build TwiML response ──────────────────────────────────────────────────
     if transfer_requested and settings.VOICE_FORWARD_NUMBER:
         logger.info("Transferring call %s to %s", call_sid, settings.VOICE_FORWARD_NUMBER)
-        twiml = await _make_response_twiml(
+        twiml = _make_response_twiml(
             response_text=response_text,
             language=language,
             next_action="/api/voice/gather",
@@ -258,7 +227,7 @@ async def gather(request: Request):
         asyncio.create_task(_save_grievance(call_sid))
 
     elif convo_complete:
-        twiml = await _make_response_twiml(
+        twiml = _make_response_twiml(
             response_text=response_text,
             language=language,
             next_action="/api/voice/gather",
@@ -267,7 +236,7 @@ async def gather(request: Request):
         asyncio.create_task(_save_grievance(call_sid))
 
     else:
-        twiml = await _make_response_twiml(
+        twiml = _make_response_twiml(
             response_text=response_text,
             language=language,
             next_action="/api/voice/gather",
@@ -296,19 +265,6 @@ async def call_status(request: Request):
             await _save_grievance(call_sid)
 
     return FastAPIResponse(content="", status_code=204)
-
-
-@router.get("/tts/{token}")
-async def serve_tts(token: str):
-    """Serve a pre-generated TTS audio file to Twilio <Play>."""
-    entry = _tts_cache.get(token)
-    if not entry:
-        return FastAPIResponse(content="Not found", status_code=404)
-    audio_bytes, expires_at = entry
-    if time.time() > expires_at:
-        _tts_cache.pop(token, None)
-        return FastAPIResponse(content="Expired", status_code=404)
-    return FastAPIResponse(content=audio_bytes, media_type="audio/mpeg")
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
