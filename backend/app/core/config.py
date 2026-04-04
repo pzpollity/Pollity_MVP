@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     MAILGUN_WEBHOOK_SIGNING_KEY: str = ""   # from Mailgun dashboard → Webhooks → Signing key
     EMAIL_INTAKE_OFFICE_ID: str = ""        # office_id that receives emailed grievances
 
+    # Twilio (inbound phone calls)
+    TWILIO_ACCOUNT_SID: str = ""            # Twilio console → Account Info
+    TWILIO_AUTH_TOKEN: str = ""             # Twilio console → Account Info
+    VOICE_FORWARD_NUMBER: str = ""          # E.164 number to transfer calls to human rep
+    VOICE_OFFICE_ID: str = ""              # office_id that receives phone grievances
+    BASE_URL: str = "https://your-backend.railway.app"  # public base URL of this server (no trailing slash)
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"

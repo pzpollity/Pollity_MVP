@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import grievances, webhook, email_intake
+from app.api import grievances, webhook, email_intake, voice
 from app.core.config import settings
 
 logging.basicConfig(
@@ -14,6 +14,7 @@ logging.basicConfig(
 _logger = logging.getLogger(__name__)
 _logger.info("STARTUP — OPENAI_API_KEY configured: %s", bool(settings.OPENAI_API_KEY))
 _logger.info("STARTUP — RESEND_API_KEY configured: %s", bool(settings.RESEND_API_KEY))
+_logger.info("STARTUP — TWILIO_ACCOUNT_SID configured: %s", bool(settings.TWILIO_ACCOUNT_SID))
 
 app = FastAPI(
     title="Jan-Sunwai API",
@@ -31,6 +32,7 @@ app.add_middleware(
 app.include_router(webhook.router)
 app.include_router(grievances.router)
 app.include_router(email_intake.router)
+app.include_router(voice.router)
 
 
 @app.get("/health")
