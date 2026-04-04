@@ -164,13 +164,13 @@ _ACK_TEMPLATES: dict[str, dict] = {
         "ref_id":     "Reference ID: *{grievance_id}*",
         "category":   "Category: {category}",
         "urgency": {
-            "critical": "⚠️ This has been flagged as CRITICAL and will be escalated immediately.",
-            "high":     "This has been marked HIGH priority.",
-            "medium":   "This has been marked MEDIUM priority.",
-            "low":      "This has been registered for review.",
+            "critical": "⚠️ This has been flagged as CRITICAL. Expected resolution: within 24 hours.",
+            "high":     "This has been marked HIGH priority. Expected resolution: within 3 days.",
+            "medium":   "This has been marked MEDIUM priority. Expected resolution: within 7 days.",
+            "low":      "This has been registered for review. Expected resolution: within 21 days.",
         },
         "footer": (
-            "You will receive a status update once it is reviewed by the office. "
+            "You will receive updates as your case progresses. "
             "Please quote your Reference ID in future communications."
         ),
     },
@@ -179,13 +179,13 @@ _ACK_TEMPLATES: dict[str, dict] = {
         "ref_id":     "संदर्भ ID: *{grievance_id}*",
         "category":   "श्रेणी: {category}",
         "urgency": {
-            "critical": "⚠️ इसे अत्यावश्यक माना गया है और तुरंत कार्रवाई की जाएगी।",
-            "high":     "इसे उच्च प्राथमिकता दी गई है।",
-            "medium":   "इसे मध्यम प्राथमिकता दी गई है।",
-            "low":      "इसे समीक्षा के लिए दर्ज किया गया है।",
+            "critical": "⚠️ इसे अत्यावश्यक माना गया है। अपेक्षित समाधान: 24 घंटे के भीतर।",
+            "high":     "इसे उच्च प्राथमिकता दी गई है। अपेक्षित समाधान: 3 दिनों के भीतर।",
+            "medium":   "इसे मध्यम प्राथमिकता दी गई है। अपेक्षित समाधान: 7 दिनों के भीतर।",
+            "low":      "इसे समीक्षा के लिए दर्ज किया गया है। अपेक्षित समाधान: 21 दिनों के भीतर।",
         },
         "footer": (
-            "समीक्षा के बाद आपको अपडेट मिलेगा। "
+            "आपकी शिकायत की प्रगति पर आपको अपडेट मिलता रहेगा। "
             "भविष्य में संपर्क के लिए अपना संदर्भ ID उल्लेख करें।"
         ),
     },
@@ -194,13 +194,13 @@ _ACK_TEMPLATES: dict[str, dict] = {
         "ref_id":     "संदर्भ ID: *{grievance_id}*",
         "category":   "श्रेणी: {category}",
         "urgency": {
-            "critical": "⚠️ ही तक्रार अत्यंत तातडीची आहे आणि त्वरित कार्यवाही केली जाईल।",
-            "high":     "ही उच्च प्राधान्याची तक्रार आहे।",
-            "medium":   "ही मध्यम प्राधान्याची तक्रार आहे।",
-            "low":      "ही तक्रार आढाव्यासाठी नोंदवली गेली आहे।",
+            "critical": "⚠️ ही तक्रार अत्यंत तातडीची आहे। अपेक्षित निराकरण: 24 तासांत।",
+            "high":     "ही उच्च प्राधान्याची तक्रार आहे। अपेक्षित निराकरण: 3 दिवसांत।",
+            "medium":   "ही मध्यम प्राधान्याची तक्रार आहे। अपेक्षित निराकरण: 7 दिवसांत।",
+            "low":      "ही तक्रार आढाव्यासाठी नोंदवली गेली आहे। अपेक्षित निराकरण: 21 दिवसांत।",
         },
         "footer": (
-            "आढावा घेतल्यानंतर तुम्हाला अपडेट मिळेल। "
+            "तुमच्या तक्रारीच्या प्रगतीबद्दल तुम्हाला अपडेट मिळत राहतील। "
             "पुढील संपर्कासाठी तुमची संदर्भ ID नमूद करा।"
         ),
     },
