@@ -42,8 +42,12 @@ logger = logging.getLogger(__name__)
 
 
 def _say_fragment(text: str, language: str) -> str:
-    """Build a Twilio <Say> fragment with the appropriate language tag."""
-    lang_map = {"hi": "hi-IN", "mr": "mr-IN", "en": "en-IN"}
+    """
+    Build a Twilio <Say> fragment.
+    Marathi uses hi-IN engine: Twilio mr-IN TTS is unreliable; both languages
+    share Devanagari script so Hindi TTS renders Marathi text adequately.
+    """
+    lang_map = {"hi": "hi-IN", "mr": "hi-IN", "en": "en-IN"}
     twilio_lang = lang_map.get(language, "hi-IN")
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return f'<Say language="{twilio_lang}">{safe_text}</Say>'
@@ -82,8 +86,9 @@ def _make_response_twiml(
         )
 
     # Continue conversation — gather next speech input via Twilio STT
+    # Marathi uses hi-IN STT: better Devanagari recognition than mr-IN
     action_url = f"{settings.BASE_URL}{next_action}"
-    lang_map = {"hi": "hi-IN", "mr": "mr-IN", "en": "en-IN"}
+    lang_map = {"hi": "hi-IN", "mr": "hi-IN", "en": "en-IN"}
     gather_lang = lang_map.get(language, "hi-IN")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
