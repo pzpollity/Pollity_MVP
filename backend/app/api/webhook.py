@@ -83,8 +83,8 @@ _VOICE_NOT_SUPPORTED = {
 
 async def _handle_message(msg):
     # ── Status inquiry: "STATUS GR-DMO-..." or bare "GR-DMO-..." ─────────────
-    if msg.text:
-        inquiry, grievance_id = is_status_inquiry(msg.text)
+    if msg.body:
+        inquiry, grievance_id = is_status_inquiry(msg.body)
         if inquiry:
             db = get_db()
             resp = (
