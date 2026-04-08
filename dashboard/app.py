@@ -289,6 +289,17 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
     background: #1565C0; color: white; font-size: 0.65rem; font-weight: 700;
 }
 
+.step-card {
+    background: white;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.1rem;
+}
+.step-card:focus-within {
+    border-color: #1565C0;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.08);
+}
 .ai-banner {
     background: #EFF6FF; border: 1px solid #BFDBFE;
     border-left: 4px solid #3B82F6; border-radius: 10px;
@@ -710,21 +721,18 @@ with tab_log:
         with st.form("walkin_form", border=False):
 
             # Step 1 — Citizen details
+            st.markdown('<div class="step-card">', unsafe_allow_html=True)
             st.markdown("""
             <div class="log-section-label">
               <span class="log-step-badge">1</span> Citizen Details
             </div>""", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            wi_name    = c1.text_input("Full Name", placeholder="Optional — leave blank if unknown",
-                                       label_visibility="collapsed")
-            wi_contact = c2.text_input("Phone Number", placeholder="Phone number  e.g. 9198765 43210",
-                                       label_visibility="collapsed")
-            c1.caption("👤 Full Name (optional)")
-            c2.caption("📞 Phone Number (optional)")
-
-            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
+            wi_name    = c1.text_input("Full Name",     placeholder="Full name  (optional)")
+            wi_contact = c2.text_input("Phone Number",  placeholder="e.g. 919876543210  (optional)")
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # Step 2 — Channel
+            st.markdown('<div class="step-card">', unsafe_allow_html=True)
             st.markdown("""
             <div class="log-section-label">
               <span class="log-step-badge">2</span> How did they come in?
@@ -733,32 +741,33 @@ with tab_log:
                 "Channel",
                 ["walk_in", "phone", "letter"],
                 format_func=lambda x: {
-                    "walk_in": "🚶  Walk-in  —  citizen came in person",
-                    "phone":   "📞  Phone Call  —  complaint via call",
-                    "letter":  "📄  Letter / Document  —  written complaint",
+                    "walk_in": "Walk-in  —  citizen came in person",
+                    "phone":   "Phone Call  —  complaint received via call",
+                    "letter":  "Letter / Document  —  written complaint",
                 }[x],
                 horizontal=False,
                 label_visibility="collapsed",
             )
+            st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
-
-            # Step 3 — Document upload (always visible, clearly labelled)
+            # Step 3 — Document upload
+            st.markdown('<div class="step-card">', unsafe_allow_html=True)
             st.markdown("""
             <div class="log-section-label">
-              <span class="log-step-badge">3</span> Attach Document  <span style="font-weight:400;color:#94A3B8">(optional — required for Letter channel)</span>
+              <span class="log-step-badge">3</span> Attach Document
+              <span style="font-weight:400;color:#94A3B8;text-transform:none;letter-spacing:0">&nbsp;— optional, required for Letter channel</span>
             </div>""", unsafe_allow_html=True)
             wi_image = st.file_uploader(
                 "Upload file",
                 type=["jpg", "jpeg", "png", "gif", "webp", "pdf"],
-                help="Accepted: JPEG, PNG, GIF, WEBP, PDF · Max 5 MB · AI will extract text automatically.",
+                help="Accepted: JPEG, PNG, GIF, WEBP, PDF · Max 5 MB · AI extracts text automatically.",
                 label_visibility="collapsed",
             )
-            st.caption("Accepted formats: JPG · PNG · PDF · GIF · WEBP  ·  Max 5 MB  ·  Drag & drop or browse")
-
-            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
+            st.caption("Accepted: JPG · PNG · PDF · GIF · WEBP  ·  Max 5 MB  ·  Drag & drop or click to browse")
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # Step 4 — Description
+            st.markdown('<div class="step-card">', unsafe_allow_html=True)
             st.markdown("""
             <div class="log-section-label">
               <span class="log-step-badge">4</span> Grievance Description
@@ -769,6 +778,7 @@ with tab_log:
                 placeholder="Describe the issue in detail — what happened, where, how many people affected, any deadlines…",
                 label_visibility="collapsed",
             )
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # AI tip
             st.markdown("""
