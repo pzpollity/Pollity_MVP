@@ -16,8 +16,10 @@ from app.services.grievance_service import process_whatsapp_message
 from app.core.database import get_db
 from app.services.whatsapp import (
     build_ack_message,
+    build_help_reply,
     build_not_found_reply,
     build_status_inquiry_reply,
+    is_help_inquiry,
     is_status_inquiry,
     parse_incoming,
     send_text,
@@ -82,9 +84,16 @@ _VOICE_NOT_SUPPORTED = {
 
 
 async def _handle_message(msg):
-    # ── Status inquiry: "STATUS GR-DMO-..." or bare "GR-DMO-..." ─────────────
     if msg.body:
-        inquiry, grievance_id = is_status_inquiry(msg.body)
+        body = msg.body.strip()
+
+        # ── HELP command ──────────────────────────────────────────────────────
+        if is_help_inquiry(body):
+            await send_text(msg.from_number, build_help_reply("en"))
+            return
+
+        # ── Status inquiry: "STATUS GR-DMO-..." / "GR-DMO-..." / "स्थिति ..." ─
+        inquiry, grievance_id = is_status_inquiry(body)
         if inquiry:
             db = get_db()
             resp = (
@@ -96,13 +105,17 @@ async def _handle_message(msg):
             )
             if resp.data:
                 row = resp.data[0]
-                reply = build_status_inquiry_reply(row, row.get("language_detected", "en"))
+                lang = row.get("language_detected", "en")
+                reply = build_status_inquiry_reply(row, lang)
             else:
-                reply = build_not_found_reply(grievance_id)
+                # Detect language from keyword prefix to reply in right language
+                prefix = body.split()[0].lower() if body.split() else ""
+                lang = "hi" if prefix in {"स्थिति", "sthiti", "स्टेटस"} else "en"
+                reply = build_not_found_reply(grievance_id, lang)
             await send_text(msg.from_number, reply)
             return
 
-    # ── Normal grievance intake ───────────────────────────────────────────────
+    # ── Normal grievance intake ──────────────────────────────────────────────
     grievance = await process_whatsapp_message(msg)
 
     if grievance is None:

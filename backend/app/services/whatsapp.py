@@ -289,7 +289,8 @@ def build_status_update_message(
 
 # ── Status Inquiry ─────────────────────────────────────────────────────────────
 
-_STATUS_INQUIRY_PREFIXES = {"status", "स्थिति", "sthiti"}  # en / hi
+_STATUS_INQUIRY_PREFIXES = {"status", "स्थिति", "sthiti", "स्टेटस"}  # en / hi
+_HELP_PREFIXES = {"help", "मदद", "madad", "?"}  # triggers a help message
 
 _STATUS_INQUIRY_REPLY = {
     "en": (
@@ -298,7 +299,8 @@ _STATUS_INQUIRY_REPLY = {
         "Urgency: {urgency}\n"
         "Status: *{status}*\n"
         "Filed: {filed}\n\n"
-        "{footer}"
+        "{footer}\n\n"
+        "_Jan Sunn · NetaWork.in_"
     ),
     "hi": (
         "📋 *{grievance_id} की स्थिति*\n\n"
@@ -306,24 +308,72 @@ _STATUS_INQUIRY_REPLY = {
         "प्राथमिकता: {urgency}\n"
         "स्थिति: *{status}*\n"
         "दर्ज: {filed}\n\n"
-        "{footer}"
+        "{footer}\n\n"
+        "_जन सुन · NetaWork.in_"
+    ),
+    "mr": (
+        "📋 *{grievance_id} ची स्थिती*\n\n"
+        "श्रेणी: {category}\n"
+        "प्राधान्य: {urgency}\n"
+        "स्थिती: *{status}*\n"
+        "नोंद: {filed}\n\n"
+        "{footer}\n\n"
+        "_जन सुन · NetaWork.in_"
     ),
 }
 
 _STATUS_INQUIRY_FOOTER = {
     "en": {
-        "open":   "Your case is still being processed. We will notify you when there is an update.",
+        "open":   "Your case is being processed. We will notify you when there is an update.",
         "closed": "This grievance has been closed. Thank you for your patience.",
     },
     "hi": {
         "open":   "आपकी शिकायत पर काम जारी है। अपडेट होने पर आपको सूचित किया जाएगा।",
         "closed": "यह शिकायत बंद कर दी गई है। आपके धैर्य के लिए धन्यवाद।",
     },
+    "mr": {
+        "open":   "तुमच्या तक्रारीवर काम सुरू आहे। अपडेट झाल्यावर सूचित केले जाईल।",
+        "closed": "ही तक्रार बंद झाली आहे। तुमच्या संयमाबद्दल धन्यवाद।",
+    },
 }
 
 _NOT_FOUND = {
-    "en": "❌ We couldn't find a grievance with ID *{gid}*. Please check the reference and try again.",
-    "hi": "❌ हमें *{gid}* ID वाली कोई शिकायत नहीं मिली। कृपया संदर्भ जांचें और पुनः प्रयास करें।",
+    "en": (
+        "❌ No grievance found with ID *{gid}*.\n\n"
+        "Please check the reference number and try again, or file a new complaint by sending your issue.\n\n"
+        "_Jan Sunn · NetaWork.in_"
+    ),
+    "hi": (
+        "❌ *{gid}* ID वाली कोई शिकायत नहीं मिली।\n\n"
+        "कृपया संदर्भ संख्या जांचें और पुनः प्रयास करें, या अपनी समस्या भेजकर नई शिकायत दर्ज करें।\n\n"
+        "_जन सुन · NetaWork.in_"
+    ),
+    "mr": (
+        "❌ *{gid}* ID ची तक्रार सापडली नाही।\n\n"
+        "कृपया संदर्भ क्रमांक तपासा आणि पुन्हा प्रयत्न करा।\n\n"
+        "_जन सुन · NetaWork.in_"
+    ),
+}
+
+_HELP_REPLY = {
+    "en": (
+        "🏛️ *Jan Sunn — Grievance Helpline*\n\n"
+        "Here's what you can do:\n\n"
+        "📝 *File a complaint* — simply type or describe your issue\n"
+        "📋 *Check status* — type *STATUS <your reference ID>*\n"
+        "   Example: STATUS GR-DMO-202604-00001\n\n"
+        "You can also send a photo of a letter or document.\n\n"
+        "_Jan Sunn · NetaWork.in_"
+    ),
+    "hi": (
+        "🏛️ *जन सुन — शिकायत हेल्पलाइन*\n\n"
+        "आप यहाँ क्या कर सकते हैं:\n\n"
+        "📝 *शिकायत दर्ज करें* — अपनी समस्या टाइप करें या बताएं\n"
+        "📋 *स्थिति जांचें* — *STATUS <संदर्भ ID>* लिखें\n"
+        "   उदाहरण: STATUS GR-DMO-202604-00001\n\n"
+        "आप पत्र या दस्तावेज़ की फ़ोटो भी भेज सकते हैं।\n\n"
+        "_जन सुन · NetaWork.in_"
+    ),
 }
 
 
@@ -341,14 +391,19 @@ def is_status_inquiry(text: str) -> tuple[bool, str]:
     return False, ""
 
 
+def is_help_inquiry(text: str) -> bool:
+    """Returns True if the message is a help request (HELP, मदद, ?, etc.)."""
+    return text.strip().lower() in _HELP_PREFIXES
+
+
 def build_status_inquiry_reply(row: dict, language: str = "en") -> str:
     """Build a WhatsApp reply for a status inquiry from a grievance DB row."""
     lang = language if language in _STATUS_INQUIRY_REPLY else "en"
     tmpl = _STATUS_INQUIRY_REPLY[lang]
-    footer_map = _STATUS_INQUIRY_FOOTER[lang]
+    footer_map = _STATUS_INQUIRY_FOOTER.get(lang, _STATUS_INQUIRY_FOOTER["en"])
 
-    status_val  = row.get("status", "")
-    filed_at    = row.get("filed_at", "")
+    status_val = row.get("status", "")
+    filed_at   = row.get("filed_at", "")
     try:
         from datetime import datetime, timezone, timedelta
         IST = timezone(timedelta(hours=5, minutes=30))
@@ -373,3 +428,8 @@ def build_status_inquiry_reply(row: dict, language: str = "en") -> str:
 def build_not_found_reply(grievance_id: str, language: str = "en") -> str:
     lang = language if language in _NOT_FOUND else "en"
     return _NOT_FOUND[lang].format(gid=grievance_id)
+
+
+def build_help_reply(language: str = "en") -> str:
+    lang = language if language in _HELP_REPLY else "en"
+    return _HELP_REPLY[lang]
