@@ -309,14 +309,6 @@ CATEGORY_LABELS = {
 CHART_BLUES = ["#0D47A1","#1565C0","#1976D2","#1E88E5","#42A5F5","#90CAF9","#BBDEFB","#E3F2FD"]
 URGENCY_COLOR = {"critical":"#DC2626","high":"#D97706","medium":"#1565C0","low":"#16A34A"}
 
-PLOTLY_LAYOUT = dict(
-    plot_bgcolor="white", paper_bgcolor="white",
-    margin=dict(l=0, r=10, t=4, b=0), height=270,
-    font=dict(family="Inter", size=12, color="#334155"),
-    xaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0", title=""),
-    yaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0", title=""),
-)
-
 
 @st.cache_resource
 def get_supabase():
@@ -581,7 +573,9 @@ with tab_overview:
             line=dict(width=2.5),
         )
         fig4.update_layout(
-            **PLOTLY_LAYOUT,
+            plot_bgcolor="white", paper_bgcolor="white",
+            margin=dict(l=0, r=10, t=4, b=0), height=270,
+            font=dict(family="Inter", size=12, color="#334155"),
             xaxis=dict(title="", color="#94A3B8", gridcolor="#F1F5F9", showgrid=False),
             yaxis=dict(title="", color="#94A3B8", gridcolor="#F1F5F9"),
         )
