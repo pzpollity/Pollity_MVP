@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1565C0"/>
+      <stop offset="100%" style="stop-color:#0D47A1"/>
+    </linearGradient>
+    <!-- Sound wave / ear shape -->
+  </defs>
+
+  <!-- Icon background circle -->
+  <circle cx="40" cy="40" r="36" fill="url(#bg)"/>
+
+  <!-- Ear/listen icon — simplified -->
+  <!-- Outer ear curve -->
+  <path d="M32 20 C20 20 16 30 16 40 C16 50 20 58 28 60 L28 54 C24 52 22 47 22 40 C22 33 25 26 32 26 C39 26 44 33 44 40 C44 47 40 54 34 56 L34 60 L36 60 C44 58 50 50 50 40 C50 30 42 20 32 20 Z" fill="white"/>
+  <!-- Inner ear -->
+  <path d="M32 30 C27 30 28 36 28 40 C28 44 30 48 34 50 L34 44 C32 43 34 38 34 38 C36 37 38 39 38 40 C38 44 35 47 32 48 L32 54 C38 52 44 47 44 40 C44 33 38 30 32 30 Z" fill="white" opacity="0.7"/>
+  <!-- Sound waves -->
+  <path d="M54 28 C60 32 60 48 54 52" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <path d="M59 23 C68 30 68 50 59 57" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Text: Jan Sunn -->
+  <text x="90" y="36" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="700" font-size="26" fill="#1565C0" letter-spacing="-0.5">Jan Sunn</text>
+
+  <!-- Tagline -->
+  <text x="91" y="56" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="400" font-size="12" fill="#546E7A" letter-spacing="2">by NetaWork</text>
+
+  <!-- Thin accent line -->
+  <line x1="91" y1="62" x2="260" y2="62" stroke="#1565C0" stroke-width="1.5" opacity="0.25"/>
+</svg>

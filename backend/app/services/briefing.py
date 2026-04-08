@@ -157,7 +157,7 @@ SAMPLE GRIEVANCE SUMMARIES (for context):
 """
 
     system_prompt = """You are the Digital Chief of Staff for an elected representative in India.
-You receive weekly grievance data from the Jan-Sunwai platform and write a concise, actionable intelligence brief.
+You receive weekly grievance data from the Jan Sunn platform and write a concise, actionable intelligence brief.
 
 Your brief must:
 1. Open with a one-line headline capturing the most important insight
@@ -181,16 +181,16 @@ Do NOT mention AI or that this was generated automatically."""
 
     # ── Format WhatsApp message ───────────────────────────────────────────────
     wa_message = (
-        f"🏛️ *Jan-Sunwai Weekly Brief — {now_ist.strftime('%d %b %Y')}*\n\n"
+        f"🏛️ *Jan Sunn Weekly Brief — {now_ist.strftime('%d %b %Y')}*\n\n"
         f"{narrative}\n\n"
-        f"_Jan-Sunwai · Pollity.in_"
+        f"_Jan Sunn · NetaWork.in_"
     )
 
     # ── Format email HTML ─────────────────────────────────────────────────────
     narrative_html = narrative.replace("\n", "<br>")
     email_html = f"""
 <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #E3F2FD;border-radius:8px;">
-  <p style="margin:0 0 4px;font-size:12px;color:#888;">Jan-Sunwai · Pollity.in</p>
+  <p style="margin:0 0 4px;font-size:12px;color:#888;">Jan Sunn · NetaWork.in</p>
   <h2 style="color:#1565C0;margin:0 0 20px;font-size:20px;">
     🏛️ Weekly Constituency Brief — {now_ist.strftime('%d %b %Y')}
   </h2>
@@ -213,7 +213,7 @@ Do NOT mention AI or that this was generated automatically."""
     </tr>
   </table>
   <div style="font-size:14px;line-height:1.8;color:#222;">{narrative_html}</div>
-  <p style="margin-top:24px;font-size:11px;color:#bbb;">Jan-Sunwai — Pollity.in · Auto-generated weekly briefing</p>
+  <p style="margin-top:24px;font-size:11px;color:#bbb;">Jan Sunn — NetaWork.in · Auto-generated weekly briefing</p>
 </div>
 """
 
@@ -226,5 +226,5 @@ Do NOT mention AI or that this was generated automatically."""
         "narrative":       narrative,
         "whatsapp_message": wa_message,
         "email_html":      email_html,
-        "email_subject":   f"Jan-Sunwai Weekly Brief — {now_ist.strftime('%d %b %Y')} ({this_stats['total']} grievances)",
+        "email_subject":   f"Jan Sunn Weekly Brief — {now_ist.strftime('%d %b %Y')} ({this_stats['total']} grievances)",
     }

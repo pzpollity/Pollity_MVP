@@ -51,7 +51,7 @@ def _build_email_html(
     )
     return f"""
     <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #c0392b;border-radius:8px;">
-      <p style="margin:0 0 16px 0;font-size:13px;color:#555;">Jan-Sunwai · Pollity.in — Urgent Grievance Alert</p>
+      <p style="margin:0 0 16px 0;font-size:13px;color:#555;">Jan Sunn · NetaWork.in — Urgent Grievance Alert</p>
       <h2 style="color:#c0392b;margin:0 0 16px 0;font-size:18px;">Urgent: Grievance {grievance_id} Requires Immediate Attention</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <tr><td style="padding:6px 0;color:#555;width:130px;">Reference ID</td>
@@ -80,7 +80,7 @@ def _build_email_text(
     category_display = category.replace("_", " ").title()
     location_line = f"Location     : {location_text}\n" if location_text else ""
     return (
-        f"Jan-Sunwai Alert — Pollity.in\n\n"
+        f"Jan Sunn Alert — NetaWork.in\n\n"
         f"Urgent: Grievance {grievance_id} requires immediate attention.\n\n"
         f"Reference ID : {grievance_id}\n"
         f"Category     : {category_display}\n"
@@ -109,7 +109,7 @@ async def fire_critical_alerts(
     wa_text    = _build_wa_alert(grievance_id, category, summary, citizen_contact, channel, location_text)
     email_html = _build_email_html(grievance_id, category, summary, citizen_contact, channel, location_text)
     email_text = _build_email_text(grievance_id, category, summary, citizen_contact, channel, location_text)
-    subject = f"[Jan-Sunwai] Urgent grievance filed — {grievance_id}"
+    subject = f"[Jan Sunn] Urgent grievance filed — {grievance_id}"
 
     # ── WhatsApp alert ────────────────────────────────────────────────────────
     if alert_whatsapp:
@@ -128,7 +128,7 @@ async def fire_critical_alerts(
                         RESEND_URL,
                         headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}"},
                         json={
-                            "from": "Jan-Sunwai Alerts <alerts@pollity.in>",
+                            "from": "Jan Sunn Alerts <alerts@netawork.in>",
                             "to": email,
                             "subject": subject,
                             "html": email_html,
@@ -160,7 +160,7 @@ async def fire_cluster_alert(
     to prevent alert fatigue during accidents or disasters.
     """
     category_display = category.replace("_", " ").title()
-    subject = f"[Jan-Sunwai] ⚠️ {count} critical grievances from {location_text}"
+    subject = f"[Jan Sunn] ⚠️ {count} critical grievances from {location_text}"
 
     wa_text = (
         f"🚨 *CLUSTER ALERT — {count} critical reports from {location_text}*\n\n"
@@ -173,7 +173,7 @@ async def fire_cluster_alert(
     email_html = f"""
     <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:24px;
                 border:2px solid #b71c1c;border-radius:8px;background:#fff8f8;">
-      <p style="margin:0 0 8px;font-size:12px;color:#888;">Jan-Sunwai · Pollity.in — Cluster Alert</p>
+      <p style="margin:0 0 8px;font-size:12px;color:#888;">Jan Sunn · NetaWork.in — Cluster Alert</p>
       <h2 style="color:#b71c1c;margin:0 0 16px;font-size:18px;">
         ⚠️ {count} Critical Reports from the Same Location
       </h2>
@@ -193,12 +193,12 @@ async def fire_cluster_alert(
         Multiple citizens are reporting the same emergency from this area.
         Immediate field response is recommended.
       </p>
-      <p style="margin-top:12px;font-size:11px;color:#bbb;">Jan-Sunwai — Pollity.in</p>
+      <p style="margin-top:12px;font-size:11px;color:#bbb;">Jan Sunn — NetaWork.in</p>
     </div>
     """
 
     email_text = (
-        f"Jan-Sunwai — CLUSTER ALERT\n\n"
+        f"Jan Sunn — CLUSTER ALERT\n\n"
         f"{count} critical reports from {location_text} in the last hour.\n\n"
         f"Category    : {category_display}\n"
         f"Reports (1h): {count}\n"
@@ -222,7 +222,7 @@ async def fire_cluster_alert(
                         RESEND_URL,
                         headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}"},
                         json={
-                            "from":    "Jan-Sunwai Alerts <alerts@pollity.in>",
+                            "from":    "Jan Sunn Alerts <alerts@netawork.in>",
                             "to":      email,
                             "subject": subject,
                             "html":    email_html,

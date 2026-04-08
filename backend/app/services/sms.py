@@ -15,20 +15,20 @@ logger = logging.getLogger(__name__)
 
 _STATUS_TEMPLATES: dict[str, dict[str, str]] = {
     "en": {
-        "acknowledged": "Update on {gid}: your case has been acknowledged. Jan-Sunwai - Pollity.in",
-        "assigned":     "Update on {gid}: your case has been assigned for action. Jan-Sunwai - Pollity.in",
-        "in_progress":  "Update on {gid}: your case is being worked on. Jan-Sunwai - Pollity.in",
-        "resolved":     "Your grievance {gid} has been resolved. Thank you. Jan-Sunwai - Pollity.in",
-        "verified":     "Resolution of {gid} has been verified. Case closed. Jan-Sunwai - Pollity.in",
-        "closed":       "Your grievance {gid} is now closed. Thank you. Jan-Sunwai - Pollity.in",
+        "acknowledged": "Update on {gid}: your case has been acknowledged. Jan Sunn - NetaWork.in",
+        "assigned":     "Update on {gid}: your case has been assigned for action. Jan Sunn - NetaWork.in",
+        "in_progress":  "Update on {gid}: your case is being worked on. Jan Sunn - NetaWork.in",
+        "resolved":     "Your grievance {gid} has been resolved. Thank you. Jan Sunn - NetaWork.in",
+        "verified":     "Resolution of {gid} has been verified. Case closed. Jan Sunn - NetaWork.in",
+        "closed":       "Your grievance {gid} is now closed. Thank you. Jan Sunn - NetaWork.in",
     },
     "hi": {
-        "acknowledged": "{gid} अपडेट: आपकी शिकायत स्वीकार कर ली गई है। Jan-Sunwai - Pollity.in",
-        "assigned":     "{gid} अपडेट: शिकायत कार्रवाई के लिए सौंप दी गई है। Jan-Sunwai - Pollity.in",
-        "in_progress":  "{gid} अपडेट: आपकी शिकायत पर काम चल रहा है। Jan-Sunwai - Pollity.in",
-        "resolved":     "आपकी शिकायत {gid} का समाधान हो गया है। Jan-Sunwai - Pollity.in",
-        "verified":     "शिकायत {gid} सत्यापित हो गई है। Jan-Sunwai - Pollity.in",
-        "closed":       "शिकायत {gid} बंद कर दी गई है। धन्यवाद। Jan-Sunwai - Pollity.in",
+        "acknowledged": "{gid} अपडेट: आपकी शिकायत स्वीकार कर ली गई है। Jan Sunn - NetaWork.in",
+        "assigned":     "{gid} अपडेट: शिकायत कार्रवाई के लिए सौंप दी गई है। Jan Sunn - NetaWork.in",
+        "in_progress":  "{gid} अपडेट: आपकी शिकायत पर काम चल रहा है। Jan Sunn - NetaWork.in",
+        "resolved":     "आपकी शिकायत {gid} का समाधान हो गया है। Jan Sunn - NetaWork.in",
+        "verified":     "शिकायत {gid} सत्यापित हो गई है। Jan Sunn - NetaWork.in",
+        "closed":       "शिकायत {gid} बंद कर दी गई है। धन्यवाद। Jan Sunn - NetaWork.in",
     },
 }
 
