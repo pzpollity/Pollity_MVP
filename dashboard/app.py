@@ -492,14 +492,16 @@ with tab_overview:
             text="Count",
         )
         fig.update_layout(
-            **PLOTLY_LAYOUT,
+            plot_bgcolor="white", paper_bgcolor="white",
+            margin=dict(l=0, r=10, t=4, b=0), height=270,
+            font=dict(family="Inter", size=12, color="#334155"),
             coloraxis_showscale=False,
+            xaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0", title=""),
             yaxis=dict(categoryorder="total ascending", title="", color="#334155", gridcolor="#F1F5F9"),
         )
         fig.update_traces(
             textposition="outside", marker_line_width=0,
             textfont=dict(size=11, color="#334155"),
-            marker_cornerradius=4,
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -545,13 +547,16 @@ with tab_overview:
             text="Count",
         )
         fig3.update_layout(
-            **PLOTLY_LAYOUT,
+            plot_bgcolor="white", paper_bgcolor="white",
+            margin=dict(l=0, r=10, t=4, b=0), height=270,
+            font=dict(family="Inter", size=12, color="#334155"),
+            xaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0", title=""),
+            yaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0", title=""),
             showlegend=False,
         )
         fig3.update_traces(
             textposition="outside", marker_line_width=0,
             textfont=dict(size=12, color="#334155"),
-            marker_cornerradius=6,
         )
         st.plotly_chart(fig3, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
