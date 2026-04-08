@@ -50,7 +50,7 @@ def _say_fragment(text: str, language: str) -> str:
     if language == "en":
         voice, twilio_lang = "Polly.Raveena", "en-IN"
     else:
-        voice, twilio_lang = "Polly.Kajal", "hi-IN"
+        voice, twilio_lang = "Polly.Aditi", "hi-IN"
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return f'<Say voice="{voice}" language="{twilio_lang}">{safe_text}</Say>'
 
@@ -125,7 +125,7 @@ async def incoming_call(request: Request):
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            '<Say voice="Polly.Kajal" language="hi-IN">Seva uplabdha nahi. Baad mein call karein.</Say>'
+            '<Say voice="Polly.Aditi" language="hi-IN">Seva uplabdha nahi. Baad mein call karein.</Say>'
             "<Hangup/>"
             "</Response>"
         )
@@ -138,7 +138,7 @@ async def incoming_call(request: Request):
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
         f'<Gather input="dtmf" numDigits="1" timeout="8" action="{action_url}">'
-        '<Say voice="Polly.Kajal" language="hi-IN">'
+        '<Say voice="Polly.Aditi" language="hi-IN">'
         "नमस्कार! जन सुन हेल्पलाइन में आपका स्वागत है। "
         "हिंदी के लिए 1 दबाएं। "
         "For English press 2."
