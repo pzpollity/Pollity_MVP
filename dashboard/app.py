@@ -267,17 +267,33 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 .badge-low      { background:#DCFCE7; color:#15803D; }
 
 /* ── LOG FORM (Tab 3) ────────────────────────────────────────────────────── */
-.log-card {
-    background: white; border-radius: 16px;
-    padding: 2rem 2.4rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
-    max-width: 700px; margin: 0 auto;
+.log-hero {
+    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 60%, #1E88E5 100%);
+    border-radius: 16px; padding: 1.5rem 2rem; color: white;
+    margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 1.2rem;
+    box-shadow: 0 4px 20px rgba(21,101,192,0.28);
 }
-.log-header { font-size: 1.2rem; font-weight: 800; color: #0F172A; margin-bottom: 4px; }
-.log-sub    { font-size: 0.82rem; color: #64748B; margin-bottom: 1.6rem; }
-.log-tip {
-    background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px;
-    padding: 0.7rem 1rem; font-size: 0.8rem; color: #1E40AF; margin-top: 1rem;
+.log-hero-icon  { font-size: 2.2rem; line-height: 1; }
+.log-hero-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; margin: 0; }
+.log-hero-sub   { font-size: 0.8rem; opacity: 0.7; margin: 3px 0 0; }
+
+.log-section-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #64748B; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+}
+.log-step-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #1565C0; color: white; font-size: 0.65rem; font-weight: 700;
+}
+
+.ai-banner {
+    background: #EFF6FF; border: 1px solid #BFDBFE;
+    border-left: 4px solid #3B82F6; border-radius: 10px;
+    padding: 0.85rem 1rem; font-size: 0.82rem; color: #1E40AF;
+    margin-top: 1.4rem; line-height: 1.5;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -675,50 +691,108 @@ with tab_grievances:
 # TAB 3 — LOG GRIEVANCE
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab_log:
-    st.markdown('<div class="log-card">', unsafe_allow_html=True)
-    st.markdown('<div class="log-header">Log a New Grievance</div>', unsafe_allow_html=True)
-    st.markdown('<div class="log-sub">Register grievances received in person, by phone, or by physical letter.</div>',
-                unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Spacer to centre the form card — use columns
-    _, form_col, _ = st.columns([1, 3, 1])
+    # ── Hero banner ───────────────────────────────────────────────────────────
+    st.markdown("""
+    <div class="log-hero">
+      <div class="log-hero-icon">📋</div>
+      <div>
+        <div class="log-hero-title">Log a New Grievance</div>
+        <div class="log-hero-sub">Register citizens' complaints received in person, by phone, or by physical letter · AI classifies automatically</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Centred form ──────────────────────────────────────────────────────────
+    _, form_col, _ = st.columns([1, 4, 1])
     with form_col:
+
         with st.form("walkin_form", border=False):
+
+            # Step 1 — Citizen details
+            st.markdown("""
+            <div class="log-section-label">
+              <span class="log-step-badge">1</span> Citizen Details
+            </div>""", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            wi_name    = c1.text_input("Citizen Name", placeholder="Optional")
-            wi_contact = c2.text_input("Phone Number", placeholder="e.g. 919876543210")
+            wi_name    = c1.text_input("Full Name", placeholder="Optional — leave blank if unknown",
+                                       label_visibility="collapsed")
+            wi_contact = c2.text_input("Phone Number", placeholder="Phone number  e.g. 9198765 43210",
+                                       label_visibility="collapsed")
+            c1.caption("👤 Full Name (optional)")
+            c2.caption("📞 Phone Number (optional)")
 
-            wi_channel = st.selectbox(
+            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
+
+            # Step 2 — Channel
+            st.markdown("""
+            <div class="log-section-label">
+              <span class="log-step-badge">2</span> How did they come in?
+            </div>""", unsafe_allow_html=True)
+            wi_channel = st.radio(
                 "Channel",
-                ["walk_in","phone","letter"],
-                format_func=lambda x: {"walk_in":"🚶 Walk-in","phone":"📞 Phone","letter":"📄 Letter"}[x],
+                ["walk_in", "phone", "letter"],
+                format_func=lambda x: {
+                    "walk_in": "🚶  Walk-in  —  citizen came in person",
+                    "phone":   "📞  Phone Call  —  complaint via call",
+                    "letter":  "📄  Letter / Document  —  written complaint",
+                }[x],
+                horizontal=False,
+                label_visibility="collapsed",
             )
 
+            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
+
+            # Step 3 — Document upload (always visible, clearly labelled)
+            st.markdown("""
+            <div class="log-section-label">
+              <span class="log-step-badge">3</span> Attach Document  <span style="font-weight:400;color:#94A3B8">(optional — required for Letter channel)</span>
+            </div>""", unsafe_allow_html=True)
             wi_image = st.file_uploader(
-                "Upload Letter Image  (JPEG / PNG ≤ 5 MB)",
-                type=["jpg","jpeg","png","gif","webp"],
-                help="OCR extracts the text automatically from a scanned letter.",
+                "Upload file",
+                type=["jpg", "jpeg", "png", "gif", "webp", "pdf"],
+                help="Accepted: JPEG, PNG, GIF, WEBP, PDF · Max 5 MB · AI will extract text automatically.",
+                label_visibility="collapsed",
             )
+            st.caption("Accepted formats: JPG · PNG · PDF · GIF · WEBP  ·  Max 5 MB  ·  Drag & drop or browse")
 
+            st.markdown("<div style='margin-top:1.2rem'></div>", unsafe_allow_html=True)
+
+            # Step 4 — Description
+            st.markdown("""
+            <div class="log-section-label">
+              <span class="log-step-badge">4</span> Grievance Description
+            </div>""", unsafe_allow_html=True)
             wi_text = st.text_area(
-                "Grievance Description",
-                height=120,
-                placeholder="Describe the grievance in detail — issue, location, people affected…",
+                "Description",
+                height=130,
+                placeholder="Describe the issue in detail — what happened, where, how many people affected, any deadlines…",
+                label_visibility="collapsed",
             )
 
-            st.markdown('<div class="log-tip">💡 For letter channel, upload the image and leave the description blank — AI will extract the text automatically.</div>',
-                        unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
+            # AI tip
+            st.markdown("""
+            <div class="ai-banner">
+              🤖&nbsp; <span><b>AI-powered:</b> Jan Sunn will automatically classify the category, urgency level,
+              and generate a summary. For Letter channel, upload the document and leave the description
+              blank — text is extracted via OCR.</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-            wi_submit = st.form_submit_button("📥  Register Grievance", use_container_width=True, type="primary")
+            st.markdown("<div style='margin-top:1.4rem'></div>", unsafe_allow_html=True)
+            wi_submit = st.form_submit_button(
+                "📥   Register Grievance",
+                use_container_width=True,
+                type="primary",
+            )
 
+        # ── Submit handler ────────────────────────────────────────────────────
         if wi_submit:
             use_ocr = wi_channel == "letter" and wi_image is not None
             if not use_ocr and not wi_text.strip():
-                st.error("Please enter a description or upload a letter image.")
+                st.error("Please enter a description OR upload a letter / document for OCR extraction.")
             else:
-                with st.spinner("Processing grievance…"):
+                with st.spinner("Processing grievance — AI is classifying…"):
                     try:
                         if use_ocr:
                             resp = httpx.post(
@@ -745,9 +819,9 @@ with tab_log:
                             )
                         if resp.status_code == 200:
                             data = resp.json()
-                            st.success(f"✅ Registered successfully — **{data['grievance_id']}**")
+                            st.success(f"✅ Grievance registered — **{data['grievance_id']}**")
                             if use_ocr and data.get("ocr_text"):
-                                with st.expander("Extracted OCR text"):
+                                with st.expander("View extracted OCR text"):
                                     st.text(data["ocr_text"])
                             st.cache_data.clear()
                             st.rerun()
