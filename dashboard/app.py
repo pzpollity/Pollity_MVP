@@ -35,25 +35,6 @@ if time.time() - st.session_state["last_refresh"] >= 60:
     st.rerun()
 
 # ── Inline SVG assets ─────────────────────────────────────────────────────────
-# Header icon — ear + soundwaves on blue circle
-HEADER_ICON = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="46" height="46">
-  <circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.18)"/>
-  <path d="M26 15C17 15 13 23 13 32C13 41 17 48 23 50L23 44C20 42 18 38 18 32C18 26 21 20 26 20C31 20 36 26 36 32C36 38 32 44 26 46L26 52C35 50 41 42 41 32C41 22 35 15 26 15Z" fill="white"/>
-  <circle cx="26" cy="32" r="3.2" fill="white" opacity="0.75"/>
-  <path d="M45 22C51 27 51 37 45 42" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-  <path d="M50 16C60 24 60 40 50 48" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
-</svg>"""
-
-# Sidebar logo — compact version on dark bg
-SIDEBAR_LOGO = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 52" width="180" height="44">
-  <circle cx="26" cy="26" r="23" fill="#1565C0"/>
-  <path d="M21 13C15 13 11 19 11 26C11 33 14 39 19 41L19 36C17 34 15 31 15 26C15 21 17 17 21 17C25 17 29 21 29 26C29 31 26 35 22 37L22 42C29 40 34 34 34 26C34 18 29 13 21 13Z" fill="white"/>
-  <circle cx="21" cy="26" r="2.8" fill="white" opacity="0.75"/>
-  <path d="M38 18C43 22 43 30 38 34" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-  <path d="M43 13C51 19 51 33 43 39" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.5"/>
-  <text x="56" y="31" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="800" font-size="19" fill="white" letter-spacing="-0.3">Jan Sunn</text>
-  <text x="57" y="44" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="500" font-size="8.5" fill="rgba(255,255,255,0.45)" letter-spacing="2">NETAWORK.IN</text>
-</svg>"""
 
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -97,7 +78,7 @@ footer    { visibility: hidden; }
     background: rgba(255,255,255,0.04);
     pointer-events: none;
 }
-.js-header-left  { display: flex; align-items: center; gap: 16px; z-index: 1; }
+.js-header-left  { display: flex; align-items: center; gap: 0; z-index: 1; }
 .js-header-right { display: flex; align-items: center; gap: 10px; z-index: 1; }
 .js-header-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; line-height: 1.1; }
 .js-header-sub   { font-size: 0.78rem; opacity: 0.68; margin: 4px 0 0; font-weight: 400; letter-spacing: 0.2px; }
@@ -389,7 +370,6 @@ now_str = datetime.now(tz=IST).strftime("%d %b %Y · %I:%M %p IST")
 st.markdown(f"""
 <div class="js-header">
   <div class="js-header-left">
-    {HEADER_ICON}
     <div>
       <div class="js-header-title">Jan Sunn</div>
       <div class="js-header-sub">Constituency Grievance Dashboard &nbsp;·&nbsp; NetaWork.in</div>
@@ -414,8 +394,13 @@ if df.empty:
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    # Logo
-    st.markdown(f'<div class="sb-logo-strip">{SIDEBAR_LOGO}</div>', unsafe_allow_html=True)
+    # Sidebar title
+    st.markdown("""
+    <div class="sb-logo-strip">
+      <div style="font-size:1.1rem;font-weight:800;color:#F1F5F9;letter-spacing:-0.3px;">Jan Sunn</div>
+      <div style="font-size:0.7rem;color:#475569;letter-spacing:1.5px;margin-top:2px;">NETAWORK.IN</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Filters
     st.markdown('<div class="sb-section-label">Filters</div>', unsafe_allow_html=True)
