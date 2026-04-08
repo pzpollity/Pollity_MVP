@@ -193,7 +193,6 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 .kpi-green::before  { background: linear-gradient(90deg,#16A34A,#4ADE80); }
 .kpi-purple::before { background: linear-gradient(90deg,#7C3AED,#C084FC); }
 
-.kpi-icon  { font-size: 1.4rem; margin-bottom: 8px; line-height: 1; }
 .kpi-label { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: #94A3B8; margin-bottom: 2px; }
 .kpi-value { font-size: 2.4rem; font-weight: 800; line-height: 1.05; color: #0F172A; }
 .kpi-blue  .kpi-value  { color: #1565C0; }
@@ -433,9 +432,9 @@ if sel_category != "All": filtered = filtered[filtered["category"] == sel_catego
 
 # ── TABS ──────────────────────────────────────────────────────────────────────
 tab_overview, tab_grievances, tab_log = st.tabs([
-    "📊  Overview",
-    "📋  Grievances",
-    "➕  Log Grievance",
+    "Overview",
+    "Grievances",
+    "Log Grievance",
 ])
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -448,31 +447,26 @@ with tab_overview:
     st.markdown(f"""
     <div class="kpi-grid">
       <div class="kpi-card kpi-blue">
-        <div class="kpi-icon">📥</div>
         <div class="kpi-label">Total Grievances</div>
         <div class="kpi-value">{len(df)}</div>
         <div class="kpi-sub">all time</div>
       </div>
       <div class="kpi-card kpi-amber">
-        <div class="kpi-icon">🕐</div>
         <div class="kpi-label">Open</div>
         <div class="kpi-value">{len(open_df)}</div>
         <div class="kpi-sub">pending resolution</div>
       </div>
       <div class="kpi-card kpi-red{critical_pulse}">
-        <div class="kpi-icon">🚨</div>
         <div class="kpi-label">Critical</div>
         <div class="kpi-value">{critical_count}</div>
         <div class="kpi-sub">{high_count} high priority</div>
       </div>
       <div class="kpi-card kpi-green">
-        <div class="kpi-icon">✅</div>
         <div class="kpi-label">Resolved Today</div>
         <div class="kpi-value">{resolved_today}</div>
         <div class="kpi-sub">verified + closed</div>
       </div>
       <div class="kpi-card kpi-purple">
-        <div class="kpi-icon">⏱️</div>
         <div class="kpi-label">SLA Breached</div>
         <div class="kpi-value">{sla_breached}</div>
         <div class="kpi-sub">{sla_at_risk} at risk</div>
