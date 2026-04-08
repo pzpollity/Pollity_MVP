@@ -1,7 +1,7 @@
 """
 Voice Intake API — Twilio Webhook Handlers
 -------------------------------------------
-Handles inbound phone calls via Twilio for the Jan-Sunwai grievance line.
+Handles inbound phone calls via Twilio for the Jan Sunn grievance line.
 
 Endpoints:
   POST /api/voice/incoming   — Twilio calls this when a new call arrives
@@ -42,10 +42,10 @@ logger = logging.getLogger(__name__)
 
 
 def _say_fragment(text: str, language: str) -> str:
-    """Build a Twilio <Say> fragment with the appropriate language tag."""
+    """Build a Twilio <Say> fragment with male voice and appropriate language."""
     twilio_lang = "en-IN" if language == "en" else "hi-IN"
     safe_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    return f'<Say language="{twilio_lang}">{safe_text}</Say>'
+    return f'<Say voice="man" language="{twilio_lang}">{safe_text}</Say>'
 
 
 def _make_response_twiml(
@@ -118,7 +118,7 @@ async def incoming_call(request: Request):
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            '<Say language="hi-IN">Seva uplabdha nahi. Baad mein call karein.</Say>'
+            '<Say voice="man" language="hi-IN">Seva uplabdha nahi. Baad mein call karein.</Say>'
             "<Hangup/>"
             "</Response>"
         )
@@ -131,8 +131,8 @@ async def incoming_call(request: Request):
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
         f'<Gather input="dtmf" numDigits="1" timeout="8" action="{action_url}">'
-        '<Say language="hi-IN">'
-        "नमस्कार! जन-सुनवाई हेल्पलाइन में आपका स्वागत है। "
+        '<Say voice="man" language="hi-IN">'
+        "नमस्कार! जन सुन हेल्पलाइन में आपका स्वागत है। "
         "हिंदी के लिए 1 दबाएं। "
         "For English press 2."
         "</Say>"
@@ -203,7 +203,7 @@ async def gather(request: Request):
     # If nothing was said (silence / timeout), prompt again
     if not user_text:
         silence_msgs = {
-            "hi": "Maafi karein, mujhe kuch sunai nahi diya. Kripya dobara bolein.",
+            "hi": "Maafi karta hoon, mujhe kuch sunai nahi diya. Kripya dobara bolein.",
             "mr": "Maafi kara, mala aikale nahi. Krupaya punha sanga.",
             "en": "Sorry, I did not hear anything. Please speak again.",
         }
@@ -279,8 +279,8 @@ async def call_status(request: Request):
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 _SMS_ACK = {
-    "hi": "आपकी शिकायत दर्ज हो गई है। संदर्भ संख्या: {gid}। Jan-Sunwai - Pollity.in",
-    "en": "Your grievance has been registered. Reference: {gid}. Jan-Sunwai - Pollity.in",
+    "hi": "आपकी शिकायत दर्ज हो गई है। संदर्भ संख्या: {gid}। Jan Sunn - NetaWork.in",
+    "en": "Your grievance has been registered. Reference: {gid}. Jan Sunn - NetaWork.in",
 }
 
 
