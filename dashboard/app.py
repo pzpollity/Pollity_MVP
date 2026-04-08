@@ -260,25 +260,16 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 
 .log-section-label {
     font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: #64748B; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px;
+    letter-spacing: 0.8px; color: #64748B;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 2px solid #E2E8F0;
+    padding-bottom: 8px; margin-bottom: 12px; margin-top: 1.6rem;
 }
 .log-step-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: #1565C0; color: white; font-size: 0.65rem; font-weight: 700;
-}
-
-.step-card {
-    background: white;
-    border: 1.5px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 1.1rem;
-}
-.step-card:focus-within {
-    border-color: #1565C0;
-    box-shadow: 0 0 0 3px rgba(21,101,192,0.08);
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1565C0; color: white; font-size: 0.68rem; font-weight: 700;
+    flex-shrink: 0;
 }
 .ai-banner {
     background: #EFF6FF; border: 1px solid #BFDBFE;
@@ -700,20 +691,15 @@ with tab_log:
         with st.form("walkin_form", border=False):
 
             # Step 1 — Citizen details
-            st.markdown('<div class="step-card">', unsafe_allow_html=True)
-            st.markdown("""
-            <div class="log-section-label">
+            st.markdown("""<div class="log-section-label">
               <span class="log-step-badge">1</span> Citizen Details
             </div>""", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            wi_name    = c1.text_input("Full Name",     placeholder="Full name  (optional)")
-            wi_contact = c2.text_input("Phone Number",  placeholder="e.g. 919876543210  (optional)")
-            st.markdown('</div>', unsafe_allow_html=True)
+            wi_name    = c1.text_input("Full Name",    placeholder="Full name  (optional)")
+            wi_contact = c2.text_input("Phone Number", placeholder="e.g. 919876543210  (optional)")
 
             # Step 2 — Channel
-            st.markdown('<div class="step-card">', unsafe_allow_html=True)
-            st.markdown("""
-            <div class="log-section-label">
+            st.markdown("""<div class="log-section-label">
               <span class="log-step-badge">2</span> How did they come in?
             </div>""", unsafe_allow_html=True)
             wi_channel = st.radio(
@@ -727,12 +713,9 @@ with tab_log:
                 horizontal=False,
                 label_visibility="collapsed",
             )
-            st.markdown('</div>', unsafe_allow_html=True)
 
             # Step 3 — Document upload
-            st.markdown('<div class="step-card">', unsafe_allow_html=True)
-            st.markdown("""
-            <div class="log-section-label">
+            st.markdown("""<div class="log-section-label">
               <span class="log-step-badge">3</span> Attach Document
               <span style="font-weight:400;color:#94A3B8;text-transform:none;letter-spacing:0">&nbsp;— optional, required for Letter channel</span>
             </div>""", unsafe_allow_html=True)
@@ -743,12 +726,9 @@ with tab_log:
                 label_visibility="collapsed",
             )
             st.caption("Accepted: JPG · PNG · PDF · GIF · WEBP  ·  Max 5 MB  ·  Drag & drop or click to browse")
-            st.markdown('</div>', unsafe_allow_html=True)
 
             # Step 4 — Description
-            st.markdown('<div class="step-card">', unsafe_allow_html=True)
-            st.markdown("""
-            <div class="log-section-label">
+            st.markdown("""<div class="log-section-label">
               <span class="log-step-badge">4</span> Grievance Description
             </div>""", unsafe_allow_html=True)
             wi_text = st.text_area(
@@ -757,7 +737,6 @@ with tab_log:
                 placeholder="Describe the issue in detail — what happened, where, how many people affected, any deadlines…",
                 label_visibility="collapsed",
             )
-            st.markdown('</div>', unsafe_allow_html=True)
 
             # AI tip
             st.markdown("""
