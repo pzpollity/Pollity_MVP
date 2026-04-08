@@ -16,6 +16,9 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from anthropic import AsyncAnthropic
+
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.grievance import (
     Grievance,
@@ -32,6 +35,51 @@ from app.services.transcription import transcribe_audio
 from app.services.whatsapp import download_media
 
 logger = logging.getLogger(__name__)
+
+_anthropic_client: AsyncAnthropic | None = None
+
+
+def _get_anthropic_client() -> AsyncAnthropic:
+    global _anthropic_client
+    if _anthropic_client is None:
+        _anthropic_client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+    return _anthropic_client
+
+
+_RELEVANCE_SYSTEM = (
+    "You are a filter for a citizen grievance helpline in India. "
+    "Respond with ONLY 'yes' or 'no' — nothing else.\n"
+    "'yes' = the message is a genuine civic complaint, grievance, or request for help "
+    "about government services, infrastructure, welfare, public utilities, healthcare, schools, roads, water, electricity, sanitation, permits, pensions, etc.\n"
+    "'no' = the message is a test, greeting, random text, joke, spam, or clearly unrelated to civic issues."
+)
+
+
+async def is_grievance_message(raw_text: str) -> bool:
+    """
+    Lightweight relevance gate: returns True if the text is a genuine citizen grievance.
+    Fails open (returns True) if ANTHROPIC_API_KEY is missing or Claude errors out,
+    so real grievances are never silently dropped.
+    """
+    if not settings.ANTHROPIC_API_KEY:
+        return True
+
+    try:
+        client = _get_anthropic_client()
+        resp = await client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=5,
+            system=_RELEVANCE_SYSTEM,
+            messages=[{"role": "user", "content": raw_text[:500]}],
+        )
+        answer = resp.content[0].text.strip().lower()
+        result = answer.startswith("y")
+        logger.info("Relevance gate: %r → %s", raw_text[:60], "ACCEPT" if result else "REJECT")
+        return result
+    except Exception:
+        logger.exception("Relevance gate Claude call failed — defaulting to accept")
+        return True
+
 
 # Cluster detection: window and minimum count
 _CLUSTER_WINDOW_MINUTES = 60

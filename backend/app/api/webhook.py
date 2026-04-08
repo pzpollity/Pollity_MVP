@@ -12,7 +12,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request, Response
 
 from app.core.config import settings
-from app.services.grievance_service import process_whatsapp_message
+from app.services.grievance_service import is_grievance_message, process_whatsapp_message
 from app.core.database import get_db
 from app.services.whatsapp import (
     build_ack_message,
@@ -76,6 +76,21 @@ async def receive_message(request: Request, background_tasks: BackgroundTasks):
     return {"status": "ok"}
 
 
+_NOT_GRIEVANCE_REPLY = {
+    "en": (
+        "Thank you for reaching out to Jan Sunn. "
+        "To register a complaint, please describe your civic issue — for example: "
+        "'There is no water supply in Ward 7 for 3 days' or 'Streetlights are broken on MG Road'.\n\n"
+        "Type HELP for more options."
+    ),
+    "hi": (
+        "जन सुन में आपका स्वागत है। "
+        "शिकायत दर्ज करने के लिए कृपया अपनी समस्या स्पष्ट रूप से बताएं — जैसे: "
+        "'वार्ड 7 में 3 दिन से पानी नहीं आ रहा' या 'एमजी रोड पर स्ट्रीटलाइट बंद है'।\n\n"
+        "अधिक जानकारी के लिए HELP टाइप करें।"
+    ),
+}
+
 _VOICE_NOT_SUPPORTED = {
     "en": "We received your voice message but voice processing is not yet enabled. Please send your grievance as a text message or photograph of a letter.",
     "hi": "हमें आपका वॉइस संदेश मिला, लेकिन अभी वॉइस प्रोसेसिंग उपलब्ध नहीं है। कृपया अपनी शिकायत टेक्स्ट संदेश या पत्र की फ़ोटो के रूप में भेजें।",
@@ -113,6 +128,16 @@ async def _handle_message(msg):
                 lang = "hi" if prefix in {"स्थिति", "sthiti", "स्टेटस"} else "en"
                 reply = build_not_found_reply(grievance_id, lang)
             await send_text(msg.from_number, reply)
+            return
+
+    # ── Relevance gate (text-only messages) ─────────────────────────────────
+    # Skip gate for media (image/audio/location) — those are inherently civic
+    if msg.body and not msg.media_id:
+        body_text = msg.body.strip()
+        if not await is_grievance_message(body_text):
+            # Guess language from script: Devanagari → Hindi reply
+            lang = "hi" if any("\u0900" <= ch <= "\u097F" for ch in body_text) else "en"
+            await send_text(msg.from_number, _NOT_GRIEVANCE_REPLY[lang])
             return
 
     # ── Normal grievance intake ──────────────────────────────────────────────
