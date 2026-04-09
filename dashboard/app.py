@@ -397,6 +397,8 @@ with st.sidebar:
     sel_status   = st.selectbox("Status",   ["All"] + STATUS_ORDER, label_visibility="collapsed")
     sel_urgency  = st.selectbox("Urgency",  ["All","critical","high","medium","low"], label_visibility="collapsed")
     sel_category = st.selectbox("Category", ["All"] + sorted(df["category"].unique().tolist()), label_visibility="collapsed")
+    _assignees   = sorted([a for a in df["assigned_to"].dropna().unique().tolist() if a])
+    sel_assignee = st.selectbox("Assigned To", ["All"] + _assignees, label_visibility="collapsed")
 
     st.divider()
     if st.button("↺  Refresh Data", use_container_width=True):
@@ -420,6 +422,7 @@ filtered = df.copy()
 if sel_status   != "All": filtered = filtered[filtered["status"]   == sel_status]
 if sel_urgency  != "All": filtered = filtered[filtered["urgency"]  == sel_urgency]
 if sel_category != "All": filtered = filtered[filtered["category"] == sel_category]
+if sel_assignee != "All": filtered = filtered[filtered["assigned_to"] == sel_assignee]
 
 # ── TABS ──────────────────────────────────────────────────────────────────────
 tab_overview, tab_grievances, tab_log = st.tabs([
@@ -587,21 +590,44 @@ with tab_grievances:
 
     # ── Table ─────────────────────────────────────────────────────────────────
     st.markdown('<div class="sec-title">📋 Grievance Log</div>', unsafe_allow_html=True)
-    st.caption(f"Showing **{len(filtered)}** of **{len(df)}** total  ·  filters applied in sidebar")
 
-    _SLA_LABEL = {
-        "on_time":  "✅ On Time",
-        "at_risk":  "⚠️ At Risk",
-        "breached": "🔴 Breached",
-        "closed":   "—",
-    }
+    def _sla_countdown(row) -> str:
+        if row["sla_status"] == "closed":
+            return "—"
+        hours_left = row["sla_hours"] - row["hours_open"]
+        if hours_left >= 0:
+            h = int(hours_left)
+            return f"✅ {h}h left" if row["sla_status"] == "on_time" else f"⚠️ {h}h left"
+        else:
+            h = int(abs(hours_left))
+            return f"🔴 {h}h overdue"
 
     display_cols = [
         "grievance_id","filed_at","urgency","category_label",
         "status","sla_status","summary","citizen_contact","assigned_to",
     ]
     table_df = filtered[display_cols].copy()
-    table_df["sla_status"] = table_df["sla_status"].map(_SLA_LABEL)
+    table_df["sla_countdown"] = filtered.apply(_sla_countdown, axis=1)
+
+    tbl_col, csv_col = st.columns([5, 1])
+    tbl_col.caption(f"Showing **{len(filtered)}** of **{len(df)}** total  ·  filters applied in sidebar")
+    csv_bytes = (
+        filtered[display_cols]
+        .rename(columns={
+            "grievance_id": "Ref ID", "filed_at": "Filed", "urgency": "Urgency",
+            "category_label": "Category", "status": "Status", "sla_status": "SLA",
+            "summary": "Summary", "citizen_contact": "Contact", "assigned_to": "Assigned To",
+        })
+        .to_csv(index=False)
+        .encode("utf-8")
+    )
+    csv_col.download_button(
+        "⬇ Export CSV",
+        data=csv_bytes,
+        file_name=f"grievances_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
 
     st.dataframe(
         table_df.rename(columns={
@@ -610,11 +636,11 @@ with tab_grievances:
             "urgency":        "Urgency",
             "category_label": "Category",
             "status":         "Status",
-            "sla_status":     "SLA",
+            "sla_countdown":  "SLA",
             "summary":        "Summary",
             "citizen_contact":"Contact",
             "assigned_to":    "Assigned To",
-        }),
+        }).drop(columns=["sla_status"]),
         use_container_width=True,
         height=400,
         hide_index=True,
@@ -624,7 +650,7 @@ with tab_grievances:
             "Urgency":    st.column_config.TextColumn("Urgency",   width="small"),
             "Category":   st.column_config.TextColumn("Category",  width="medium"),
             "Status":     st.column_config.TextColumn("Status",    width="medium"),
-            "SLA":        st.column_config.TextColumn("SLA",       width="small"),
+            "SLA":        st.column_config.TextColumn("SLA",       width="medium"),
             "Summary":    st.column_config.TextColumn("Summary",   width="large"),
             "Contact":    st.column_config.TextColumn("Contact",   width="medium"),
             "Assigned To":st.column_config.TextColumn("Assigned To", width="medium"),
