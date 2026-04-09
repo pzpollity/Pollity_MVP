@@ -117,6 +117,40 @@ async def update_status(grievance_uuid: str, body: StatusUpdate):
     return row
 
 
+@router.post("/{grievance_uuid}/notify-citizen")
+async def notify_citizen(grievance_uuid: str):
+    """
+    Manually send a WhatsApp status-update message to the citizen.
+    Uses the grievance's current status and detected language.
+    Raises 422 if no valid contact is on file or no template exists for the status.
+    """
+    db = get_db()
+    resp = db.table("grievances").select("*").eq("id", grievance_uuid).single().execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Grievance not found")
+
+    row = resp.data
+    citizen_contact = row.get("citizen_contact", "")
+
+    if not citizen_contact or citizen_contact in ("WALK-IN", ""):
+        raise HTTPException(status_code=422, detail="No WhatsApp contact on file for this grievance.")
+
+    language     = row.get("language_detected", "en") or "en"
+    grievance_id = row["grievance_id"]
+    status       = row.get("status", "")
+
+    msg = build_status_update_message(grievance_id, status, language)
+    if not msg:
+        raise HTTPException(
+            status_code=422,
+            detail=f"No notification template for status '{status}'.",
+        )
+
+    await send_text(citizen_contact, msg)
+    logger.info("Manual WA notification sent for %s to %s", grievance_id, citizen_contact)
+    return {"sent": True, "to": citizen_contact, "grievance_id": grievance_id}
+
+
 # ── Walk-in / Phone / Letter intake ──────────────────────────────────────────
 
 class WalkInRequest(BaseModel):

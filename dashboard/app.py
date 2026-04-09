@@ -663,9 +663,49 @@ with tab_grievances:
 
         if submitted:
             update_status(row["id"], new_status, assigned_to, next_action)
-            st.success(f"**{sel_id}** → **{new_status}**")
+            contact      = row.get("citizen_contact", "")
+            has_wa       = bool(contact) and contact not in ("WALK-IN", "")
+            auto_notified = has_wa and new_status in {
+                "acknowledged", "assigned", "in_progress", "resolved", "verified", "closed"
+            }
+            suffix = f"  ·  📲 WhatsApp update sent to {contact}" if auto_notified else ""
+            st.success(f"**{sel_id}** → **{new_status}**{suffix}")
             st.cache_data.clear()
             st.rerun()
+
+        # ── WhatsApp manual notification ──────────────────────────────────────
+        st.markdown('<br><div class="sec-title">📲 Send WhatsApp Update</div>', unsafe_allow_html=True)
+        contact = row.get("citizen_contact", "")
+        has_wa  = bool(contact) and contact not in ("WALK-IN", "")
+
+        if has_wa:
+            wa_col1, wa_col2 = st.columns([3, 1])
+            wa_col1.markdown(
+                f"Citizen contact: **{contact}**&nbsp;&nbsp;·&nbsp;&nbsp;"
+                f"Current status: **{row['status']}**  \n"
+                f"<span style='font-size:0.78rem;color:#64748B;'>"
+                f"Sends the standard status-update message for the current status.</span>",
+                unsafe_allow_html=True,
+            )
+            if wa_col2.button("📲 Send Now", use_container_width=True, key="wa_manual_send"):
+                with st.spinner("Sending WhatsApp message…"):
+                    try:
+                        r = httpx.post(
+                            f"{BACKEND_URL}/grievances/{row['id']}/notify-citizen",
+                            timeout=15,
+                        )
+                        if r.status_code == 200:
+                            st.success(f"✅ WhatsApp message sent to **{contact}**")
+                        else:
+                            err = r.json().get("detail", r.text) if r.headers.get("content-type", "").startswith("application/json") else r.text
+                            st.error(f"Could not send: {err}")
+                    except Exception as exc:
+                        st.error(f"Could not reach backend: {exc}")
+        else:
+            st.caption(
+                "⚠️ No WhatsApp contact on file — this grievance was logged as a walk-in "
+                "without a phone number. Add a contact number to enable notifications."
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
