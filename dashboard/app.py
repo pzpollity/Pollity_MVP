@@ -425,9 +425,10 @@ if sel_category != "All": filtered = filtered[filtered["category"] == sel_catego
 if sel_assignee != "All": filtered = filtered[filtered["assigned_to"] == sel_assignee]
 
 # ── TABS ──────────────────────────────────────────────────────────────────────
-tab_overview, tab_grievances, tab_log = st.tabs([
+tab_overview, tab_grievances, tab_lookup, tab_log = st.tabs([
     "Overview",
     "Grievances",
+    "Citizen Lookup",
     "Log Grievance",
 ])
 
@@ -702,7 +703,86 @@ with tab_grievances:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — LOG GRIEVANCE
+# TAB 3 — CITIZEN LOOKUP
+# ═══════════════════════════════════════════════════════════════════════════════
+with tab_lookup:
+
+    st.markdown('<div class="sec-title">🔍 Citizen Lookup by Phone</div>', unsafe_allow_html=True)
+    st.caption("Enter a phone number to see all grievances filed by that citizen.")
+
+    lookup_col, _ = st.columns([2, 3])
+    phone_query = lookup_col.text_input(
+        "Phone number",
+        placeholder="e.g. 919876543210",
+        label_visibility="collapsed",
+    )
+
+    if phone_query.strip():
+        q = phone_query.strip()
+        # Match anywhere in the contact field (handles partial / country-code variants)
+        matches = df[df["citizen_contact"].str.contains(q, na=False, case=False)]
+
+        if matches.empty:
+            st.info(f"No grievances found for **{q}**.")
+        else:
+            citizen_contact = matches.iloc[0]["citizen_contact"]
+            total   = len(matches)
+            open_n  = int((~matches["status"].isin(["resolved","verified","closed"])).sum())
+            closed_n = total - open_n
+
+            # ── Citizen summary card ──────────────────────────────────────────
+            st.markdown(f"""
+            <div class="detail-card" style="margin-bottom:1rem;">
+              <b>Contact:</b> {citizen_contact}
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <b>Total grievances:</b> {total}
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <b>Open:</b> {open_n}
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <b>Closed:</b> {closed_n}
+            </div>
+            """, unsafe_allow_html=True)
+
+            # ── Grievance table ───────────────────────────────────────────────
+            lookup_display = matches[[
+                "grievance_id", "filed_at", "urgency", "category_label",
+                "status", "summary", "assigned_to",
+            ]].copy()
+
+            st.dataframe(
+                lookup_display.rename(columns={
+                    "grievance_id":   "Ref ID",
+                    "filed_at":       "Filed",
+                    "urgency":        "Urgency",
+                    "category_label": "Category",
+                    "status":         "Status",
+                    "summary":        "Summary",
+                    "assigned_to":    "Assigned To",
+                }),
+                use_container_width=True,
+                height=min(120 + 35 * total, 450),
+                hide_index=True,
+                column_config={
+                    "Ref ID":     st.column_config.TextColumn("Ref ID",    width="medium"),
+                    "Filed":      st.column_config.DatetimeColumn("Filed", format="DD MMM, hh:mm a"),
+                    "Urgency":    st.column_config.TextColumn("Urgency",   width="small"),
+                    "Category":   st.column_config.TextColumn("Category",  width="medium"),
+                    "Status":     st.column_config.TextColumn("Status",    width="medium"),
+                    "Summary":    st.column_config.TextColumn("Summary",   width="large"),
+                    "Assigned To":st.column_config.TextColumn("Assigned To", width="medium"),
+                },
+            )
+    else:
+        st.markdown("""
+        <div style="text-align:center;padding:3rem 0;color:#94A3B8;">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;">📱</div>
+          <div style="font-size:0.9rem;">Type a phone number above to look up a citizen's history</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TAB 4 — LOG GRIEVANCE
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab_log:
 
