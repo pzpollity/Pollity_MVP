@@ -52,7 +52,7 @@ footer    { visibility: hidden; }
 
 /* ── HEADER ──────────────────────────────────────────────────────────────── */
 .js-header {
-    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 55%, #1976D2 100%);
+    background: linear-gradient(135deg, #040265 0%, #06038D 55%, #0908B8 100%);
     border-radius: 18px;
     padding: 1.25rem 2rem;
     color: white;
@@ -60,7 +60,7 @@ footer    { visibility: hidden; }
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 6px 24px rgba(21,101,192,0.38);
+    box-shadow: 0 6px 24px rgba(6,3,141,0.38);
     position: relative;
     overflow: hidden;
 }
@@ -131,16 +131,16 @@ section[data-testid="stSidebar"] .stCaption { color: #475569 !important; font-si
 
 /* sidebar button */
 section[data-testid="stSidebar"] .stButton > button {
-    background: rgba(21,101,192,0.75) !important;
+    background: rgba(6,3,141,0.75) !important;
     color: #E0EFFF !important;
-    border: 1px solid rgba(21,101,192,0.5) !important;
+    border: 1px solid rgba(6,3,141,0.5) !important;
     border-radius: 10px !important;
     font-weight: 600 !important;
     font-size: 0.82rem !important;
     transition: background 0.15s !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #1565C0 !important;
+    background: #06038D !important;
 }
 section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0.78rem !important; }
 
@@ -168,8 +168,8 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
     margin-bottom: -2px !important;
 }
 .stTabs [aria-selected="true"] {
-    color: #1565C0 !important;
-    border-bottom: 3px solid #1565C0 !important;
+    color: #06038D !important;
+    border-bottom: 3px solid #06038D !important;
     background: white !important;
 }
 .stTabs [data-baseweb="tab-panel"] { padding-top: 1.5rem !important; }
@@ -187,7 +187,7 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
     content: ''; position: absolute; top: 0; left: 0; right: 0;
     height: 3.5px; border-radius: 14px 14px 0 0;
 }
-.kpi-blue::before   { background: linear-gradient(90deg,#1565C0,#42A5F5); }
+.kpi-blue::before   { background: linear-gradient(90deg,#06038D,#2929CC); }
 .kpi-amber::before  { background: linear-gradient(90deg,#D97706,#FCD34D); }
 .kpi-red::before    { background: linear-gradient(90deg,#DC2626,#F87171); }
 .kpi-green::before  { background: linear-gradient(90deg,#16A34A,#4ADE80); }
@@ -195,7 +195,7 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 
 .kpi-label { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: #94A3B8; margin-bottom: 2px; }
 .kpi-value { font-size: 2.4rem; font-weight: 800; line-height: 1.05; color: #0F172A; }
-.kpi-blue  .kpi-value  { color: #1565C0; }
+.kpi-blue  .kpi-value  { color: #06038D; }
 .kpi-amber .kpi-value  { color: #D97706; }
 .kpi-red   .kpi-value  { color: #DC2626; }
 .kpi-green .kpi-value  { color: #16A34A; }
@@ -208,8 +208,8 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 /* ── SECTION TITLE ───────────────────────────────────────────────────────── */
 .sec-title {
     font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.9px; color: #1565C0;
-    border-bottom: 2px solid #E3F2FD;
+    letter-spacing: 0.9px; color: #06038D;
+    border-bottom: 2px solid #E0E0FF;
     padding-bottom: 8px; margin: 0 0 14px;
     display: flex; align-items: center; gap: 6px;
 }
@@ -229,9 +229,9 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 
 /* ── DETAIL CARD ─────────────────────────────────────────────────────────── */
 .detail-card {
-    background: #F8FAFF;
-    border: 1px solid #DBEAFE;
-    border-left: 4px solid #1565C0;
+    background: #F5F5FF;
+    border: 1px solid #C0C0FF;
+    border-left: 4px solid #06038D;
     border-radius: 12px;
     padding: 1rem 1.3rem;
     margin-bottom: 1rem;
@@ -243,16 +243,16 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
 .badge-critical { background:#FEE2E2; color:#DC2626; }
 .badge-high     { background:#FEF3C7; color:#B45309; }
-.badge-medium   { background:#DBEAFE; color:#1D4ED8; }
+.badge-medium   { background:#E0E0FF; color:#06038D; }
 .badge-low      { background:#DCFCE7; color:#15803D; }
 
 /* ── LOG FORM (Tab 3) ────────────────────────────────────────────────────── */
 .log-hero {
-    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 60%, #1E88E5 100%);
+    background: linear-gradient(135deg, #040265 0%, #06038D 60%, #0908B8 100%);
     border-radius: 16px; padding: 1.5rem 2rem; color: white;
     margin-bottom: 1.8rem;
     display: flex; align-items: center; gap: 1.2rem;
-    box-shadow: 0 4px 20px rgba(21,101,192,0.28);
+    box-shadow: 0 4px 20px rgba(6,3,141,0.28);
 }
 .log-hero-icon  { font-size: 2.2rem; line-height: 1; }
 .log-hero-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; margin: 0; }
@@ -268,13 +268,13 @@ section[data-testid="stSidebar"] label { color: #94A3B8 !important; font-size: 0
 .log-step-badge {
     display: inline-flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; border-radius: 50%;
-    background: #1565C0; color: white; font-size: 0.68rem; font-weight: 700;
+    background: #06038D; color: white; font-size: 0.68rem; font-weight: 700;
     flex-shrink: 0;
 }
 .ai-banner {
-    background: #EFF6FF; border: 1px solid #BFDBFE;
-    border-left: 4px solid #3B82F6; border-radius: 10px;
-    padding: 0.85rem 1rem; font-size: 0.82rem; color: #1E40AF;
+    background: #EBEBFF; border: 1px solid #C0C0FF;
+    border-left: 4px solid #06038D; border-radius: 10px;
+    padding: 0.85rem 1rem; font-size: 0.82rem; color: #040270;
     margin-top: 1.4rem; line-height: 1.5;
 }
 </style>
@@ -304,8 +304,8 @@ CATEGORY_LABELS = {
     "corruption":      "Corruption",
     "others":          "Others",
 }
-CHART_BLUES = ["#0D47A1","#1565C0","#1976D2","#1E88E5","#42A5F5","#90CAF9","#BBDEFB","#E3F2FD"]
-URGENCY_COLOR = {"critical":"#DC2626","high":"#D97706","medium":"#1565C0","low":"#16A34A"}
+CHART_BLUES = ["#040265","#06038D","#0806AA","#0A08C0","#2929CC","#8080E0","#C0C0F0","#E8E8FF"]
+URGENCY_COLOR = {"critical":"#DC2626","high":"#D97706","medium":"#06038D","low":"#16A34A"}
 
 
 @st.cache_resource
