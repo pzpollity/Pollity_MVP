@@ -481,7 +481,7 @@ with tab_overview:
         fig = px.bar(
             cat_counts, x="Count", y="Category", orientation="h",
             color="Count",
-            color_continuous_scale=[[0,"#BFDBFE"],[0.5,"#1E88E5"],[1,"#0D47A1"]],
+            color_continuous_scale=[[0,"#C0C0F0"],[0.5,"#2929CC"],[1,"#06038D"]],
             text="Count",
         )
         fig.update_layout(
@@ -505,9 +505,12 @@ with tab_overview:
         st.markdown('<div class="chart-sub">Pipeline breakdown across all cases</div>', unsafe_allow_html=True)
         status_counts = df["status"].value_counts().reset_index()
         status_counts.columns = ["Status", "Count"]
+        # 7 colours sampled from the same gradient as the category chart
+        # (darkest = most frequent, lightest = least frequent)
+        STATUS_BLUES = ["#06038D","#1210A2","#1D1CB7","#2929CC","#5B5BD8","#8E8EE4","#C0C0F0"]
         fig2 = px.pie(
             status_counts, names="Status", values="Count",
-            hole=0.6, color_discrete_sequence=CHART_BLUES,
+            hole=0.6, color_discrete_sequence=STATUS_BLUES,
         )
         fig2.update_layout(
             margin=dict(l=0, r=0, t=4, b=0), height=270,
@@ -566,11 +569,11 @@ with tab_overview:
         fig4 = px.area(
             daily, x="date", y="Count",
             line_shape="spline",
-            color_discrete_sequence=["#1565C0"],
+            color_discrete_sequence=["#06038D"],
         )
         fig4.update_traces(
             fill="tozeroy",
-            fillcolor="rgba(21,101,192,0.10)",
+            fillcolor="rgba(6,3,141,0.10)",
             line=dict(width=2.5),
         )
         fig4.update_layout(
