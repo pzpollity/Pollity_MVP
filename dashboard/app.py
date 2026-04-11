@@ -22,7 +22,7 @@ from supabase import create_client
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Jan-Sun | NetaWork.in",
-    page_icon="🏛️",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -367,7 +367,7 @@ st.markdown(f"""
   </div>
   <div class="js-header-right">
     <div class="js-pill"><span class="js-live-dot"></span>Live</div>
-    <div class="js-pill">🕐 {now_str}</div>
+    <div class="js-pill">{now_str}</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -404,7 +404,7 @@ with st.sidebar:
     if st.button("↺  Refresh Data", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
-    st.caption("⚡ Auto-refreshes every 60 s")
+    st.caption("Auto-refreshes every 60 s")
 
 # ── COMPUTE KPIs ──────────────────────────────────────────────────────────────
 open_df        = df[~df["status"].isin(["resolved","verified","closed"])]
@@ -590,7 +590,7 @@ with tab_overview:
 with tab_grievances:
 
     # ── Table ─────────────────────────────────────────────────────────────────
-    st.markdown('<div class="sec-title">📋 Grievance Log</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">Grievance Log</div>', unsafe_allow_html=True)
 
     def _sla_countdown(row) -> str:
         if row["sla_status"] == "closed":
@@ -598,10 +598,10 @@ with tab_grievances:
         hours_left = row["sla_hours"] - row["hours_open"]
         if hours_left >= 0:
             h = int(hours_left)
-            return f"✅ {h}h left" if row["sla_status"] == "on_time" else f"⚠️ {h}h left"
+            return f"{h}h left" if row["sla_status"] == "on_time" else f"{h}h left"
         else:
             h = int(abs(hours_left))
-            return f"🔴 {h}h overdue"
+            return f"{h}h overdue"
 
     display_cols = [
         "grievance_id","filed_at","urgency","category_label",
@@ -623,7 +623,7 @@ with tab_grievances:
         .encode("utf-8")
     )
     csv_col.download_button(
-        "⬇ Export CSV",
+        "Export CSV",
         data=csv_bytes,
         file_name=f"grievances_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv",
@@ -659,7 +659,7 @@ with tab_grievances:
     )
 
     # ── Update a grievance ────────────────────────────────────────────────────
-    st.markdown('<br><div class="sec-title">✏️ Update a Grievance</div>', unsafe_allow_html=True)
+    st.markdown('<br><div class="sec-title">Update a Grievance</div>', unsafe_allow_html=True)
 
     grievance_ids = filtered["grievance_id"].tolist()
     if not grievance_ids:
@@ -695,7 +695,7 @@ with tab_grievances:
             auto_notified = has_wa and new_status in {
                 "acknowledged", "assigned", "in_progress", "resolved", "verified", "closed"
             }
-            suffix = f"  ·  📲 WhatsApp update sent to {contact}" if auto_notified else ""
+            suffix = f"  ·  WhatsApp update sent to {contact}" if auto_notified else ""
             st.success(f"**{sel_id}** → **{new_status}**{suffix}")
             st.cache_data.clear()
             st.rerun()
@@ -707,7 +707,7 @@ with tab_grievances:
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab_lookup:
 
-    st.markdown('<div class="sec-title">🔍 Citizen Lookup by Phone</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">Citizen Lookup by Phone</div>', unsafe_allow_html=True)
     st.caption("Enter a phone number to see all grievances filed by that citizen.")
 
     lookup_col, _ = st.columns([2, 3])
@@ -775,7 +775,7 @@ with tab_lookup:
     else:
         st.markdown("""
         <div style="text-align:center;padding:3rem 0;color:#94A3B8;">
-          <div style="font-size:2.5rem;margin-bottom:0.5rem;">📱</div>
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;"></div>
           <div style="font-size:0.9rem;">Type a phone number above to look up a citizen's history</div>
         </div>
         """, unsafe_allow_html=True)
@@ -789,7 +789,7 @@ with tab_log:
     # ── Hero banner ───────────────────────────────────────────────────────────
     st.markdown("""
     <div class="log-hero">
-      <div class="log-hero-icon">📋</div>
+      <div class="log-hero-icon"></div>
       <div>
         <div class="log-hero-title">Log a New Grievance</div>
         <div class="log-hero-sub">Register citizens' complaints received in person, by phone, or by physical letter · AI classifies automatically</div>
@@ -854,7 +854,7 @@ with tab_log:
             # AI tip
             st.markdown("""
             <div class="ai-banner">
-              🤖&nbsp; <span><b>AI-powered:</b> Jan Sunn will automatically classify the category, urgency level,
+              <span><b>AI-powered:</b> Jan Sunn will automatically classify the category, urgency level,
               and generate a summary. For Letter channel, upload the document and leave the description
               blank — text is extracted via OCR.</span>
             </div>
@@ -862,7 +862,7 @@ with tab_log:
 
             st.markdown("<div style='margin-top:1.4rem'></div>", unsafe_allow_html=True)
             wi_submit = st.form_submit_button(
-                "📥   Register Grievance",
+                "Register Grievance",
                 use_container_width=True,
                 type="primary",
             )
@@ -900,7 +900,7 @@ with tab_log:
                             )
                         if resp.status_code == 200:
                             data = resp.json()
-                            st.success(f"✅ Grievance registered — **{data['grievance_id']}**")
+                            st.success(f"Grievance registered — **{data['grievance_id']}**")
                             if use_ocr and data.get("ocr_text"):
                                 with st.expander("View extracted OCR text"):
                                     st.text(data["ocr_text"])
