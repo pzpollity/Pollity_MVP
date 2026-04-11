@@ -1,5 +1,5 @@
 """
-Jan Sunn Dashboard — v3
+Jan-Sun Dashboard — v3
 -------------------------
 UI/UX redesign: dark sidebar, tabbed navigation, inline SVG logo,
 modern KPI cards with gradient accents, urgency badges, spacious
@@ -21,7 +21,7 @@ from supabase import create_client
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Jan Sunn | NetaWork.in",
+    page_title="Jan-Sun | NetaWork.in",
     page_icon="🏛️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -361,7 +361,7 @@ st.markdown(f"""
 <div class="js-header">
   <div class="js-header-left">
     <div>
-      <div class="js-header-title">Jan Sunn</div>
+      <div class="js-header-title">Jan-Sun</div>
       <div class="js-header-sub">Constituency Grievance Dashboard &nbsp;·&nbsp; NetaWork.in</div>
     </div>
   </div>
@@ -387,7 +387,7 @@ with st.sidebar:
     # Sidebar title
     st.markdown("""
     <div class="sb-logo-strip">
-      <div style="font-size:1.1rem;font-weight:800;color:#F1F5F9;letter-spacing:-0.3px;">Jan Sunn</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#F1F5F9;letter-spacing:-0.3px;">Jan-Sun</div>
       <div style="font-size:0.7rem;color:#475569;letter-spacing:1.5px;margin-top:2px;">NETAWORK.IN</div>
     </div>
     """, unsafe_allow_html=True)
