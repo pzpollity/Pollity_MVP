@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.models.grievance import GrievanceChannel, GrievanceStatus
+from app.services.action_advisor import suggest_action
 from app.services.grievance_service import process_walkin_grievance
 from app.services.ocr import extract_text_from_image
 from app.services.sms import build_sms_status_message, send_sms
@@ -149,6 +150,43 @@ async def notify_citizen(grievance_uuid: str):
     await send_text(citizen_contact, msg)
     logger.info("Manual WA notification sent for %s to %s", grievance_id, citizen_contact)
     return {"sent": True, "to": citizen_contact, "grievance_id": grievance_id}
+
+
+# ── Action Advisor ────────────────────────────────────────────────────────────
+
+@router.get("/{grievance_uuid}/suggest-action")
+async def suggest_action_endpoint(grievance_uuid: str):
+    """
+    Generate an AI action recommendation for this grievance via Claude Sonnet.
+    Saves the result to grievances.suggested_action.
+    Response: { action_type, action_text, target_dept, draft_message }
+    """
+    db = get_db()
+    resp = db.table("grievances").select("*").eq("id", grievance_uuid).single().execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Grievance not found")
+
+    result = await suggest_action(resp.data)
+    return result
+
+
+class ActionTakenBody(BaseModel):
+    action_taken: str
+
+
+@router.patch("/{grievance_uuid}/action-taken")
+def log_action_taken(grievance_uuid: str, body: ActionTakenBody):
+    """
+    Record what action the staff actually took on this grievance.
+    Stored in grievances.action_taken for audit trail and briefing analytics.
+    """
+    db = get_db()
+    resp = db.table("grievances").update({
+        "action_taken": body.action_taken,
+    }).eq("id", grievance_uuid).execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Grievance not found")
+    return {"saved": True}
 
 
 # ── Walk-in / Phone / Letter intake ──────────────────────────────────────────

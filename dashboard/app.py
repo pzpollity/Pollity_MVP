@@ -700,6 +700,111 @@ with tab_grievances:
             st.cache_data.clear()
             st.rerun()
 
+    # ── AI Action Advisor ─────────────────────────────────────────────────────
+    st.markdown('<br><div class="sec-title">AI Action Advisor</div>', unsafe_allow_html=True)
+
+    if not grievance_ids:
+        st.info("No grievances match the current filter.")
+    else:
+        adv_id = st.selectbox(
+            "Select grievance to advise on",
+            grievance_ids,
+            key="advisor_select",
+        )
+        adv_row = filtered[filtered["grievance_id"] == adv_id].iloc[0]
+
+        # Show cached suggestion if it exists on the row
+        cached = adv_row.get("suggested_action") if "suggested_action" in adv_row.index else None
+
+        col_btn, col_spacer = st.columns([2, 5])
+        run_advisor = col_btn.button(
+            "Suggest Action",
+            key="run_advisor",
+            type="primary",
+            use_container_width=True,
+        )
+
+        adv_state_key = f"advisor_result_{adv_id}"
+
+        if run_advisor:
+            with st.spinner("Claude Sonnet is analysing this grievance…"):
+                try:
+                    resp = httpx.get(
+                        f"{BACKEND_URL}/grievances/{adv_row['id']}/suggest-action",
+                        timeout=30,
+                    )
+                    if resp.status_code == 200:
+                        st.session_state[adv_state_key] = resp.json()
+                    else:
+                        st.error(f"Advisor error: {resp.text}")
+                except Exception as e:
+                    st.error(f"Could not reach backend: {e}")
+
+        # Display result (from this run or session cache)
+        adv_result = st.session_state.get(adv_state_key)
+
+        if adv_result:
+            action_type  = adv_result.get("action_type", "").replace("_", " ").title()
+            action_text  = adv_result.get("action_text", "")
+            target_dept  = adv_result.get("target_dept", "")
+            draft_msg    = adv_result.get("draft_message", "")
+
+            st.markdown(f"""
+            <div style="
+                background:#F0F0FF;
+                border:1px solid #C0C0FF;
+                border-left:4px solid #06038D;
+                border-radius:12px;
+                padding:1rem 1.3rem;
+                margin-top:0.8rem;
+                font-size:0.88rem;
+                line-height:1.7;
+            ">
+              <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;
+                          letter-spacing:1px;color:#06038D;margin-bottom:6px;">
+                AI Recommendation · {action_type}
+              </div>
+              <b>What to do:</b> {action_text}<br>
+              <b>Contact:</b> {target_dept}
+            </div>
+            """, unsafe_allow_html=True)
+
+            with st.expander("View draft message to department"):
+                st.text_area(
+                    "Draft (copy and edit before sending)",
+                    value=draft_msg,
+                    height=110,
+                    key=f"draft_{adv_id}",
+                )
+
+        elif cached:
+            st.caption(f"Last suggestion: {cached}")
+
+        # Log action taken
+        st.markdown("<div style='margin-top:1rem'></div>", unsafe_allow_html=True)
+        with st.form(f"action_taken_form_{adv_id}"):
+            action_taken_text = st.text_input(
+                "Log action taken",
+                placeholder="e.g. Forwarded to PWD Executive Engineer via WhatsApp on 24 Apr",
+                key=f"action_input_{adv_id}",
+            )
+            save_action = st.form_submit_button("Save Action Log", use_container_width=True)
+
+        if save_action and action_taken_text.strip():
+            try:
+                r = httpx.patch(
+                    f"{BACKEND_URL}/grievances/{adv_row['id']}/action-taken",
+                    json={"action_taken": action_taken_text.strip()},
+                    timeout=10,
+                )
+                if r.status_code == 200:
+                    st.success("Action logged.")
+                    st.cache_data.clear()
+                else:
+                    st.error(f"Could not save: {r.text}")
+            except Exception as e:
+                st.error(f"Backend error: {e}")
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

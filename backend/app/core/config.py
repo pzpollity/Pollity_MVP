@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     # Weekly briefing
     BRIEFING_SECRET: str = ""   # Secret token to protect /api/briefing/trigger
 
+    # Proactive follow-up scheduler
+    FOLLOWUP_SECRET: str = ""   # Secret token to protect /api/followup/run
+
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"

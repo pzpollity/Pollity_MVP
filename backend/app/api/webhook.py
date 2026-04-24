@@ -12,8 +12,17 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request, Response
 
 from app.core.config import settings
+from app.services.followup import (
+    advance_to_verified,
+    find_pending_verify,
+    is_no_reply,
+    is_yes_reply,
+    mark_followup_replied,
+    reopen_grievance,
+)
 from app.services.grievance_service import is_grievance_message, process_whatsapp_message
 from app.core.database import get_db
+from app.services.notifications import fire_critical_alerts
 from app.services.whatsapp import (
     build_ack_message,
     build_help_reply,
@@ -129,6 +138,57 @@ async def _handle_message(msg):
                 reply = build_not_found_reply(grievance_id, lang)
             await send_text(msg.from_number, reply)
             return
+
+    # ── Resolution YES / NO reply ────────────────────────────────────────────
+    if msg.body and not msg.media_id:
+        body_text = msg.body.strip()
+        if is_no_reply(body_text) or is_yes_reply(body_text):
+            grievance = find_pending_verify(msg.from_number)
+            if grievance:
+                lang = grievance.get("language_detected", "en") or "en"
+                gid  = grievance["grievance_id"]
+                is_no = is_no_reply(body_text)
+                mark_followup_replied(grievance["id"], "NO" if is_no else "YES")
+
+                if is_no:
+                    reopen_grievance(grievance["id"])
+                    # Notify staff that citizen disputed resolution
+                    db = get_db()
+                    office_resp = (
+                        db.table("offices")
+                        .select("alert_whatsapp, alert_emails")
+                        .eq("id", grievance["office_id"])
+                        .single()
+                        .execute()
+                    )
+                    if office_resp.data:
+                        await fire_critical_alerts(
+                            grievance_id=gid,
+                            category=grievance.get("category", "others"),
+                            summary=f"Citizen disputed resolution: {grievance.get('summary', '')}",
+                            citizen_contact=msg.from_number,
+                            channel="whatsapp",
+                            alert_whatsapp=office_resp.data.get("alert_whatsapp"),
+                            alert_emails=office_resp.data.get("alert_emails") or [],
+                            location_text=grievance.get("location_text"),
+                        )
+                    _REOPEN_REPLY = {
+                        "en": f"We have noted that your issue for *{gid}* is still unresolved. The case has been reopened and escalated. You will receive an update shortly.",
+                        "hi": f"हमने नोट किया कि *{gid}* की समस्या अभी भी है। मामला पुनः खोला और एस्केलेट किया गया है। जल्द अपडेट मिलेगा।",
+                        "mr": f"आम्ही नोंद केली की *{gid}* ची समस्या अजूनही आहे. प्रकरण पुन्हा उघडले व एस्केलेट केले आहे.",
+                    }
+                    reply_lang = lang if lang in _REOPEN_REPLY else "en"
+                    await send_text(msg.from_number, _REOPEN_REPLY[reply_lang])
+                else:
+                    advance_to_verified(grievance["id"])
+                    _VERIFY_REPLY = {
+                        "en": f"Thank you for confirming! Grievance *{gid}* has been verified and closed. We are glad the issue was resolved.",
+                        "hi": f"पुष्टि के लिए धन्यवाद! शिकायत *{gid}* सत्यापित और बंद कर दी गई है।",
+                        "mr": f"पुष्टीबद्दल धन्यवाद! तक्रार *{gid}* सत्यापित व बंद केली आहे.",
+                    }
+                    reply_lang = lang if lang in _VERIFY_REPLY else "en"
+                    await send_text(msg.from_number, _VERIFY_REPLY[reply_lang])
+                return
 
     # ── Relevance gate (text-only messages) ─────────────────────────────────
     # Skip gate for media (image/audio/location) — those are inherently civic
