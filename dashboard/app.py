@@ -1291,6 +1291,21 @@ with tab_birthday:
                         )
                         if lr.status_code == 200:
                             st.session_state["manual_bday_letter"] = lr.json()
+                            # Auto-save citizen so they appear in future birthday reminders
+                            try:
+                                db = create_client(
+                                    os.environ["SUPABASE_URL"],
+                                    os.environ["SUPABASE_ANON_KEY"],
+                                )
+                                db.table("citizens").insert({
+                                    "office_id":   DEMO_OFFICE_ID,
+                                    "name":        m_name.strip(),
+                                    "dob":         m_dob.isoformat(),
+                                    "salutation":  m_sal or "Shri",
+                                    "designation": m_desig.strip() if m_desig else None,
+                                }).execute()
+                            except Exception:
+                                pass  # non-critical
                         else:
                             st.error(f"Error: {lr.text}")
                     except Exception as e:
