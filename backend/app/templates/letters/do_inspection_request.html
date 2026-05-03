@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D.O. Letter (Inspection Request) — {{ do_number }}</title>
+<style>
+  /* ── Reset ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Base ─────────────────────────────────────────────── */
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    color: #111;
+    background: #fff;
+  }
+
+  /* ── Page wrapper ─────────────────────────────────────── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 18mm 20mm 22mm 20mm;
+    background: #fff;
+    position: relative;
+  }
+
+  /* ── Print / A4 ───────────────────────────────────────── */
+  @page {
+    size: A4 portrait;
+    margin: 18mm 20mm 22mm 20mm;
+  }
+  @media print {
+    body { background: #fff; }
+    .page {
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      box-shadow: none;
+    }
+    .no-print { display: none !important; }
+  }
+
+  /* ── Screen shadow for preview ────────────────────────── */
+  @media screen {
+    body { background: #e8e8e8; padding: 20px 0; }
+    .page { box-shadow: 0 2px 18px rgba(0,0,0,0.18); }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     HEADER — 3-column grid (identical to do_standard)
+  ══════════════════════════════════════════════════════ */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: start;
+    padding-bottom: 10px;
+    border-bottom: 2.5px double #800000;
+  }
+
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .rep-name-hindi {
+    font-size: 13.5pt;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.25;
+  }
+  .rep-name-english {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.3;
+  }
+  .rep-designation {
+    font-size: 9.5pt;
+    color: #333;
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .do-number-block {
+    margin-top: 10px;
+    font-size: 9.5pt;
+    color: #111;
+    line-height: 1.5;
+  }
+  .do-number-block span { font-weight: 700; }
+
+  .header-center { text-align: center; padding: 0 10px; }
+  .emblem-box {
+    width: 72px;
+    height: 72px;
+    border: 1.5px solid #aaa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 22pt;
+    line-height: 1;
+    color: #333;
+  }
+  .satyamev {
+    font-size: 6.5pt;
+    color: #555;
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+    font-family: "Times New Roman", serif;
+  }
+
+  .header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sender-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #800000;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.35;
+  }
+  .sender-title-hindi {
+    font-size: 9pt;
+    color: #800000;
+    line-height: 1.35;
+  }
+  .letter-date {
+    margin-top: 10px;
+    font-size: 10pt;
+    color: #111;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     SUBJECT + SALUTATION
+  ══════════════════════════════════════════════════════ */
+  .subject-block {
+    margin-top: 16px;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+  .subject-label   { font-weight: 700; text-decoration: underline; }
+  .subject-text    { font-weight: 700; }
+
+  .salutation { margin-top: 14px; font-size: 11pt; }
+
+  /* ══════════════════════════════════════════════════════
+     BODY
+  ══════════════════════════════════════════════════════ */
+  .body-section { margin-top: 14px; }
+  .body-para {
+    font-size: 11pt;
+    line-height: 1.75;
+    text-align: justify;
+    text-indent: 30px;
+    margin-bottom: 12px;
+  }
+
+  /* ── Inspection-specific inset box ─────────────────── */
+  .inspection-notice {
+    margin: 16px 0;
+    padding: 10px 14px;
+    border-left: 4px solid #800000;
+    background: #fdf8f8;
+    font-size: 10.5pt;
+    line-height: 1.65;
+    font-style: italic;
+    color: #333;
+  }
+  .inspection-notice strong {
+    font-style: normal;
+    color: #800000;
+    text-transform: uppercase;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     OPTIONAL TABLE
+  ══════════════════════════════════════════════════════ */
+  .table-block { margin: 14px 0; }
+  .table-block table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  .table-block th { background: #f5f5f5; border: 1px solid #999; padding: 5px 8px; text-align: left; font-weight: 700; }
+  .table-block td { border: 1px solid #bbb; padding: 5px 8px; vertical-align: top; }
+
+  /* ══════════════════════════════════════════════════════
+     CLOSING NOTE
+  ══════════════════════════════════════════════════════ */
+  .closing-note {
+    margin-top: 10px;
+    font-size: 11pt;
+    line-height: 1.75;
+    text-align: justify;
+    text-indent: 30px;
+    margin-bottom: 18px;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     SIGNATURE ROW
+  ══════════════════════════════════════════════════════ */
+  .signature-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 8px;
+    font-size: 11pt;
+  }
+  .sig-left  { font-style: italic; }
+  .sig-right { text-align: right; }
+  .sig-space { margin-top: 38px; }
+  .sig-name  { font-weight: 700; font-size: 10.5pt; }
+  .sig-role  { font-size: 9.5pt; color: #333; margin-top: 2px; line-height: 1.4; }
+
+  /* ══════════════════════════════════════════════════════
+     ADDRESSEE BLOCK
+  ══════════════════════════════════════════════════════ */
+  .addressee-block {
+    margin-top: 28px;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+  }
+  .addressee-name  { font-weight: 700; }
+  .addressee-email { font-size: 9.5pt; color: #444; }
+
+  /* ══════════════════════════════════════════════════════
+     FOOTER BAR
+  ══════════════════════════════════════════════════════ */
+  .footer-bar {
+    border-top: 1.5px solid #800000;
+    padding-top: 6px;
+    font-size: 8.5pt;
+    color: #555;
+    text-align: center;
+    line-height: 1.6;
+    position: absolute;
+    bottom: 14mm;
+    left: 20mm;
+    right: 20mm;
+  }
+  .footer-bar .footer-contact { font-size: 8pt; color: #777; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════════
+       HEADER (3-column letterhead)
+  ═══════════════════════════════════════════════════ -->
+  <div class="header">
+
+    <div class="header-left">
+      <div class="rep-name-hindi">{{ rep_name_hindi }}</div>
+      <div class="rep-name-english">{{ rep_name }}</div>
+      <div class="rep-designation">{{ rep_designation }}</div>
+      <div class="do-number-block">
+        <span>D.O. No.:</span> {{ do_number }}
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="emblem-box">
+        <span>&#9784;</span>
+      </div>
+      <div class="satyamev">सत्यमेव जयते</div>
+    </div>
+
+    <div class="header-right">
+      <div class="sender-title">{{ sender_role_english }}</div>
+      {% if sender_role_hindi %}
+      <div class="sender-title-hindi">{{ sender_role_hindi }}</div>
+      {% endif %}
+      <div class="letter-date">Dated: {{ letter_date }}</div>
+    </div>
+
+  </div><!-- /.header -->
+
+  <!-- ══════════════════════════════════════════════════
+       SUBJECT
+  ═══════════════════════════════════════════════════ -->
+  <div class="subject-block">
+    <span class="subject-label">Subject:</span>
+    <span class="subject-text"> {{ subject }}</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SALUTATION
+  ═══════════════════════════════════════════════════ -->
+  <div class="salutation">{{ salutation }}</div>
+
+  <!-- ══════════════════════════════════════════════════
+       BODY
+  ═══════════════════════════════════════════════════ -->
+  <div class="body-section">
+
+    <p class="body-para">{{ opening_para }}</p>
+
+    {% for para in body_paras %}
+    <p class="body-para">{{ para }}</p>
+    {% endfor %}
+
+    <!-- ── Inspection-specific inset ────────────────── -->
+    <div class="inspection-notice">
+      <strong>Site Inspection Required</strong>
+      It is, therefore, requested that a field inspection of the site at
+      <strong>{{ inspection_location }}</strong> may kindly be arranged at the earliest by
+      the competent authority, and a report submitted to this office within
+      <strong>15 days</strong> of receipt of this letter.
+    </div>
+
+    <!-- Optional table -->
+    {% if table_rows is defined and table_rows %}
+    <div class="table-block">
+      <table>
+        <thead>
+          <tr>
+            {% for col in table_headers %}
+            <th>{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table_rows %}
+          <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <p class="closing-note">{{ closing_note }}</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SIGNATURE ROW
+  ═══════════════════════════════════════════════════ -->
+  <div class="signature-row">
+    <div class="sig-left">Regards,</div>
+    <div class="sig-right">
+      <div>Yours sincerely,</div>
+      <div class="sig-space"></div>
+      <div class="sig-name">({{ sender_name }})</div>
+      <div class="sig-role">{{ sender_role_english }}</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ADDRESSEE BLOCK
+  ═══════════════════════════════════════════════════ -->
+  <div class="addressee-block">
+    <div class="addressee-name">{{ addressee_name }}</div>
+    <div>{{ addressee_designation }}</div>
+    <div>{{ addressee_org }}</div>
+    {% for line in addressee_address_lines %}
+    <div>{{ line }}</div>
+    {% endfor %}
+    {% if addressee_email %}
+    <div class="addressee-email">E-mail: {{ addressee_email }}</div>
+    {% endif %}
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       FOOTER BAR
+  ═══════════════════════════════════════════════════ -->
+  <div class="footer-bar">
+    <div>{{ office_address }}</div>
+    <div class="footer-contact">
+      {% if office_phone %}Tel: {{ office_phone }}{% endif %}
+      {% if office_fax %}&nbsp;|&nbsp;Fax: {{ office_fax }}{% endif %}
+      {% if office_email %}&nbsp;|&nbsp;E-mail: {{ office_email }}{% endif %}
+    </div>
+  </div>
+
+</div><!-- /.page -->
+</body>
+</html>

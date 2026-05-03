@@ -18,6 +18,7 @@ from app.core.database import get_db
 from app.models.grievance import GrievanceChannel, GrievanceStatus
 from app.services.action_advisor import suggest_action
 from app.services.grievance_service import process_walkin_grievance
+from app.services.letter_generator import generate_do_letter
 from app.services.ocr import extract_text_from_image
 from app.services.sms import build_sms_status_message, send_sms
 from app.services.whatsapp import build_status_update_message, send_text
@@ -282,4 +283,53 @@ async def letter_ocr_intake(
         "grievance_id": grievance.grievance_id,
         "id": grievance.id,
         "ocr_text": raw_text,
+    }
+
+
+# ── D.O. Letter Generation ────────────────────────────────────────────────────
+
+@router.post("/{grievance_uuid}/generate-letter")
+async def generate_letter_endpoint(grievance_uuid: str):
+    """
+    Generate a D.O. (Demi-Official) letter for a grievance.
+
+    Flow:
+      1. Fetch grievance from DB
+      2. Fetch office row (via grievance.office_id), including letter_profile JSONB
+      3. Call generate_do_letter(grievance, office) — Claude Sonnet + Jinja2
+      4. Letter is auto-logged to letters_log inside generate_do_letter
+      5. Return { html, do_number, letter_type }
+
+    The 'html' field is a complete, print-ready A4 HTML document.
+    Suitable for direct display in an iframe or download as .html.
+    """
+    db = get_db()
+
+    # 1. Fetch grievance
+    g_resp = db.table("grievances").select("*").eq("id", grievance_uuid).single().execute()
+    if not g_resp.data:
+        raise HTTPException(status_code=404, detail="Grievance not found")
+    grievance = g_resp.data
+
+    # 2. Fetch office (with letter_profile)
+    office_id = grievance.get("office_id")
+    if not office_id:
+        raise HTTPException(status_code=422, detail="Grievance has no office_id")
+
+    o_resp = db.table("offices").select("*").eq("id", office_id).single().execute()
+    if not o_resp.data:
+        raise HTTPException(status_code=404, detail="Office not found")
+    office = o_resp.data
+
+    # 3. Generate letter
+    try:
+        result = await generate_do_letter(grievance, office)
+    except Exception:
+        logger.exception("Letter generation failed for grievance %s", grievance_uuid)
+        raise HTTPException(status_code=500, detail="Letter generation failed. Check server logs.")
+
+    return {
+        "html":        result["html"],
+        "do_number":   result["do_number"],
+        "letter_type": result["letter_type"],
     }

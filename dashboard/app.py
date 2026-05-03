@@ -716,15 +716,22 @@ with tab_grievances:
         # Show cached suggestion if it exists on the row
         cached = adv_row.get("suggested_action") if "suggested_action" in adv_row.index else None
 
-        col_btn, col_spacer = st.columns([2, 5])
+        col_btn, col_letter, col_spacer = st.columns([2, 2, 3])
         run_advisor = col_btn.button(
             "Suggest Action",
             key="run_advisor",
             type="primary",
             use_container_width=True,
         )
+        run_letter = col_letter.button(
+            "Generate D.O. Letter",
+            key="run_letter",
+            type="secondary",
+            use_container_width=True,
+        )
 
-        adv_state_key = f"advisor_result_{adv_id}"
+        adv_state_key    = f"advisor_result_{adv_id}"
+        letter_state_key = f"letter_result_{adv_id}"
 
         if run_advisor:
             with st.spinner("Claude Sonnet is analysing this grievance…"):
@@ -779,6 +786,43 @@ with tab_grievances:
 
         elif cached:
             st.caption(f"Last suggestion: {cached}")
+
+        # ── D.O. Letter generation ────────────────────────────────────────────
+        if run_letter:
+            with st.spinner("Generating D.O. letter via Claude Sonnet…"):
+                try:
+                    letter_resp = httpx.post(
+                        f"{BACKEND_URL}/grievances/{adv_row['id']}/generate-letter",
+                        timeout=60,
+                    )
+                    if letter_resp.status_code == 200:
+                        st.session_state[letter_state_key] = letter_resp.json()
+                    else:
+                        st.error(f"Letter generation error: {letter_resp.text}")
+                except Exception as e:
+                    st.error(f"Could not reach backend: {e}")
+
+        letter_result = st.session_state.get(letter_state_key)
+
+        if letter_result:
+            import streamlit.components.v1 as components
+            do_num       = letter_result.get("do_number", "")
+            letter_type  = letter_result.get("letter_type", "do_standard")
+            html_content = letter_result.get("html", "")
+
+            st.success(f"Letter generated — D.O. No: {do_num}  |  Template: {letter_type}")
+
+            with st.expander("Preview D.O. Letter", expanded=True):
+                components.html(html_content, height=700, scrolling=True)
+
+            safe_filename = f"DO_Letter_{do_num.replace('/', '-')}_{adv_id[:8]}.html"
+            st.download_button(
+                label="Download Letter (.html)",
+                data=html_content,
+                file_name=safe_filename,
+                mime="text/html",
+                key=f"dl_letter_{adv_id}",
+            )
 
         # Log action taken
         st.markdown("<div style='margin-top:1rem'></div>", unsafe_allow_html=True)
