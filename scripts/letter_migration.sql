@@ -12,18 +12,25 @@ ALTER TABLE offices ADD COLUMN IF NOT EXISTS letter_profile JSONB DEFAULT '{}'::
 -- Replace every [PLACEHOLDER] value with real data before going to production.
 UPDATE offices
 SET letter_profile = jsonb_build_object(
-  'rep_name',            '[REPRESENTATIVE NAME]',
-  'rep_name_hindi',      '[REPRESENTATIVE NAME IN HINDI]',
-  'rep_designation',     '[MLA / MP / Councillor]',
-  'rep_full_title',      '[Full official title of the representative]',
-  'sender_name',         '[Name of PS/PA signing the letter]',
-  'sender_role_english', 'PRIVATE SECRETARY TO [REPRESENTATIVE TITLE]',
-  'sender_role_hindi',   '[Role in Hindi]',
-  'office_address',      '[Office Address, City - PIN Code]',
-  'office_phone',        '[Phone Number]',
-  'office_fax',          '[Fax Number]',
-  'office_email',        '[official@gov.in]',
-  'do_prefix',           'OFF/25'
+  'rep_name',               '[REPRESENTATIVE NAME]',
+  'rep_name_hindi',         '[REPRESENTATIVE NAME IN HINDI]',
+  'rep_designation',        '[MLA / MP / Councillor]',
+  'rep_full_title',         '[Full official title of the representative]',
+  'sender_name',            '[Name of PS/PA signing the letter]',
+  'sender_role_english',    'PRIVATE SECRETARY TO [REPRESENTATIVE TITLE]',
+  'sender_role_hindi',      '[Role in Hindi]',
+  'office_address',         '[Office Address, City - PIN Code]',
+  'office_phone',           '[Phone Number]',
+  'office_mobile',          '[Mobile Number]',
+  'office_fax',             '[Fax Number]',
+  'office_email',           '[official@gov.in]',
+  'office_footer',          '[Footer text — e.g. constituency address line]',
+  'do_prefix',              'OFF/25',
+  'ic_number',              '[IC Number of the representative — for railway quota sign-off]',
+  'committee_memberships',  '[
+    "Standing Committee on Finance",
+    "Consultative Committee on Railways"
+  ]'
 )
 WHERE short_code = 'DMO';
 

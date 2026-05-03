@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Railway Quota Letter — {{ do_number }}</title>
+  <style>
+    /* ── Print / Page setup ─────────────────────────────────────────────── */
+    @page {
+      size: A4;
+      margin: 2cm 2.5cm 2.5cm 2.5cm;
+    }
+    @media print {
+      body  { margin: 0; }
+      .no-print { display: none; }
+    }
+
+    /* ── Base ───────────────────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #000;
+      background: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 40px 40px 40px;
+    }
+
+    /* ── Header: 3-column ───────────────────────────────────────────────── */
+    .header {
+      display: grid;
+      grid-template-columns: 1fr 90px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+    .header-left {
+      text-align: left;
+    }
+    .rep-name-hindi {
+      font-size: 16pt;
+      font-weight: bold;
+      color: #1a6b1a;   /* green — matches the green ink on original */
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+    .rep-designation {
+      font-size: 10.5pt;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .committee-memberships {
+      font-size: 9pt;
+      line-height: 1.4;
+    }
+    .committee-memberships .member-label {
+      font-weight: bold;
+    }
+    .committee-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 2px;
+    }
+    .committee-item::before {
+      content: "• ";
+      flex-shrink: 0;
+      margin-right: 2px;
+    }
+
+    .header-center {
+      text-align: center;
+      padding-top: 4px;
+    }
+    .emblem-box {
+      display: inline-block;
+      width: 72px;
+      height: 72px;
+      border: 1px solid #aaa;
+      line-height: 1.1;
+      text-align: center;
+      padding-top: 8px;
+      font-size: 28pt;
+    }
+    .emblem-motto {
+      font-size: 7pt;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      text-align: right;
+      font-size: 10.5pt;
+      line-height: 1.6;
+    }
+    .header-right .address-line { }
+    .header-right .phone-line {
+      margin-top: 4px;
+    }
+
+    /* ── Divider ────────────────────────────────────────────────────────── */
+    .header-rule {
+      border: none;
+      border-top: 2px solid #1a6b1a;
+      margin: 4px 0 14px 0;
+    }
+
+    /* ── Date ───────────────────────────────────────────────────────────── */
+    .date-line {
+      text-align: right;
+      font-size: 11pt;
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+
+    /* ── Addressee (appears BEFORE body in this format) ─────────────────── */
+    .addressee-top {
+      margin-bottom: 18px;
+    }
+    .addressee-top p {
+      font-weight: bold;
+      font-size: 11.5pt;
+      line-height: 1.5;
+    }
+
+    /* ── Body ───────────────────────────────────────────────────────────── */
+    .body-section {
+      margin-bottom: 16px;
+    }
+    .body-section p {
+      text-indent: 2em;
+      text-align: justify;
+      margin-bottom: 10px;
+    }
+
+    /* ── Details table ──────────────────────────────────────────────────── */
+    .details-table {
+      width: 92%;
+      margin: 16px auto 20px auto;
+      border-collapse: collapse;
+      font-size: 11.5pt;
+    }
+    .details-table td {
+      border: 1px solid #000;
+      padding: 6px 10px;
+      vertical-align: middle;
+    }
+    .details-table td:first-child {
+      width: 6%;
+      text-align: center;
+    }
+    .details-table td:nth-child(2) {
+      width: 28%;
+      font-weight: normal;
+    }
+    .details-table td:nth-child(3) {
+      width: 66%;
+    }
+    /* Destination row spans two sub-cells */
+    .destination-from { display: inline; }
+    .destination-sep  { margin: 0 6px; font-style: italic; color: #333; }
+
+    /* ── Sign-off ────────────────────────────────────────────────────────── */
+    .signoff {
+      margin-top: 8px;
+    }
+    .signoff .regards {
+      font-size: 11pt;
+      margin-bottom: 48px; /* space for signature */
+    }
+    .signoff .yours-sincerely {
+      font-size: 11pt;
+      margin-bottom: 4px;
+    }
+    .signoff .sig-name {
+      font-size: 11pt;
+      font-weight: normal;
+    }
+    .ic-number {
+      font-size: 10.5pt;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 32px;
+      border-top: 1px solid #1a6b1a;
+      padding-top: 6px;
+      font-size: 8.5pt;
+      text-align: center;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="header">
+
+    <div class="header-left">
+      <div class="rep-name-hindi">{{ rep_name_hindi }}</div>
+      <div class="rep-designation">{{ rep_designation }}</div>
+      {% if committee_memberships %}
+      <div class="committee-memberships">
+        <span class="member-label">सदस्य:</span>
+        {% for item in committee_memberships %}
+        <div class="committee-item">{{ item }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="header-center">
+      <div class="emblem-box">☸</div>
+      <div class="emblem-motto">सत्यमेव जयते</div>
+    </div>
+
+    <div class="header-right">
+      {% for line in office_address_lines %}
+      <div class="address-line">{{ line }}</div>
+      {% endfor %}
+      {% if office_phone %}
+      <div class="phone-line">फोन &nbsp; : {{ office_phone }}</div>
+      {% endif %}
+      {% if office_mobile %}
+      <div>मोबाइल : {{ office_mobile }}</div>
+      {% endif %}
+    </div>
+
+  </div>
+  <hr class="header-rule"/>
+
+  <!-- ── Date ──────────────────────────────────────────────────────────── -->
+  <div class="date-line">{{ letter_date }}</div>
+
+  <!-- ── Addressee (top of body for railway quota format) ──────────────── -->
+  <div class="addressee-top">
+    <p>{{ addressee_name }}</p>
+    {% if addressee_designation %}<p>{{ addressee_designation }}</p>{% endif %}
+    {% if addressee_org %}<p>{{ addressee_org }}</p>{% endif %}
+    {% for line in addressee_address_lines %}
+    <p>{{ line }}</p>
+    {% endfor %}
+  </div>
+
+  <!-- ── Body ──────────────────────────────────────────────────────────── -->
+  <div class="body-section">
+    <p>{{ opening_line }}</p>
+  </div>
+
+  <!-- ── Details table ─────────────────────────────────────────────────── -->
+  <table class="details-table">
+    <tbody>
+      <tr>
+        <td>1.</td>
+        <td>PNR No.</td>
+        <td>{{ pnr_number | default('[PNR NUMBER]') }}</td>
+      </tr>
+      <tr>
+        <td>2.</td>
+        <td>Train No.</td>
+        <td>{{ train_number | default('[TRAIN NUMBER]') }}</td>
+      </tr>
+      <tr>
+        <td>3.</td>
+        <td>Date</td>
+        <td>{{ travel_date | default('[TRAVEL DATE]') }}</td>
+      </tr>
+      <tr>
+        <td>4.</td>
+        <td>Class</td>
+        <td>{{ travel_class | default('[CLASS]') }}</td>
+      </tr>
+      <tr>
+        <td>5.</td>
+        <td>Destination</td>
+        <td>
+          <span class="destination-from">From</span>
+          <strong>{{ from_station | default('[FROM]') }}</strong>
+          <span class="destination-sep">To</span>
+          <strong>{{ to_station | default('[TO]') }}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>6.</td>
+        <td>Name</td>
+        <td>{{ passenger_name | default('[PASSENGER NAME]') }}</td>
+      </tr>
+      <tr>
+        <td>7.</td>
+        <td>Contact No.</td>
+        <td>{{ passenger_contact | default('[CONTACT NUMBER]') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Sign-off ──────────────────────────────────────────────────────── -->
+  <div class="signoff">
+    <div class="regards">With Regards,</div>
+    <div class="yours-sincerely">Yours Sincerely</div>
+    <div class="sig-name">({{ sender_name }})</div>
+    {% if ic_number %}
+    <div class="ic-number">IC No. {{ ic_number }}</div>
+    {% endif %}
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────── -->
+  {% if office_footer %}
+  <div class="footer">{{ office_footer }}</div>
+  {% endif %}
+
+</body>
+</html>

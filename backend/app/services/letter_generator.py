@@ -47,21 +47,48 @@ _TEMPLATE_MAP: dict[tuple[str, str], str] = {
     ("field_visit",       "infrastructure"): "do_inspection_request.html",
     ("escalate_to_dept",  "infrastructure"): "do_inspection_request.html",
     ("call_official",     "infrastructure"): "do_inspection_request.html",
+    # Railway / transport complaints → railway quota letter
+    ("railway_quota",     "*"):              "railway_quota.html",
+    ("escalate_to_dept",  "transport"):      "railway_quota.html",
+    ("forward_to_dept",   "transport"):      "railway_quota.html",
 }
 _DEFAULT_TEMPLATE = "do_standard.html"
 
+# Keywords that indicate a railway quota/ticket request (checked against raw_text + summary)
+_RAILWAY_KEYWORDS = {
+    "pnr", "train", "railway", "reservation", "ticket", "berth", "irctc",
+    "quota", "coach", "seat", "tatkal", "waitlist", "waiting list", "rac",
+    "रेलवे", "टिकट", "ट्रेन", "रिजर्वेशन",
+}
 
-def select_template(action_type: str, category: str) -> str:
+
+def _is_railway_request(grievance: dict) -> bool:
+    """Return True if the grievance text strongly suggests a railway quota request."""
+    text = " ".join([
+        (grievance.get("summary") or ""),
+        (grievance.get("raw_text") or ""),
+        (grievance.get("description") or ""),
+    ]).lower()
+    return any(kw in text for kw in _RAILWAY_KEYWORDS)
+
+
+def select_template(action_type: str, category: str, grievance: dict | None = None) -> str:
     """
     Return the Jinja2 template filename for the given action_type + category.
 
     Lookup order:
-      1. Exact (action_type, category) match
-      2. (action_type, '*') wildcard  — not currently used but easy to add
-      3. Default: do_standard.html
+      1. Railway keyword auto-detection (if grievance dict provided)
+      2. Exact (action_type, category) match
+      3. (action_type, '*') wildcard
+      4. Default: do_standard.html
     """
+    if grievance and _is_railway_request(grievance):
+        return "railway_quota.html"
     key = (action_type.lower().strip(), category.lower().strip())
-    return _TEMPLATE_MAP.get(key, _DEFAULT_TEMPLATE)
+    if key in _TEMPLATE_MAP:
+        return _TEMPLATE_MAP[key]
+    wildcard_key = (action_type.lower().strip(), "*")
+    return _TEMPLATE_MAP.get(wildcard_key, _DEFAULT_TEMPLATE)
 
 
 # ── Claude prompt ─────────────────────────────────────────────────────────────
@@ -98,6 +125,92 @@ REQUIRED JSON SCHEMA — respond ONLY with valid JSON, no prose, no markdown fen
 
 Do NOT add any fields beyond this schema. Values must be plain strings (no markdown inside values).
 """
+
+_RAILWAY_SYSTEM_PROMPT = """\
+You are a senior Private Secretary extracting travel details from a railway reservation request submitted by a \
+constituent, and drafting a one-sentence polite opening line for the MP/MLA's railway quota letter.
+
+Your job is to:
+1. Extract every travel detail that appears in the grievance text — PNR number, train number, date of journey, \
+   travel class, from/to station, passenger name, and passenger contact number.
+2. If a detail is not mentioned, return an empty string for that field.
+3. Draft a single formal opening sentence for the MP/MLA to send to the Chief Reservation Supervisor.
+
+REQUIRED JSON SCHEMA — respond ONLY with valid JSON, no prose, no markdown fences:
+{
+  "opening_line": "<Single formal sentence: 'I shall be highly grateful to you, if you could kindly make an arrangement for ticket confirmation / reservation for my constituent / guest, whose details are given below:'>",
+  "pnr_number":        "<PNR number, or empty string>",
+  "train_number":      "<Train number, or empty string>",
+  "travel_date":       "<Date of journey in DD.MM.YYYY format, or empty string>",
+  "travel_class":      "<Class code e.g. 2A / 3A / SL / CC, or empty string>",
+  "from_station":      "<Departure station name, or empty string>",
+  "to_station":        "<Destination station name, or empty string>",
+  "passenger_name":    "<Full name of passenger, or empty string>",
+  "passenger_contact": "<Mobile number of passenger, or empty string>",
+  "addressee_name":    "The Chief Reservation Supervisor",
+  "addressee_designation": "Chief Reservation Supervisor",
+  "addressee_org":     "Indian Railways",
+  "addressee_address_lines": ["Reservation Office", "Railway Station"]
+}
+
+Do NOT add any fields beyond this schema.
+"""
+
+
+async def _call_claude_for_railway_fields(grievance: dict, office: dict) -> dict:
+    """Call Claude to extract railway travel details from the grievance text."""
+    client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+    profile       = office.get("letter_profile") or {}
+    grievance_ref = grievance.get("grievance_id", "N/A")
+    raw_text      = grievance.get("raw_text") or grievance.get("description") or ""
+    summary       = grievance.get("summary", "")
+    citizen_name  = grievance.get("citizen_name", "")
+
+    user_content = f"""
+GRIEVANCE REFERENCE: {grievance_ref}
+CITIZEN NAME: {citizen_name}
+
+GRIEVANCE TEXT:
+{raw_text or summary}
+
+Extract the railway travel details and draft the opening line now.
+"""
+
+    response = await client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=600,
+        system=_RAILWAY_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_content}],
+    )
+
+    raw = response.content[0].text.strip()
+    start, end = raw.find("{"), raw.rfind("}")
+    if start != -1 and end != -1:
+        raw = raw[start : end + 1]
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        logger.error("Railway letter generator returned non-JSON: %s", raw)
+        return {
+            "opening_line": (
+                "I shall be highly grateful to you, if you could kindly make an arrangement "
+                "for ticket confirmation / reservation for my constituent, whose details are given below:"
+            ),
+            "pnr_number": "",
+            "train_number": "",
+            "travel_date": "",
+            "travel_class": "",
+            "from_station": "",
+            "to_station": "",
+            "passenger_name": citizen_name,
+            "passenger_contact": grievance.get("citizen_contact", ""),
+            "addressee_name": "The Chief Reservation Supervisor",
+            "addressee_designation": "Chief Reservation Supervisor",
+            "addressee_org": "Indian Railways",
+            "addressee_address_lines": ["Reservation Office", "Railway Station"],
+        }
 
 
 async def _call_claude_for_letter_fields(grievance: dict, office: dict, rep_title: str) -> dict:
@@ -228,7 +341,11 @@ def _log_letter(
         logger.exception("Failed to log letter (do_number=%s) — continuing anyway", do_number)
 
 
-async def generate_do_letter(grievance: dict, office: dict) -> dict:
+async def generate_do_letter(
+    grievance: dict,
+    office: dict,
+    letter_type_override: str | None = None,
+) -> dict:
     """
     Main entry point: produce a complete D.O. letter for a grievance.
 
@@ -238,6 +355,9 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
         Grievance row from Supabase.
     office : dict
         Office row from Supabase (must include letter_profile JSONB).
+    letter_type_override : str | None
+        Force a specific template stem (e.g. "railway_quota").
+        If None, auto-detected from action_type + category + keywords.
 
     Returns
     -------
@@ -252,8 +372,11 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
     category    = grievance.get("category", "others")
 
     # ── 1. Pick template ──────────────────────────────────────────────────────
-    template_file = select_template(action_type, category)
-    letter_type   = template_file.replace(".html", "")
+    if letter_type_override:
+        template_file = f"{letter_type_override}.html"
+    else:
+        template_file = select_template(action_type, category, grievance)
+    letter_type = template_file.replace(".html", "")
 
     # ── 2. Build rep title (safe fallbacks for missing profile fields) ────────
     rep_title = (
@@ -262,8 +385,12 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
         or "[REPRESENTATIVE TITLE]"
     )
 
-    # ── 3. Call Claude for letter content ─────────────────────────────────────
-    fields = await _call_claude_for_letter_fields(grievance, office, rep_title)
+    # ── 3. Call Claude for letter content (branch on template type) ───────────
+    is_railway = (letter_type == "railway_quota")
+    if is_railway:
+        fields = await _call_claude_for_railway_fields(grievance, office)
+    else:
+        fields = await _call_claude_for_letter_fields(grievance, office, rep_title)
 
     # ── 4. Compute D.O. number ────────────────────────────────────────────────
     office_id = str(office.get("id", ""))
@@ -272,6 +399,14 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
 
     # ── 5. Assemble template context ──────────────────────────────────────────
     today_str = datetime.now(tz=timezone.utc).strftime("%d %B %Y")
+
+    # Parse office_address into a list of lines for railway template
+    raw_address = profile.get("office_address", "[Office Address]")
+    office_address_lines = (
+        [l.strip() for l in raw_address.split(",") if l.strip()]
+        if isinstance(raw_address, str)
+        else raw_address
+    )
 
     context = {
         # Letterhead — rep / sender side
@@ -284,10 +419,17 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
             "sender_role_english", "PRIVATE SECRETARY TO THE REPRESENTATIVE"
         ),
         "sender_role_hindi": profile.get("sender_role_hindi", "[हिंदी में पदनाम]"),
-        "office_address":    profile.get("office_address", "[Office Address]"),
+        "office_address":    raw_address,
+        "office_address_lines": office_address_lines,
         "office_phone":      profile.get("office_phone", ""),
+        "office_mobile":     profile.get("office_mobile", ""),
         "office_fax":        profile.get("office_fax", ""),
         "office_email":      profile.get("office_email", ""),
+        "office_footer":     profile.get("office_footer", ""),
+        # Committee memberships (for railway quota header)
+        "committee_memberships": profile.get("committee_memberships", []),
+        # IC number (for railway quota sign-off)
+        "ic_number":         profile.get("ic_number", ""),
         # Letter metadata
         "do_number":         do_number,
         "letter_date":       today_str,
@@ -295,10 +437,20 @@ async def generate_do_letter(grievance: dict, office: dict) -> dict:
         "subject":           fields.get("subject", ""),
         "salutation":        fields.get("salutation", "Sir,"),
         "opening_para":      fields.get("opening_para", ""),
+        "opening_line":      fields.get("opening_line", ""),
         "body_paras":        fields.get("body_paras", []),
         "closing_note":      fields.get("closing_note", ""),
         # Inspection-specific (used only in do_inspection_request.html)
         "inspection_location": grievance.get("location_text") or "[Location]",
+        # Railway-specific fields
+        "pnr_number":        fields.get("pnr_number", ""),
+        "train_number":      fields.get("train_number", ""),
+        "travel_date":       fields.get("travel_date", ""),
+        "travel_class":      fields.get("travel_class", ""),
+        "from_station":      fields.get("from_station", ""),
+        "to_station":        fields.get("to_station", ""),
+        "passenger_name":    fields.get("passenger_name", ""),
+        "passenger_contact": fields.get("passenger_contact", ""),
         # Addressee block
         "addressee_name":    fields.get("addressee_name", "The Concerned Officer"),
         "addressee_designation": fields.get("addressee_designation", ""),

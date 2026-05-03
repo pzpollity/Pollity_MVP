@@ -288,21 +288,32 @@ async def letter_ocr_intake(
 
 # ── D.O. Letter Generation ────────────────────────────────────────────────────
 
+_VALID_LETTER_TYPES = {"do_standard", "do_inspection_request", "railway_quota"}
+
+
 @router.post("/{grievance_uuid}/generate-letter")
-async def generate_letter_endpoint(grievance_uuid: str):
+async def generate_letter_endpoint(
+    grievance_uuid: str,
+    letter_type: Annotated[str | None, Query()] = None,
+):
     """
     Generate a D.O. (Demi-Official) letter for a grievance.
 
-    Flow:
-      1. Fetch grievance from DB
-      2. Fetch office row (via grievance.office_id), including letter_profile JSONB
-      3. Call generate_do_letter(grievance, office) — Claude Sonnet + Jinja2
-      4. Letter is auto-logged to letters_log inside generate_do_letter
-      5. Return { html, do_number, letter_type }
+    Optional query param:
+      ?letter_type=railway_quota   — force a specific template
+      ?letter_type=do_standard
+      ?letter_type=do_inspection_request
+    If omitted, the template is auto-detected from grievance category + keywords.
 
+    Returns { html, do_number, letter_type }.
     The 'html' field is a complete, print-ready A4 HTML document.
-    Suitable for direct display in an iframe or download as .html.
     """
+    if letter_type and letter_type not in _VALID_LETTER_TYPES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid letter_type '{letter_type}'. Choose from: {sorted(_VALID_LETTER_TYPES)}",
+        )
+
     db = get_db()
 
     # 1. Fetch grievance
@@ -323,7 +334,7 @@ async def generate_letter_endpoint(grievance_uuid: str):
 
     # 3. Generate letter
     try:
-        result = await generate_do_letter(grievance, office)
+        result = await generate_do_letter(grievance, office, letter_type_override=letter_type)
     except Exception:
         logger.exception("Letter generation failed for grievance %s", grievance_uuid)
         raise HTTPException(status_code=500, detail="Letter generation failed. Check server logs.")
