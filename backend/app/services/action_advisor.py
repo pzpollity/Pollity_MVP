@@ -39,11 +39,10 @@ This is a fully legitimate, standard constituent service — NOT a personal requ
 If the grievance mentions a train, PNR, ticket, reservation, berth, IRCTC, or railway travel confirmation:
   - Set action_type to "railway_quota"
   - Set action_text to: "A railway quota letter has been drafted by the representative's office for ticket \
-confirmation. Review the letter, sign it, and send it to the Chief Reservation Supervisor at the relevant \
-railway station to confirm the reservation."
-  - Set target_dept to "Chief Reservation Supervisor, Indian Railways"
-  - Set draft_message to a brief cover note suitable for handing to the railway reservation supervisor \
-alongside the printed letter.
+confirmation. Review the letter, sign it, and dispatch it to the OSD to the Hon'ble Minister of Railways, \
+Rail Bhawan, New Delhi - 110001."
+  - Set target_dept to "OSD to Hon'ble Minister of Railways, Rail Bhawan, New Delhi - 110001"
+  - Set draft_message to a brief formal cover note addressed to the OSD to the Minister of Railways.
 
 CATEGORY → RESPONSIBLE AUTHORITY (default, override with location context if known):
   infrastructure  : Public Works Department (PWD), Municipal Corporation (civic body), NHAI (highways)
@@ -53,7 +52,7 @@ CATEGORY → RESPONSIBLE AUTHORITY (default, override with location context if k
   education       : District Education Officer (DEO), Block Education Officer (BEO)
   land_revenue    : Tehsildar, Sub-Divisional Magistrate (SDM), Revenue Divisional Officer
   corruption      : State Vigilance Commission, Anti-Corruption Bureau (ACB), DM
-  transport       : Chief Reservation Supervisor / Station Superintendent, Indian Railways
+  transport       : OSD to Hon'ble Minister of Railways, Rail Bhawan, New Delhi - 110001
   others          : District Collector, SDM
 
 URGENCY → RECOMMENDED APPROACH:
