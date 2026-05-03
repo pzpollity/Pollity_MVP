@@ -11,7 +11,7 @@ Run locally:
 
 import os
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 
 import httpx
 import pandas as pd
@@ -425,11 +425,12 @@ if sel_category != "All": filtered = filtered[filtered["category"] == sel_catego
 if sel_assignee != "All": filtered = filtered[filtered["assigned_to"] == sel_assignee]
 
 # ── TABS ──────────────────────────────────────────────────────────────────────
-tab_overview, tab_grievances, tab_lookup, tab_log = st.tabs([
+tab_overview, tab_grievances, tab_lookup, tab_log, tab_birthday = st.tabs([
     "Overview",
     "Grievances",
     "Citizen Lookup",
     "Log Grievance",
+    "Birthday Letters",
 ])
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -992,6 +993,20 @@ with tab_log:
             c1, c2 = st.columns(2)
             wi_name    = c1.text_input("Full Name",    placeholder="Full name  (optional)")
             wi_contact = c2.text_input("Phone Number", placeholder="e.g. 919876543210  (optional)")
+            c3, c4 = st.columns(2)
+            wi_salutation = c3.selectbox(
+                "Salutation",
+                ["Shri", "Smt", "Dr", "Prof", ""],
+                index=0,
+                format_func=lambda x: x if x else "— select —",
+            )
+            wi_dob = c4.date_input(
+                "Date of Birth  (optional — for birthday letters)",
+                value=None,
+                min_value=date(1900, 1, 1),
+                max_value=date.today(),
+                format="DD/MM/YYYY",
+            )
 
             # Step 2 — Channel
             st.markdown("""<div class="log-section-label">
@@ -1086,9 +1101,227 @@ with tab_log:
                             if use_ocr and data.get("ocr_text"):
                                 with st.expander("View extracted OCR text"):
                                     st.text(data["ocr_text"])
+                            # Save citizen to citizens table if name + DOB provided
+                            if wi_name and wi_dob:
+                                try:
+                                    db = create_client(
+                                        os.environ["SUPABASE_URL"],
+                                        os.environ["SUPABASE_ANON_KEY"],
+                                    )
+                                    db.table("citizens").upsert({
+                                        "office_id":  DEMO_OFFICE_ID,
+                                        "name":       wi_name.strip(),
+                                        "dob":        wi_dob.isoformat(),
+                                        "salutation": wi_salutation or "Shri",
+                                        "phone":      wi_contact.strip() if wi_contact else None,
+                                    }, on_conflict="office_id,phone").execute()
+                                    st.caption("Citizen saved for birthday reminders.")
+                                except Exception:
+                                    pass  # non-critical — don't block grievance success
                             st.cache_data.clear()
                             st.rerun()
                         else:
                             st.error(f"Error {resp.status_code}: {resp.text}")
                     except Exception as e:
                         st.error(f"Could not reach backend: {e}")
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TAB 5 — BIRTHDAY LETTERS
+# ═══════════════════════════════════════════════════════════════════════════════
+with tab_birthday:
+    st.markdown("""
+    <div style="font-size:1.35rem;font-weight:700;color:#1E293B;margin-bottom:0.2rem;">
+      Birthday Letters
+    </div>
+    <div style="font-size:0.88rem;color:#64748B;margin-bottom:1.4rem;">
+      Generate personalised birthday wishes letters for constituents.
+      Citizens are added automatically when you log a walk-in grievance with their date of birth.
+    </div>
+    """, unsafe_allow_html=True)
+
+    bday_col1, bday_col2 = st.columns([3, 2])
+
+    # ── Today's birthdays ─────────────────────────────────────────────────────
+    with bday_col1:
+        st.markdown("#### Today's Birthdays")
+        try:
+            today_resp = httpx.get(
+                f"{BACKEND_URL}/letters/birthdays/today",
+                params={"office_id": DEMO_OFFICE_ID},
+                timeout=15,
+            )
+            today_citizens = today_resp.json() if today_resp.status_code == 200 else []
+        except Exception:
+            today_citizens = []
+
+        if not today_citizens:
+            st.info("No birthdays today.")
+        else:
+            for citizen in today_citizens:
+                with st.container(border=True):
+                    name = citizen.get("name", "")
+                    sal  = citizen.get("salutation", "Shri")
+                    dob  = citizen.get("dob", "")
+                    desig = citizen.get("designation", "")
+
+                    st.markdown(f"**{sal} {name}**" + (f" · {desig}" if desig else ""))
+                    if dob:
+                        st.caption(f"DOB: {dob}")
+
+                    bday_key = f"bday_letter_{citizen.get('id', name)}"
+                    if st.button("Generate Birthday Letter", key=f"gen_{bday_key}", type="primary", use_container_width=True):
+                        with st.spinner("Generating letter…"):
+                            try:
+                                lr = httpx.post(
+                                    f"{BACKEND_URL}/letters/birthday",
+                                    json={
+                                        "office_id":     DEMO_OFFICE_ID,
+                                        "citizen_name":  name,
+                                        "dob":           dob,
+                                        "salutation":    sal,
+                                        "designation":   desig or "",
+                                        "address_lines": [],
+                                    },
+                                    timeout=60,
+                                )
+                                if lr.status_code == 200:
+                                    st.session_state[bday_key] = lr.json()
+                                else:
+                                    st.error(f"Error: {lr.text}")
+                            except Exception as e:
+                                st.error(f"Could not reach backend: {e}")
+
+                    letter_res = st.session_state.get(bday_key)
+                    if letter_res:
+                        import base64
+                        import streamlit.components.v1 as components
+                        do_num  = letter_res.get("do_number", "")
+                        html_c  = letter_res.get("html", "")
+                        pdf_b64 = letter_res.get("pdf_b64", "")
+                        docx_b64 = letter_res.get("docx_b64", "")
+                        safe_fn = f"Birthday_{name.replace(' ', '_')}_{dob}"
+
+                        st.success(f"Letter ready — {do_num}")
+                        with st.expander("Preview", expanded=False):
+                            components.html(html_c, height=600, scrolling=True)
+
+                        dl1, dl2, dl3 = st.columns(3)
+                        with dl1:
+                            st.download_button("HTML", data=html_c,
+                                file_name=f"{safe_fn}.html", mime="text/html",
+                                key=f"dl_html_{bday_key}", use_container_width=True)
+                        with dl2:
+                            if pdf_b64:
+                                st.download_button("PDF", data=base64.b64decode(pdf_b64),
+                                    file_name=f"{safe_fn}.pdf", mime="application/pdf",
+                                    key=f"dl_pdf_{bday_key}", use_container_width=True)
+                        with dl3:
+                            if docx_b64:
+                                st.download_button("DOCX", data=base64.b64decode(docx_b64),
+                                    file_name=f"{safe_fn}.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    key=f"dl_docx_{bday_key}", use_container_width=True)
+
+    # ── Upcoming birthdays ────────────────────────────────────────────────────
+    with bday_col2:
+        st.markdown("#### Upcoming (next 7 days)")
+        try:
+            up_resp = httpx.get(
+                f"{BACKEND_URL}/letters/birthdays/upcoming",
+                params={"office_id": DEMO_OFFICE_ID, "days": 7},
+                timeout=15,
+            )
+            upcoming_citizens = up_resp.json() if up_resp.status_code == 200 else []
+        except Exception:
+            upcoming_citizens = []
+
+        # Exclude today
+        today_str = date.today().strftime("%m-%d")
+        upcoming_citizens = [c for c in upcoming_citizens if str(c.get("dob",""))[5:10] != today_str]
+
+        if not upcoming_citizens:
+            st.info("No upcoming birthdays in the next 7 days.")
+        else:
+            for citizen in upcoming_citizens:
+                dob_str = str(citizen.get("dob", ""))
+                try:
+                    dob_dt   = date.fromisoformat(dob_str[:10])
+                    days_left = (dob_dt.replace(year=date.today().year) - date.today()).days
+                    if days_left < 0:
+                        days_left += 365
+                    day_label = f"in {days_left} day{'s' if days_left != 1 else ''}"
+                except Exception:
+                    day_label = dob_str
+
+                sal  = citizen.get("salutation", "Shri")
+                name = citizen.get("name", "")
+                st.markdown(f"**{sal} {name}**  \n<small style='color:#64748B'>{day_label} · {dob_str[:10]}</small>",
+                            unsafe_allow_html=True)
+                st.divider()
+
+    # ── Manual entry ──────────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("#### Generate for any citizen")
+    with st.expander("Enter details manually"):
+        mc1, mc2, mc3 = st.columns(3)
+        m_sal   = mc1.selectbox("Salutation", ["Shri", "Smt", "Dr", "Prof"], key="m_sal")
+        m_name  = mc2.text_input("Full Name", key="m_name")
+        m_dob   = mc3.date_input("Date of Birth", value=None, format="DD/MM/YYYY", key="m_dob")
+        m_desig = st.text_input("Designation / Occupation (optional)", key="m_desig")
+        m_addr  = st.text_area("Address (one line per row)", height=80, key="m_addr")
+
+        if st.button("Generate Letter", key="m_gen", type="primary"):
+            if not m_name or not m_dob:
+                st.error("Name and Date of Birth are required.")
+            else:
+                with st.spinner("Generating letter…"):
+                    try:
+                        addr_lines = [l.strip() for l in m_addr.splitlines() if l.strip()]
+                        lr = httpx.post(
+                            f"{BACKEND_URL}/letters/birthday",
+                            json={
+                                "office_id":     DEMO_OFFICE_ID,
+                                "citizen_name":  m_name,
+                                "dob":           m_dob.isoformat(),
+                                "salutation":    m_sal,
+                                "designation":   m_desig or "",
+                                "address_lines": addr_lines,
+                            },
+                            timeout=60,
+                        )
+                        if lr.status_code == 200:
+                            st.session_state["manual_bday_letter"] = lr.json()
+                        else:
+                            st.error(f"Error: {lr.text}")
+                    except Exception as e:
+                        st.error(f"Could not reach backend: {e}")
+
+        manual_res = st.session_state.get("manual_bday_letter")
+        if manual_res:
+            import base64
+            import streamlit.components.v1 as components
+            html_c   = manual_res.get("html", "")
+            pdf_b64  = manual_res.get("pdf_b64", "")
+            docx_b64 = manual_res.get("docx_b64", "")
+            safe_fn  = f"Birthday_{m_name.replace(' ','_') if m_name else 'letter'}"
+
+            st.success(f"Letter ready — {manual_res.get('do_number','')}")
+            with st.expander("Preview", expanded=True):
+                components.html(html_c, height=600, scrolling=True)
+
+            d1, d2, d3 = st.columns(3)
+            with d1:
+                st.download_button("HTML", data=html_c,
+                    file_name=f"{safe_fn}.html", mime="text/html",
+                    key="m_dl_html", use_container_width=True)
+            with d2:
+                if pdf_b64:
+                    st.download_button("PDF", data=base64.b64decode(pdf_b64),
+                        file_name=f"{safe_fn}.pdf", mime="application/pdf",
+                        key="m_dl_pdf", use_container_width=True)
+            with d3:
+                if docx_b64:
+                    st.download_button("DOCX", data=base64.b64decode(docx_b64),
+                        file_name=f"{safe_fn}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        key="m_dl_docx", use_container_width=True)
