@@ -149,7 +149,7 @@ REQUIRED JSON SCHEMA — respond ONLY with valid JSON, no prose, no markdown fen
   "passenger_name":    "<Full name of passenger, or empty string>",
   "passenger_contact": "<Mobile number of passenger, or empty string>",
   "addressee_name":    "OSD to Hon'ble Minister of Railways",
-  "addressee_designation": "OSD to Hon'ble Minister of Railways",
+  "addressee_designation": "",
   "addressee_org":     "Government of India",
   "addressee_address_lines": ["Rail Bhawan, Raisina Road", "New Delhi - 110001"]
 }
@@ -209,7 +209,7 @@ Extract the railway travel details and draft the opening line now.
             "passenger_name": citizen_name,
             "passenger_contact": grievance.get("citizen_contact", ""),
             "addressee_name": "OSD to Hon'ble Minister of Railways",
-            "addressee_designation": "OSD to Hon'ble Minister of Railways",
+            "addressee_designation": "",
             "addressee_org": "Government of India",
             "addressee_address_lines": ["Rail Bhawan, Raisina Road", "New Delhi - 110001"],
         }
