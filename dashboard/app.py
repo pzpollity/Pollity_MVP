@@ -1306,8 +1306,7 @@ with tab_birthday:
             safe_fn  = f"Birthday_{m_name.replace(' ','_') if m_name else 'letter'}"
 
             st.success(f"Letter ready — {manual_res.get('do_number','')}")
-            with st.expander("Preview", expanded=True):
-                components.html(html_c, height=600, scrolling=True)
+            components.html(html_c, height=600, scrolling=True)
 
             d1, d2, d3 = st.columns(3)
             with d1:
