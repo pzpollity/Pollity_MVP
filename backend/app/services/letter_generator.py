@@ -399,7 +399,7 @@ def _generate_docx(context: dict, letter_type: str) -> bytes:
         bottom = OxmlElement("w:bottom")
         bottom.set(qn("w:val"), "single")
         bottom.set(qn("w:sz"), "6")
-        bottom.set(qn("w:color"), f"{accent.red:02X}{accent.green:02X}{accent.blue:02X}")
+        bottom.set(qn("w:color"), f"{accent[0]:02X}{accent[1]:02X}{accent[2]:02X}")
         pBdr.append(bottom)
         pPr.append(pBdr)
 
@@ -485,8 +485,12 @@ def _generate_docx(context: dict, letter_type: str) -> bytes:
     # ── Railway details table ─────────────────────────────────────────────────
     if is_railway:
         from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
         table = doc.add_table(rows=7, cols=3)
-        table.style = "Table Grid"
+        try:
+            table.style = "Table Grid"
+        except KeyError:
+            pass  # style not in default template — borders added manually below
         table.autofit = True
 
         rows_data = [
