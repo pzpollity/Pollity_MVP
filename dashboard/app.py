@@ -805,24 +805,57 @@ with tab_grievances:
         letter_result = st.session_state.get(letter_state_key)
 
         if letter_result:
+            import base64
             import streamlit.components.v1 as components
             do_num       = letter_result.get("do_number", "")
             letter_type  = letter_result.get("letter_type", "do_standard")
             html_content = letter_result.get("html", "")
+            pdf_b64      = letter_result.get("pdf_b64", "")
+            docx_b64     = letter_result.get("docx_b64", "")
 
             st.success(f"Letter generated — D.O. No: {do_num}  |  Template: {letter_type}")
 
             with st.expander("Preview D.O. Letter", expanded=True):
                 components.html(html_content, height=700, scrolling=True)
 
-            safe_filename = f"DO_Letter_{do_num.replace('/', '-')}_{adv_id[:8]}.html"
-            st.download_button(
-                label="Download Letter (.html)",
-                data=html_content,
-                file_name=safe_filename,
-                mime="text/html",
-                key=f"dl_letter_{adv_id}",
-            )
+            safe_base    = f"DO_Letter_{do_num.replace('/', '-')}_{adv_id[:8]}"
+            dl_col1, dl_col2, dl_col3 = st.columns(3)
+
+            with dl_col1:
+                st.download_button(
+                    label="Download HTML",
+                    data=html_content,
+                    file_name=f"{safe_base}.html",
+                    mime="text/html",
+                    key=f"dl_html_{adv_id}",
+                    use_container_width=True,
+                )
+            with dl_col2:
+                if pdf_b64:
+                    st.download_button(
+                        label="Download PDF",
+                        data=base64.b64decode(pdf_b64),
+                        file_name=f"{safe_base}.pdf",
+                        mime="application/pdf",
+                        key=f"dl_pdf_{adv_id}",
+                        use_container_width=True,
+                    )
+                else:
+                    st.button("PDF unavailable", disabled=True, key=f"dl_pdf_na_{adv_id}",
+                              use_container_width=True)
+            with dl_col3:
+                if docx_b64:
+                    st.download_button(
+                        label="Download DOCX",
+                        data=base64.b64decode(docx_b64),
+                        file_name=f"{safe_base}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        key=f"dl_docx_{adv_id}",
+                        use_container_width=True,
+                    )
+                else:
+                    st.button("DOCX unavailable", disabled=True, key=f"dl_docx_na_{adv_id}",
+                              use_container_width=True)
 
         # Log action taken
         st.markdown("<div style='margin-top:1rem'></div>", unsafe_allow_html=True)

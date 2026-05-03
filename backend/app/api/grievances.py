@@ -341,6 +341,8 @@ async def generate_letter_endpoint(
 
     return {
         "html":        result["html"],
+        "pdf_b64":     result.get("pdf_b64", ""),
+        "docx_b64":    result.get("docx_b64", ""),
         "do_number":   result["do_number"],
         "letter_type": result["letter_type"],
     }

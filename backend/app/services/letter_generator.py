@@ -17,6 +17,7 @@ The counter is the count of existing letters_log rows for this office + 1
 (simple, restartable, no race condition for low-volume usage).
 """
 
+import io
 import json
 import logging
 import os
@@ -24,6 +25,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from anthropic import AsyncAnthropic
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Cm, Pt, RGBColor
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.core.config import settings
@@ -341,6 +345,188 @@ def _log_letter(
         logger.exception("Failed to log letter (do_number=%s) — continuing anyway", do_number)
 
 
+def _generate_pdf(html: str) -> bytes:
+    """Convert rendered HTML to PDF bytes using WeasyPrint."""
+    try:
+        from weasyprint import HTML
+        return HTML(string=html).write_pdf()
+    except Exception:
+        logger.exception("WeasyPrint PDF generation failed")
+        raise
+
+
+def _generate_docx(context: dict, letter_type: str) -> bytes:
+    """
+    Build a clean, editable Word document from the letter context.
+    Uses python-docx directly — does not parse HTML.
+    """
+    doc = Document()
+
+    # ── Page setup: A4 ───────────────────────────────────────────────────────
+    section = doc.sections[0]
+    section.page_width  = Cm(21)
+    section.page_height = Cm(29.7)
+    section.left_margin   = Cm(2.5)
+    section.right_margin  = Cm(2.5)
+    section.top_margin    = Cm(2)
+    section.bottom_margin = Cm(2.5)
+
+    # Accent colour (maroon for D.O. letters, green for railway)
+    is_railway = (letter_type == "railway_quota")
+    accent = RGBColor(0x1a, 0x6b, 0x1a) if is_railway else RGBColor(0x8B, 0x00, 0x00)
+
+    def _para(text: str, bold=False, italic=False, size=11,
+              align=WD_ALIGN_PARAGRAPH.LEFT, color=None, space_before=0, space_after=6):
+        p = doc.add_paragraph()
+        p.alignment = align
+        p.paragraph_format.space_before = Pt(space_before)
+        p.paragraph_format.space_after  = Pt(space_after)
+        run = p.add_run(text)
+        run.bold   = bold
+        run.italic = italic
+        run.font.size  = Pt(size)
+        run.font.color.rgb = color or RGBColor(0, 0, 0)
+        return p
+
+    def _rule():
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after  = Pt(8)
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+        pPr = p._p.get_or_add_pPr()
+        pBdr = OxmlElement("w:pBdr")
+        bottom = OxmlElement("w:bottom")
+        bottom.set(qn("w:val"), "single")
+        bottom.set(qn("w:sz"), "6")
+        bottom.set(qn("w:color"), f"{accent.red:02X}{accent.green:02X}{accent.blue:02X}")
+        pBdr.append(bottom)
+        pPr.append(pBdr)
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    _para(context.get("rep_name_hindi", ""), bold=True, size=14, color=accent)
+    _para(context.get("rep_designation", ""), bold=True, size=10, space_after=2)
+
+    memberships = context.get("committee_memberships") or []
+    for m in memberships:
+        _para(f"• {m}", size=9, space_after=1)
+
+    _para(context.get("office_address", ""), size=9, space_after=2)
+    phone = context.get("office_phone", "")
+    mobile = context.get("office_mobile", "")
+    if phone:
+        _para(f"Phone: {phone}", size=9, space_after=1)
+    if mobile:
+        _para(f"Mobile: {mobile}", size=9, space_after=1)
+
+    _rule()
+
+    # ── D.O. Number + Date ────────────────────────────────────────────────────
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.paragraph_format.space_after = Pt(12)
+    r1 = p.add_run(f"D.O. No. {context.get('do_number', '')}    ")
+    r1.font.size = Pt(10)
+    r2 = p.add_run(f"Date: {context.get('letter_date', '')}")
+    r2.font.size = Pt(10)
+    r2.italic = True
+
+    # ── Addressee (railway: top; D.O.: below subject) ─────────────────────────
+    def _write_addressee():
+        _para(context.get("addressee_name", ""), bold=True, size=11, space_after=2)
+        if context.get("addressee_designation"):
+            _para(context["addressee_designation"], size=11, space_after=2)
+        if context.get("addressee_org"):
+            _para(context["addressee_org"], size=11, space_after=2)
+        for line in (context.get("addressee_address_lines") or []):
+            _para(line, size=11, space_after=2)
+        doc.add_paragraph()
+
+    if is_railway:
+        _write_addressee()
+
+    # ── Subject (D.O. letters only) ───────────────────────────────────────────
+    subject = context.get("subject", "")
+    if subject and not is_railway:
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after = Pt(10)
+        r = p.add_run(f"Sub: {subject}")
+        r.bold = True
+        r.font.size = Pt(11)
+        r.font.underline = True
+
+        _write_addressee()
+
+    # ── Salutation / Opening ──────────────────────────────────────────────────
+    if is_railway:
+        _para(context.get("opening_line", ""), size=11, space_after=10)
+    else:
+        _para(context.get("salutation", "Sir,"), size=11, space_after=8)
+        opening = context.get("opening_para", "")
+        if opening:
+            p = doc.add_paragraph(opening)
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            p.paragraph_format.first_line_indent = Cm(1)
+            p.paragraph_format.space_after = Pt(8)
+
+        for para_text in (context.get("body_paras") or []):
+            p = doc.add_paragraph(para_text)
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            p.paragraph_format.first_line_indent = Cm(1)
+            p.paragraph_format.space_after = Pt(8)
+
+        closing = context.get("closing_note", "")
+        if closing:
+            p = doc.add_paragraph(closing)
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            p.paragraph_format.first_line_indent = Cm(1)
+            p.paragraph_format.space_after = Pt(16)
+
+    # ── Railway details table ─────────────────────────────────────────────────
+    if is_railway:
+        from docx.oxml.ns import qn
+        table = doc.add_table(rows=7, cols=3)
+        table.style = "Table Grid"
+        table.autofit = True
+
+        rows_data = [
+            ("1.", "PNR No.",     context.get("pnr_number", "")),
+            ("2.", "Train No.",   context.get("train_number", "")),
+            ("3.", "Date",        context.get("travel_date", "")),
+            ("4.", "Class",       context.get("travel_class", "")),
+            ("5.", "Destination", f"From {context.get('from_station','')} To {context.get('to_station','')}"),
+            ("6.", "Name",        context.get("passenger_name", "")),
+            ("7.", "Contact No.", context.get("passenger_contact", "")),
+        ]
+        for i, (num, label, value) in enumerate(rows_data):
+            row = table.rows[i]
+            row.cells[0].text = num
+            row.cells[1].text = label
+            row.cells[2].text = value
+            for cell in row.cells:
+                for para in cell.paragraphs:
+                    for run in para.runs:
+                        run.font.size = Pt(11)
+
+        doc.add_paragraph()
+
+    # ── Sign-off ──────────────────────────────────────────────────────────────
+    _para("With Regards," if is_railway else "Yours faithfully,", size=11, space_before=16, space_after=36)
+    _para(f"({context.get('sender_name', '')})", size=11, space_after=2)
+    if is_railway and context.get("ic_number"):
+        _para(f"IC No. {context['ic_number']}", size=10, space_after=2)
+
+    # ── Footer ────────────────────────────────────────────────────────────────
+    footer_text = context.get("office_footer", "")
+    if footer_text:
+        _rule()
+        _para(footer_text, size=8, align=WD_ALIGN_PARAGRAPH.CENTER, color=RGBColor(0x33, 0x33, 0x33))
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
 async def generate_do_letter(
     grievance: dict,
     office: dict,
@@ -470,7 +656,24 @@ async def generate_do_letter(
         logger.exception("Jinja2 render failed for template %s", template_file)
         raise
 
-    # ── 7. Log to letters_log ─────────────────────────────────────────────────
+    # ── 7. Generate PDF and DOCX ──────────────────────────────────────────────
+    import base64
+
+    try:
+        pdf_bytes  = _generate_pdf(html)
+        pdf_b64    = base64.b64encode(pdf_bytes).decode()
+    except Exception:
+        logger.exception("PDF generation failed — continuing without PDF")
+        pdf_b64 = ""
+
+    try:
+        docx_bytes = _generate_docx(context, letter_type)
+        docx_b64   = base64.b64encode(docx_bytes).decode()
+    except Exception:
+        logger.exception("DOCX generation failed — continuing without DOCX")
+        docx_b64 = ""
+
+    # ── 8. Log to letters_log ─────────────────────────────────────────────────
     _log_letter(
         office_id=office_id,
         grievance_id_uuid=grievance.get("id"),
@@ -482,6 +685,8 @@ async def generate_do_letter(
 
     return {
         "html":          html,
+        "pdf_b64":       pdf_b64,
+        "docx_b64":      docx_b64,
         "do_number":     do_number,
         "letter_type":   letter_type,
         "letter_fields": fields,
