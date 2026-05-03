@@ -233,14 +233,6 @@
     <div class="sig-name">({{ rep_name }})</div>
   </div>
 
-  <!-- ── Addressee block (bottom) ────────────────────────── -->
-  <div class="addressee-bottom">
-    <p><strong>{{ citizen_salutation }} {{ citizen_name }}</strong></p>
-    {% if citizen_designation %}<p>{{ citizen_designation }}</p>{% endif %}
-    {% for line in citizen_address_lines %}
-    <p>{{ line }}</p>
-    {% endfor %}
-  </div>
 
 </div>
 </body>
