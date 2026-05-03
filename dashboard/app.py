@@ -1270,7 +1270,38 @@ with tab_birthday:
         m_desig = st.text_input("Designation / Occupation (optional)", key="m_desig")
         m_addr  = st.text_area("Address (one line per row)", height=80, key="m_addr")
 
-        if st.button("Generate Letter", key="m_gen", type="primary"):
+        btn_col1, btn_col2 = st.columns([1, 2])
+        with btn_col1:
+            save_clicked = st.button("Save to Birthday List", key="m_save")
+        with btn_col2:
+            gen_clicked = st.button("Generate Letter", key="m_gen", type="primary")
+
+        if save_clicked:
+            if not m_name or not m_dob:
+                st.error("Name and Date of Birth are required.")
+            else:
+                with st.spinner("Saving…"):
+                    try:
+                        sr = httpx.post(
+                            f"{BACKEND_URL}/letters/citizens",
+                            json={
+                                "office_id":  DEMO_OFFICE_ID,
+                                "name":       m_name,
+                                "dob":        m_dob.isoformat(),
+                                "salutation": m_sal,
+                                "designation": m_desig or "",
+                            },
+                            timeout=15,
+                        )
+                        if sr.status_code == 200:
+                            st.success(f"{m_name} saved to birthday list.")
+                            st.cache_data.clear()
+                        else:
+                            st.error(f"Save failed: {sr.text}")
+                    except Exception as e:
+                        st.error(f"Could not reach backend: {e}")
+
+        if gen_clicked:
             if not m_name or not m_dob:
                 st.error("Name and Date of Birth are required.")
             else:
@@ -1291,21 +1322,7 @@ with tab_birthday:
                         )
                         if lr.status_code == 200:
                             st.session_state["manual_bday_letter"] = lr.json()
-                            # Auto-save citizen so they appear in future birthday reminders
-                            try:
-                                db = create_client(
-                                    os.environ["SUPABASE_URL"],
-                                    os.environ["SUPABASE_ANON_KEY"],
-                                )
-                                db.table("citizens").insert({
-                                    "office_id":   DEMO_OFFICE_ID,
-                                    "name":        m_name.strip(),
-                                    "dob":         m_dob.isoformat(),
-                                    "salutation":  m_sal or "Shri",
-                                    "designation": m_desig.strip() if m_desig else None,
-                                }).execute()
-                            except Exception:
-                                pass  # non-critical
+                            st.cache_data.clear()
                         else:
                             st.error(f"Error: {lr.text}")
                     except Exception as e:

@@ -29,6 +29,37 @@ class BirthdayLetterRequest(BaseModel):
     address_lines: list[str] = []
 
 
+class SaveCitizenRequest(BaseModel):
+    office_id: str
+    name: str
+    dob: str                          # ISO date: YYYY-MM-DD
+    salutation: str = "Shri"
+    designation: str = ""
+    phone: str = ""
+
+
+@router.post("/citizens")
+def save_citizen(body: SaveCitizenRequest):
+    """
+    Save a citizen to the citizens table (service role key — bypasses RLS).
+    Returns the saved citizen row.
+    """
+    db = get_db()
+    try:
+        resp = db.table("citizens").insert({
+            "office_id":   body.office_id,
+            "name":        body.name.strip(),
+            "dob":         body.dob[:10] if body.dob else None,
+            "salutation":  body.salutation or "Shri",
+            "designation": body.designation.strip() or None,
+            "phone":       body.phone.strip() or None,
+        }).execute()
+        return {"ok": True, "citizen": resp.data[0] if resp.data else {}}
+    except Exception:
+        logger.exception("Failed to save citizen %s", body.name)
+        raise HTTPException(status_code=500, detail="Failed to save citizen.")
+
+
 @router.post("/birthday")
 async def birthday_letter(body: BirthdayLetterRequest):
     """
