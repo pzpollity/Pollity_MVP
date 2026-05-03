@@ -1108,13 +1108,13 @@ with tab_log:
                                         os.environ["SUPABASE_URL"],
                                         os.environ["SUPABASE_ANON_KEY"],
                                     )
-                                    db.table("citizens").upsert({
+                                    db.table("citizens").insert({
                                         "office_id":  DEMO_OFFICE_ID,
                                         "name":       wi_name.strip(),
                                         "dob":        wi_dob.isoformat(),
                                         "salutation": wi_salutation or "Shri",
                                         "phone":      wi_contact.strip() if wi_contact else None,
-                                    }, on_conflict="office_id,phone").execute()
+                                    }).execute()
                                     st.caption("Citizen saved for birthday reminders.")
                                 except Exception:
                                     pass  # non-critical — don't block grievance success
