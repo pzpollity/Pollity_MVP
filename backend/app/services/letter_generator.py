@@ -25,9 +25,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from anthropic import AsyncAnthropic
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Cm, Pt, RGBColor
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.core.config import settings
@@ -360,6 +357,10 @@ def _generate_docx(context: dict, letter_type: str) -> bytes:
     Build a clean, editable Word document from the letter context.
     Uses python-docx directly — does not parse HTML.
     """
+    from docx import Document
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Cm, Pt, RGBColor
+
     doc = Document()
 
     # ── Page setup: A4 ───────────────────────────────────────────────────────
