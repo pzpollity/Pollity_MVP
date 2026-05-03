@@ -697,3 +697,209 @@ async def generate_do_letter(
         "letter_type":   letter_type,
         "letter_fields": fields,
     }
+
+
+async def generate_birthday_letter(citizen: dict, office: dict) -> dict:
+    """
+    Generate a birthday wishes letter for a citizen.
+
+    Parameters
+    ----------
+    citizen : dict
+        Must contain: name, dob (date object or ISO string), salutation,
+        designation (optional), address_lines (list, optional).
+    office : dict
+        Office row from Supabase (must include letter_profile JSONB).
+
+    Returns
+    -------
+    dict with keys: html, pdf_b64, docx_b64, letter_type
+    """
+    import base64
+
+    profile  = office.get("letter_profile") or {}
+    today    = datetime.now(tz=timezone.utc)
+    today_str = today.strftime("%B %d, %Y")
+
+    # Parse citizen DOB for display
+    dob_raw = citizen.get("dob", "")
+    try:
+        if isinstance(dob_raw, str):
+            from datetime import date
+            dob_dt = date.fromisoformat(dob_raw[:10])
+        else:
+            dob_dt = dob_raw
+        birthday_date = dob_dt.strftime("%d.%m.%Y")
+    except Exception:
+        birthday_date = str(dob_raw)
+
+    # Citizen salutation — default "Shri" for unknown gender
+    salutation = citizen.get("salutation") or citizen.get("gender_salutation") or "Shri"
+
+    raw_address = profile.get("office_address", "[Office Address]")
+
+    context = {
+        # Letterhead
+        "rep_name":           profile.get("rep_name", "[REPRESENTATIVE NAME]"),
+        "rep_name_hindi":     profile.get("rep_name_hindi", "[प्रतिनिधि का नाम]"),
+        "rep_designation":    profile.get("rep_designation", "[Designation]"),
+        "sender_role_english": profile.get("sender_role_english", ""),
+        "sender_role_hindi":  profile.get("sender_role_hindi", ""),
+        "office_address":     raw_address,
+        # Letter metadata
+        "letter_date":        today_str,
+        # Citizen details
+        "citizen_name":        citizen.get("name", ""),
+        "citizen_salutation":  salutation,
+        "citizen_designation": citizen.get("designation", ""),
+        "citizen_address_lines": citizen.get("address_lines", []),
+        "birthday_date":       birthday_date,
+    }
+
+    # Render HTML
+    try:
+        tmpl = _jinja_env.get_template("birthday_wishes.html")
+        html = tmpl.render(**context)
+    except Exception:
+        logger.exception("Jinja2 render failed for birthday_wishes.html")
+        raise
+
+    # Generate PDF and DOCX
+    try:
+        pdf_bytes = _generate_pdf(html)
+        pdf_b64   = base64.b64encode(pdf_bytes).decode()
+    except Exception:
+        logger.exception("PDF generation failed for birthday letter")
+        pdf_b64 = ""
+
+    try:
+        docx_bytes = _generate_birthday_docx(context)
+        docx_b64   = base64.b64encode(docx_bytes).decode()
+    except Exception:
+        logger.exception("DOCX generation failed for birthday letter")
+        docx_b64 = ""
+
+    # Log to letters_log (no grievance link)
+    office_id = str(office.get("id", ""))
+    counter   = _get_letter_counter(office_id)
+    do_number = _build_do_number(office, counter)
+
+    _log_letter(
+        office_id=office_id,
+        grievance_id_uuid=None,
+        do_number=do_number,
+        letter_type="birthday_wishes",
+        addressee_name=citizen.get("name", ""),
+        html_content=html,
+    )
+
+    return {
+        "html":        html,
+        "pdf_b64":     pdf_b64,
+        "docx_b64":    docx_b64,
+        "letter_type": "birthday_wishes",
+        "do_number":   do_number,
+    }
+
+
+def _generate_birthday_docx(context: dict) -> bytes:
+    """Build a clean Word document for a birthday wishes letter."""
+    import io
+    from docx import Document
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Cm, Pt, RGBColor
+
+    doc = Document()
+    section = doc.sections[0]
+    section.page_width    = Cm(21)
+    section.page_height   = Cm(29.7)
+    section.left_margin   = Cm(2.5)
+    section.right_margin  = Cm(2.5)
+    section.top_margin    = Cm(2)
+    section.bottom_margin = Cm(2.5)
+
+    maroon = RGBColor(0x80, 0x00, 0x00)
+    black  = RGBColor(0x00, 0x00, 0x00)
+
+    def _p(text, bold=False, size=11, align=WD_ALIGN_PARAGRAPH.LEFT,
+           color=None, space_before=0, space_after=6, italic=False):
+        para = doc.add_paragraph()
+        para.alignment = align
+        para.paragraph_format.space_before = Pt(space_before)
+        para.paragraph_format.space_after  = Pt(space_after)
+        run = para.add_run(text)
+        run.bold   = bold
+        run.italic = italic
+        run.font.size = Pt(size)
+        run.font.color.rgb = color or black
+        return para
+
+    # Header
+    _p(context.get("rep_name_hindi", ""), bold=True, size=13)
+    _p(context.get("rep_name", ""),       bold=True, size=11, space_after=2)
+    _p(context.get("rep_designation", ""),size=9,  color=RGBColor(0x33,0x33,0x33), space_after=2)
+    _p(context.get("office_address", ""), size=9,  color=RGBColor(0x33,0x33,0x33), space_after=8)
+
+    # Separator rule
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    rule_p = doc.add_paragraph()
+    rule_p.paragraph_format.space_after = Pt(10)
+    pPr = rule_p._p.get_or_add_pPr()
+    pBdr = OxmlElement("w:pBdr")
+    bottom = OxmlElement("w:bottom")
+    bottom.set(qn("w:val"), "double")
+    bottom.set(qn("w:sz"), "6")
+    bottom.set(qn("w:color"), "800000")
+    pBdr.append(bottom)
+    pPr.append(pBdr)
+
+    # Date (right-aligned)
+    _p(context.get("letter_date", ""), size=11, align=WD_ALIGN_PARAGRAPH.RIGHT,
+       italic=True, space_before=10, space_after=18)
+
+    # Salutation
+    sal = f"Dear {context.get('citizen_salutation','')} {context.get('citizen_name','')},"
+    _p(sal, bold=True, size=11, space_after=14)
+
+    # Body paragraphs (indented)
+    for text in [
+        f"I convey my best wishes on your birthday on {context.get('birthday_date', '')}.",
+        "May God bless you with good health and happiness and many more years of "
+        "continued and dedicated service to the nation.",
+    ]:
+        para = doc.add_paragraph()
+        para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        para.paragraph_format.first_line_indent = Cm(1.2)
+        para.paragraph_format.space_after = Pt(12)
+        run = para.add_run(text)
+        run.font.size = Pt(11)
+
+    # Sign-off
+    _p("With the best wishes,", size=11, space_before=10, space_after=8)
+    _p("Yours sincerely,", size=11, align=WD_ALIGN_PARAGRAPH.RIGHT, space_after=48)
+    _p(f"({context.get('rep_name', '')})", size=11, align=WD_ALIGN_PARAGRAPH.RIGHT, space_after=24)
+
+    # Addressee bottom block
+    from docx.oxml import OxmlElement
+    rule_p2 = doc.add_paragraph()
+    rule_p2.paragraph_format.space_after = Pt(8)
+    pPr2 = rule_p2._p.get_or_add_pPr()
+    pBdr2 = OxmlElement("w:pBdr")
+    top2 = OxmlElement("w:top")
+    top2.set(qn("w:val"), "single")
+    top2.set(qn("w:sz"), "4")
+    top2.set(qn("w:color"), "CCCCCC")
+    pBdr2.append(top2)
+    pPr2.append(pBdr2)
+
+    citizen_name = f"{context.get('citizen_salutation','')} {context.get('citizen_name','')}".strip()
+    _p(citizen_name, bold=True, size=10, space_after=2)
+    if context.get("citizen_designation"):
+        _p(context["citizen_designation"], size=10, space_after=2)
+    for line in (context.get("citizen_address_lines") or []):
+        _p(line, size=10, space_after=2)
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()

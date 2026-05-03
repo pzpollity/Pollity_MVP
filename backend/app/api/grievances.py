@@ -18,7 +18,7 @@ from app.core.database import get_db
 from app.models.grievance import GrievanceChannel, GrievanceStatus
 from app.services.action_advisor import suggest_action
 from app.services.grievance_service import process_walkin_grievance
-from app.services.letter_generator import generate_do_letter
+from app.services.letter_generator import generate_birthday_letter, generate_do_letter
 from app.services.ocr import extract_text_from_image
 from app.services.sms import build_sms_status_message, send_sms
 from app.services.whatsapp import build_status_update_message, send_text
